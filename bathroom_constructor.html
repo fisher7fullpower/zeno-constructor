@@ -675,11 +675,10 @@
           <div class="hd-tool-body">
             <div class="hd-note">AI меняет цвет/фактуру в выделенной зоне. Создайте зону ниже, затем нажмите.</div>
             <select class="hd-select" id="hd-col-object">
-              <option value="wall">Стена</option>
-              <option value="floor">Пол</option>
-              <option value="ceiling">Потолок</option>
-              <option value="cabinet">Тумба / мебель</option>
-              <option value="door">Дверь</option>
+              <option value="Wall">Стена</option>
+              <option value="Floor">Пол</option>
+              <option value="Cabinet">Тумба / мебель</option>
+              <option value="Door">Дверь</option>
             </select>
             <select class="hd-select" id="hd-col-color">
               <option value="">— Цвет —</option>
@@ -702,7 +701,6 @@
               <option value="Stone">Камень</option>
               <option value="Ceramics and Porcelain">Керамика / Плитка</option>
               <option value="Wood">Дерево</option>
-              <option value="Metal">Металл</option>
               <option value="Glass">Стекло</option>
             </select>
             <select class="hd-select" id="hd-col-mtype">
@@ -969,6 +967,27 @@ const LABEL_MAP = {
   vanity: 'Тумба', cabinet: 'Тумба', 'towel warmer': 'Полотенцесушитель',
   towel: 'Полотенцесушитель', plant: 'Растение', light: 'Светильник', faucet: 'Смеситель',
 };
+
+function applyNMS(dets, iouThresh) {
+  dets.sort((a, b) => b.confidence - a.confidence);
+  const kept = [], used = new Set();
+  for (let i = 0; i < dets.length; i++) {
+    if (used.has(i)) continue;
+    kept.push(dets[i]);
+    for (let j = i + 1; j < dets.length; j++) {
+      if (used.has(j)) continue;
+      if (boxIoU(dets[i].box, dets[j].box) > iouThresh) used.add(j);
+    }
+  }
+  return kept;
+}
+function boxIoU(a, b) {
+  const ix1 = Math.max(a[0],b[0]), iy1 = Math.max(a[1],b[1]);
+  const ix2 = Math.min(a[2],b[2]), iy2 = Math.min(a[3],b[3]);
+  const inter = Math.max(0, ix2-ix1) * Math.max(0, iy2-iy1);
+  const aArea = (a[2]-a[0])*(a[3]-a[1]), bArea = (b[2]-b[0])*(b[3]-b[1]);
+  return inter / (aArea + bArea - inter + 1e-6);
+}
 
 function translateLabel(label) {
   const lower = String(label).toLowerCase();
@@ -1490,11 +1509,11 @@ async function hdChangeColorTexture() {
   const mtype    = document.getElementById('hd-col-mtype').value;
   const obj      = document.getElementById('hd-col-object').value;
   if (!color && !material) { setHdStatus('colors','Выберите цвет или материал','error'); return; }
+  if (material && !mtype) { setHdStatus('colors','Выберите тип поверхности (матовая/глянцевая)','error'); return; }
   setHdStatus('colors','AI перекрашивает...','loading',true);
   const payload = { image: getOriginalBase64(), masked_image: maskB64, design_type: 'Interior', no_design: 1 };
   if (color) payload.color = color;
-  if (material) payload.materials = material;
-  if (mtype) payload.materials_type = mtype;
+  if (material) { payload.materials = material; payload.materials_type = mtype; }
   if (obj) payload.object = obj;
   try {
     const data = await callHdApi('change_color_textures', payload);
@@ -1768,25 +1787,25 @@ async function analyzeImage() {
     if (!output) { setStatus('Превышено время. Добавьте объект вручную.', 'error'); setProgress(0); return; }
 
     // Parse new output format: output.detections[{bbox:[x1,y1,x2,y2],label,confidence}]
-    // bbox is in ABSOLUTE pixels of the uploaded image (apiCanvas.width × apiCanvas.height)
-    const detections = output.detections || [];
-    let labels = [], boxes = [];
-    const minConf = 0.08;
-    for (const d of detections) {
-      if (!d.label || d.confidence < minConf) continue;
-      const [x1, y1, x2, y2] = d.bbox;
-      labels.push(d.label);
-      boxes.push([x1 / apiCanvas.width, y1 / apiCanvas.height,
-                  x2 / apiCanvas.width, y2 / apiCanvas.height]);
-    }
+    const rawDets = (output.detections || [])
+      .filter(d => d.label && d.confidence >= 0.15)
+      .map(d => ({
+        label: d.label,
+        confidence: d.confidence,
+        box: [d.bbox[0]/apiCanvas.width, d.bbox[1]/apiCanvas.height,
+              d.bbox[2]/apiCanvas.width, d.bbox[3]/apiCanvas.height]
+      }));
 
-    if (!labels.length) {
+    // NMS: remove duplicate/overlapping boxes
+    const nmsResult = applyNMS(rawDets, 0.4);
+
+    if (!nmsResult.length) {
       setStatus('AI не нашёл объекты. Используйте «Добавить вручную» — нарисуйте рамку на объекте.', 'error');
       setProgress(0); return;
     }
 
-    detectedObjects = labels.map((label, i) => ({
-      id: i, label: translateLabel(label), labelEn: label, box: boxes[i]
+    detectedObjects = nmsResult.map((d, i) => ({
+      id: i, label: translateLabel(d.label), labelEn: d.label, box: d.box
     }));
 
     setStatus(`Очищаю фон...`, 'loading', true);
