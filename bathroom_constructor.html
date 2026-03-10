@@ -3,91 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZENO — Конструктор планировки</title>
+  <title>Morrow Lab — Конструктор планировки</title>
   <script src="https://unpkg.com/konva@9/konva.min.js"></script>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2d3e;
-      --accent: #6c63ff;
-      --accent-dim: rgba(108, 99, 255, 0.15);
-      --text: #e8e8f0;
-      --muted: #7878a0;
-      --success: #10b981;
-      --warn: #f59e0b;
-      --error: #ef4444;
+      --black: #000000;
+      --lime: #CCFF00;
+      --lime-dim: rgba(204, 255, 0, 0.12);
+      --lime-border: rgba(204, 255, 0, 0.25);
+      --white: #ffffff;
+      --gray: #1a1a1a;
+      --gray2: #2a2a2a;
+      --gray3: #3a3a3a;
+      --muted: #666666;
+      --text: #ffffff;
+      --success: #CCFF00;
+      --warn: #ffaa00;
+      --error: #ff4444;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--black);
+      color: var(--white);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       display: flex;
+      flex-direction: column;
       height: 100vh;
       overflow: hidden;
     }
 
+    /* ── Header ───────────────────────────────────── */
+    .header {
+      height: 52px;
+      background: var(--black);
+      border-bottom: 1px solid var(--gray2);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .header-logo img {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .header-brand {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.3px;
+    }
+    .header-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--gray2);
+    }
+    .header-title {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .spacer { flex: 1; }
+    .header-actions { display: flex; gap: 8px; }
+
+    /* ── Layout ───────────────────────────────────── */
+    .layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
     /* ── Sidebar ──────────────────────────────────── */
     .sidebar {
-      width: 272px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+      width: 260px;
+      background: var(--black);
+      border-right: 1px solid var(--gray2);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
       flex-shrink: 0;
     }
-    .sidebar::-webkit-scrollbar { width: 4px; }
-    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .sidebar-logo {
-      padding: 18px 20px 14px;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.3px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sidebar-logo span { color: var(--muted); font-weight: 400; font-size: 13px; }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 2px; }
 
     .section {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray2);
     }
     .section-title {
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.5px;
       color: var(--muted);
       margin-bottom: 10px;
       font-weight: 600;
     }
 
-    .field-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 5px;
-      display: block;
-    }
-    input[type="password"],
-    input[type="text"] {
-      width: 100%;
-      padding: 8px 11px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input:focus { border-color: var(--accent); }
-
+    /* Buttons */
     .btn {
       width: 100%;
       padding: 9px 14px;
@@ -95,39 +118,42 @@
       border: none;
       cursor: pointer;
       font-size: 13px;
-      font-weight: 500;
-      transition: opacity 0.15s, transform 0.1s;
+      font-weight: 600;
+      transition: all 0.15s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
+      letter-spacing: 0.1px;
     }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+    .btn-lime { background: var(--lime); color: var(--black); }
+    .btn-lime:hover { background: #d9ff1a; }
     .btn-ghost {
       background: transparent;
-      border: 1px dashed var(--border);
+      border: 1px dashed var(--gray3);
       color: var(--muted);
     }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-dim { background: var(--border); color: var(--text); }
-    .btn-dim:hover { opacity: 0.8; }
+    .btn-ghost:hover { border-color: var(--lime); color: var(--lime); }
+    .btn-dark { background: var(--gray); border: 1px solid var(--gray2); color: var(--white); }
+    .btn-dark:hover { background: var(--gray2); }
 
+    /* Status */
     .status-bar {
-      margin-top: 10px;
-      font-size: 12px;
-      min-height: 18px;
+      margin-top: 9px;
+      font-size: 11px;
+      min-height: 16px;
       display: flex;
       align-items: center;
       gap: 6px;
+      line-height: 1.4;
     }
     .status-bar.idle { color: var(--muted); }
     .status-bar.loading { color: var(--warn); }
-    .status-bar.success { color: var(--success); }
+    .status-bar.success { color: var(--lime); }
     .status-bar.error { color: var(--error); }
     .spinner {
-      width: 12px; height: 12px;
+      width: 11px; height: 11px;
       border: 2px solid var(--warn);
       border-top-color: transparent;
       border-radius: 50%;
@@ -136,29 +162,25 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Color pickers ────────────────────────────── */
+    /* Color pickers */
     .color-control { display: flex; flex-direction: column; gap: 8px; }
-    .color-row { display: flex; align-items: center; gap: 8px; }
     .color-input-wrap {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--gray);
+      border: 1px solid var(--gray2);
       border-radius: 8px;
       padding: 6px 10px;
-      flex: 1;
       cursor: pointer;
       transition: border-color 0.15s;
     }
-    .color-input-wrap:hover { border-color: var(--accent); }
+    .color-input-wrap:hover { border-color: var(--lime); }
     input[type="color"] {
-      width: 22px; height: 22px;
-      padding: 0;
-      border: none;
-      background: none;
-      cursor: pointer;
-      border-radius: 4px;
+      width: 20px; height: 20px;
+      padding: 0; border: none;
+      background: none; cursor: pointer;
+      border-radius: 3px;
     }
     .color-text { font-size: 12px; color: var(--muted); }
     .swatches { display: flex; gap: 5px; flex-wrap: wrap; }
@@ -169,48 +191,56 @@
       border: 2px solid transparent;
       transition: transform 0.1s, border-color 0.15s;
     }
-    .swatch:hover { transform: scale(1.2); border-color: rgba(255,255,255,0.3); }
-    .swatch.active { border-color: white; }
-
-    /* ── Opacity slider ───────────────────────────── */
+    .swatch:hover { transform: scale(1.2); }
+    .swatch.active { border-color: var(--lime); }
     .range-row { display: flex; align-items: center; gap: 8px; }
-    .range-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-    input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-    .range-val { font-size: 12px; color: var(--text); min-width: 28px; text-align: right; }
+    .range-row label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    input[type="range"] { flex: 1; accent-color: var(--lime); cursor: pointer; }
+    .range-val { font-size: 11px; color: var(--white); min-width: 28px; text-align: right; }
 
-    /* ── Object list ──────────────────────────────── */
+    /* Style grid */
+    .style-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .style-item {
+      padding: 7px 8px;
+      background: var(--gray);
+      border: 1px solid var(--gray2);
+      border-radius: 7px;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .style-item:hover { border-color: var(--lime); color: var(--white); }
+    .style-item.active { border-color: var(--lime); background: var(--lime-dim); color: var(--lime); font-weight: 600; }
+
+    /* Object list */
     .obj-list { display: flex; flex-direction: column; gap: 5px; }
     .obj-item {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       padding: 7px 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
+      background: var(--gray);
+      border: 1px solid var(--gray2);
+      border-radius: 7px;
+      font-size: 12px;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      user-select: none;
+      transition: all 0.15s;
     }
-    .obj-item:hover { border-color: var(--accent); }
-    .obj-item.active { border-color: var(--accent); background: var(--accent-dim); }
-    .obj-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .obj-item:hover { border-color: var(--lime); }
+    .obj-item.active { border-color: var(--lime); background: var(--lime-dim); }
+    .obj-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); flex-shrink: 0; }
     .obj-name { flex: 1; }
-    .obj-confidence {
-      font-size: 10px;
-      color: var(--muted);
-      background: var(--surface);
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-    .obj-hint { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .obj-en { font-size: 10px; color: var(--muted); }
+    .obj-hint { font-size: 11px; color: var(--muted); line-height: 1.6; }
 
-    /* ── Main area ────────────────────────────────── */
+    /* ── Main canvas area ─────────────────────────── */
     .main {
       flex: 1;
       display: flex;
@@ -219,80 +249,98 @@
       min-width: 0;
     }
 
-    .toolbar {
-      height: 52px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+    .canvas-toolbar {
+      height: 48px;
+      background: var(--black);
+      border-bottom: 1px solid var(--gray2);
       display: flex;
       align-items: center;
-      padding: 0 18px;
-      gap: 10px;
+      padding: 0 16px;
+      gap: 8px;
       flex-shrink: 0;
     }
-    .toolbar-title { font-size: 14px; font-weight: 600; }
-    .toolbar-sub { font-size: 12px; color: var(--muted); }
-    .spacer { flex: 1; }
+    .canvas-info { font-size: 12px; color: var(--muted); }
+    .canvas-info b { color: var(--white); }
+
     .tb-btn {
-      padding: 6px 13px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--gray2);
       cursor: pointer;
       font-size: 12px;
       font-weight: 500;
-      background: transparent;
-      color: var(--text);
-      transition: background 0.15s, border-color 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      background: var(--gray);
+      color: var(--white);
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 5px;
     }
-    .tb-btn:hover { background: var(--border); border-color: #3a3d55; }
-    .tb-btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
-    .tb-btn.primary:hover { opacity: 0.88; }
+    .tb-btn:hover { background: var(--gray2); border-color: var(--gray3); }
+    .tb-btn.lime { background: var(--lime); border-color: var(--lime); color: var(--black); font-weight: 700; }
+    .tb-btn.lime:hover { background: #d9ff1a; }
 
     .canvas-area {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #090b10;
+      background: #050505;
       overflow: hidden;
       position: relative;
     }
     #canvas-container {
-      box-shadow: 0 8px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 80px rgba(204, 255, 0, 0.05), 0 0 40px rgba(0,0,0,0.8);
       border-radius: 4px;
       overflow: hidden;
     }
 
     /* Placeholder */
-    .canvas-placeholder {
+    .placeholder {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      color: var(--muted);
-      pointer-events: none;
+      gap: 16px;
       text-align: center;
+      pointer-events: none;
     }
-    .canvas-placeholder .icon {
-      font-size: 48px;
-      opacity: 0.3;
+    .placeholder-icon {
+      width: 80px; height: 80px;
+      border: 1px solid var(--gray2);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      background: var(--gray);
     }
-    .canvas-placeholder h3 { font-size: 16px; font-weight: 500; color: var(--text); opacity: 0.5; }
-    .canvas-placeholder p { font-size: 13px; max-width: 280px; line-height: 1.6; }
-
-    .corner-hint {
-      position: absolute;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(6px);
-      color: var(--muted);
-      padding: 5px 14px;
+    .placeholder h3 { font-size: 16px; color: var(--white); font-weight: 600; }
+    .placeholder p { font-size: 13px; color: var(--muted); max-width: 300px; line-height: 1.6; }
+    .placeholder-steps {
+      display: flex; gap: 8px; margin-top: 4px;
+    }
+    .step {
+      padding: 6px 12px;
+      border: 1px solid var(--gray2);
       border-radius: 20px;
       font-size: 11px;
+      color: var(--muted);
+    }
+    .step b { color: var(--lime); }
+
+    /* Progress */
+    .progress-wrap { height: 2px; background: var(--gray2); flex-shrink: 0; }
+    .progress-bar { height: 100%; background: var(--lime); width: 0%; transition: width 0.4s; }
+
+    /* Toast hint */
+    .corner-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(204, 255, 0, 0.12);
+      border: 1px solid var(--lime-border);
+      color: var(--lime);
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
       pointer-events: none;
       white-space: nowrap;
       opacity: 0;
@@ -300,174 +348,222 @@
     }
     .corner-hint.visible { opacity: 1; }
 
-    /* Progress bar */
-    .progress-wrap {
-      height: 2px;
-      background: var(--border);
-      flex-shrink: 0;
+    /* AI Restyle result overlay */
+    .restyle-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 100;
     }
-    .progress-bar {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.4s ease;
+    .restyle-overlay.visible { display: flex; }
+    .restyle-overlay img {
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(204,255,0,0.2);
+    }
+    .restyle-overlay-btns { display: flex; gap: 10px; }
+    .restyle-btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-<!-- ══════ SIDEBAR ══════ -->
-<div class="sidebar">
-  <div class="sidebar-logo">
-    ZENO <span>конструктор</span>
-  </div>
-
-  <!-- Upload -->
-  <div class="section">
-    <div class="section-title">Рендер</div>
-    <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
-      📁 Загрузить изображение
-    </button>
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
-  </div>
-
-  <!-- Analyze -->
-  <div class="section">
-    <div class="section-title">Анализ объектов</div>
-    <button class="btn btn-primary" onclick="analyzeImage()">
-      🔍 Найти объекты
-    </button>
-    <div id="statusBar" class="status-bar idle">Загрузите рендер для начала работы</div>
-  </div>
-
-  <!-- Wall color -->
-  <div class="section">
-    <div class="section-title">Цвет стен</div>
-    <div class="color-control">
-      <div class="color-input-wrap" onclick="document.getElementById('wallColor').click()">
-        <input type="color" id="wallColor" value="#e8e0d8" oninput="updateColors()">
-        <span class="color-text">Выбрать цвет стен</span>
-      </div>
-      <div class="swatches" id="wallSwatches">
-        <div class="swatch active" style="background:#e8e0d8" onclick="setWallColor('#e8e0d8')"></div>
-        <div class="swatch" style="background:#d4e8d0" onclick="setWallColor('#d4e8d0')"></div>
-        <div class="swatch" style="background:#d0dde8" onclick="setWallColor('#d0dde8')"></div>
-        <div class="swatch" style="background:#f5e6d0" onclick="setWallColor('#f5e6d0')"></div>
-        <div class="swatch" style="background:#e8d0e8" onclick="setWallColor('#e8d0e8')"></div>
-        <div class="swatch" style="background:#d0e8e8" onclick="setWallColor('#d0e8e8')"></div>
-        <div class="swatch" style="background:#1e2030" onclick="setWallColor('#1e2030')"></div>
-        <div class="swatch" style="background:#f5f0e8" onclick="setWallColor('#f5f0e8')"></div>
-      </div>
-      <div class="range-row">
-        <label>Интенсивность</label>
-        <input type="range" id="wallOpacity" min="0" max="60" value="25" oninput="updateColors(); document.getElementById('wallOpVal').textContent = this.value + '%'">
-        <span class="range-val" id="wallOpVal">25%</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Floor color -->
-  <div class="section">
-    <div class="section-title">Цвет пола</div>
-    <div class="color-control">
-      <div class="color-input-wrap" onclick="document.getElementById('floorColor').click()">
-        <input type="color" id="floorColor" value="#c8b89a" oninput="updateColors()">
-        <span class="color-text">Выбрать цвет пола</span>
-      </div>
-      <div class="swatches" id="floorSwatches">
-        <div class="swatch active" style="background:#c8b89a" onclick="setFloorColor('#c8b89a')"></div>
-        <div class="swatch" style="background:#a89070" onclick="setFloorColor('#a89070')"></div>
-        <div class="swatch" style="background:#c8c8c8" onclick="setFloorColor('#c8c8c8')"></div>
-        <div class="swatch" style="background:#604838" onclick="setFloorColor('#604838')"></div>
-        <div class="swatch" style="background:#e8e8e0" onclick="setFloorColor('#e8e8e0')"></div>
-        <div class="swatch" style="background:#282828" onclick="setFloorColor('#282828')"></div>
-        <div class="swatch" style="background:#b8d0c8" onclick="setFloorColor('#b8d0c8')"></div>
-        <div class="swatch" style="background:#e0c8b0" onclick="setFloorColor('#e0c8b0')"></div>
-      </div>
-      <div class="range-row">
-        <label>Интенсивность</label>
-        <input type="range" id="floorOpacity" min="0" max="60" value="25" oninput="updateColors(); document.getElementById('floorOpVal').textContent = this.value + '%'">
-        <span class="range-val" id="floorOpVal">25%</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Object list -->
-  <div class="section" style="flex:1">
-    <div class="section-title">Объекты на рендере</div>
-    <div class="obj-list" id="objList">
-      <div class="obj-hint">После анализа здесь появятся обнаруженные объекты — их можно перетаскивать на холсте.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ MAIN ══════ -->
-<div class="main">
-  <div class="toolbar">
-    <div>
-      <div class="toolbar-title">Конструктор планировки</div>
-      <div class="toolbar-sub" id="toolbarSub">Загрузите рендер и нажмите «Найти объекты»</div>
-    </div>
-    <div class="spacer"></div>
-    <button class="tb-btn" onclick="resetPositions()">↺ Сброс позиций</button>
+<!-- ══════ HEADER ══════ -->
+<div class="header">
+  <a class="header-logo" href="#">
+    <img src="/logo.png" alt="Morrow Lab" onerror="this.style.display='none'">
+    <span class="header-brand">Morrow Lab</span>
+  </a>
+  <div class="header-sep"></div>
+  <span class="header-title">Конструктор планировки</span>
+  <div class="spacer"></div>
+  <div class="header-actions">
+    <button class="tb-btn" onclick="resetPositions()">↺ Сброс</button>
     <button class="tb-btn" onclick="toggleLabels()">🏷 Метки</button>
-    <button class="tb-btn primary" onclick="exportImage()">💾 Экспорт PNG</button>
-  </div>
-
-  <div class="progress-wrap">
-    <div class="progress-bar" id="progressBar"></div>
-  </div>
-
-  <div class="canvas-area" id="canvasArea">
-    <div id="canvas-container"></div>
-    <div class="canvas-placeholder" id="placeholder">
-      <div class="icon">🛁</div>
-      <h3>Загрузите рендер ванной</h3>
-      <p>Нажмите «Загрузить изображение» в боковой панели, затем «Найти объекты» — AI обнаружит ванну, душ, унитаз и другие элементы.</p>
-    </div>
-    <div class="corner-hint" id="cornerHint">Перетаскивайте объекты для изменения планировки</div>
+    <button class="tb-btn lime" onclick="exportImage()">↓ Экспорт PNG</button>
   </div>
 </div>
+
+<!-- ══════ LAYOUT ══════ -->
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+
+    <!-- Upload -->
+    <div class="section">
+      <div class="section-title">Рендер</div>
+      <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
+        ↑ Загрузить изображение
+      </button>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+    </div>
+
+    <!-- Detect objects -->
+    <div class="section">
+      <div class="section-title">AI — Поиск объектов</div>
+      <button class="btn btn-lime" onclick="analyzeImage()">
+        ⬡ Найти объекты
+      </button>
+      <div id="statusBar" class="status-bar idle">Загрузите рендер</div>
+    </div>
+
+    <!-- AI Restyle (homedesigns.ai) -->
+    <div class="section">
+      <div class="section-title">AI — Изменить стиль</div>
+      <div class="style-grid" id="styleGrid">
+        <div class="style-item active" onclick="selectStyle('modern', this)">Модерн</div>
+        <div class="style-item" onclick="selectStyle('minimalist', this)">Минимализм</div>
+        <div class="style-item" onclick="selectStyle('scandinavian', this)">Скандинавский</div>
+        <div class="style-item" onclick="selectStyle('industrial', this)">Лофт</div>
+        <div class="style-item" onclick="selectStyle('japandi', this)">Japandi</div>
+        <div class="style-item" onclick="selectStyle('luxury', this)">Люкс</div>
+      </div>
+      <button class="btn btn-dark" onclick="restyleRoom()" style="margin-top:8px">
+        ✦ Применить стиль
+      </button>
+      <div id="restyleStatus" class="status-bar idle"></div>
+    </div>
+
+    <!-- Wall color -->
+    <div class="section">
+      <div class="section-title">Цвет стен</div>
+      <div class="color-control">
+        <div class="color-input-wrap" onclick="document.getElementById('wallColor').click()">
+          <input type="color" id="wallColor" value="#e8e0d8" oninput="updateColors()">
+          <span class="color-text">Выбрать цвет</span>
+        </div>
+        <div class="swatches" id="wallSwatches">
+          <div class="swatch active" style="background:#e8e0d8" onclick="setWallColor('#e8e0d8')"></div>
+          <div class="swatch" style="background:#d4e8d0" onclick="setWallColor('#d4e8d0')"></div>
+          <div class="swatch" style="background:#d0dde8" onclick="setWallColor('#d0dde8')"></div>
+          <div class="swatch" style="background:#f5e6d0" onclick="setWallColor('#f5e6d0')"></div>
+          <div class="swatch" style="background:#e8d0e8" onclick="setWallColor('#e8d0e8')"></div>
+          <div class="swatch" style="background:#d0e8e8" onclick="setWallColor('#d0e8e8')"></div>
+          <div class="swatch" style="background:#1a1a1a" onclick="setWallColor('#1a1a1a')"></div>
+          <div class="swatch" style="background:#f5f0e8" onclick="setWallColor('#f5f0e8')"></div>
+        </div>
+        <div class="range-row">
+          <label>Интенсивность</label>
+          <input type="range" id="wallOpacity" min="0" max="60" value="25"
+            oninput="updateColors(); document.getElementById('wallOpVal').textContent = this.value+'%'">
+          <span class="range-val" id="wallOpVal">25%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floor color -->
+    <div class="section">
+      <div class="section-title">Цвет пола</div>
+      <div class="color-control">
+        <div class="color-input-wrap" onclick="document.getElementById('floorColor').click()">
+          <input type="color" id="floorColor" value="#c8b89a" oninput="updateColors()">
+          <span class="color-text">Выбрать цвет</span>
+        </div>
+        <div class="swatches" id="floorSwatches">
+          <div class="swatch active" style="background:#c8b89a" onclick="setFloorColor('#c8b89a')"></div>
+          <div class="swatch" style="background:#a89070" onclick="setFloorColor('#a89070')"></div>
+          <div class="swatch" style="background:#c8c8c8" onclick="setFloorColor('#c8c8c8')"></div>
+          <div class="swatch" style="background:#604838" onclick="setFloorColor('#604838')"></div>
+          <div class="swatch" style="background:#e8e8e0" onclick="setFloorColor('#e8e8e0')"></div>
+          <div class="swatch" style="background:#181818" onclick="setFloorColor('#181818')"></div>
+          <div class="swatch" style="background:#b8d0c8" onclick="setFloorColor('#b8d0c8')"></div>
+          <div class="swatch" style="background:#e0c8b0" onclick="setFloorColor('#e0c8b0')"></div>
+        </div>
+        <div class="range-row">
+          <label>Интенсивность</label>
+          <input type="range" id="floorOpacity" min="0" max="60" value="25"
+            oninput="updateColors(); document.getElementById('floorOpVal').textContent = this.value+'%'">
+          <span class="range-val" id="floorOpVal">25%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objects -->
+    <div class="section" style="flex:1">
+      <div class="section-title">Объекты</div>
+      <div class="obj-list" id="objList">
+        <div class="obj-hint">Загрузите рендер и нажмите «Найти объекты»</div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div class="canvas-toolbar">
+      <span class="canvas-info" id="canvasInfo">Нет изображения</span>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="canvas-area" id="canvasArea">
+      <div id="canvas-container" style="display:none"></div>
+
+      <!-- Placeholder -->
+      <div class="placeholder" id="placeholder">
+        <div class="placeholder-icon">🛁</div>
+        <h3>Загрузите рендер</h3>
+        <p>AI обнаружит объекты — ванну, душ, унитаз, раковину — и сделает их перетаскиваемыми. Также можно изменить стиль комнаты через AI.</p>
+        <div class="placeholder-steps">
+          <div class="step"><b>1</b> Загрузить</div>
+          <div class="step"><b>2</b> Найти объекты</div>
+          <div class="step"><b>3</b> Перетащить</div>
+        </div>
+      </div>
+
+      <!-- AI Restyle overlay -->
+      <div class="restyle-overlay" id="restyleOverlay">
+        <img id="restyleImg" src="" alt="AI Restyle">
+        <div class="restyle-overlay-btns">
+          <button class="restyle-btn" style="background:var(--lime);color:var(--black)"
+            onclick="applyRestyleAsBackground()">Использовать как фон</button>
+          <button class="restyle-btn" style="background:var(--gray);color:var(--white);border:1px solid var(--gray2)"
+            onclick="closeRestyle()">Закрыть</button>
+        </div>
+      </div>
+
+      <div class="corner-hint" id="cornerHint">Перетаскивайте объекты для изменения планировки</div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
 
 <script>
 // ══════════════════════════════════════════════════════
 // State
 // ══════════════════════════════════════════════════════
-let stage = null;
-let bgLayer = null;
-let overlayLayer = null;
-let objectsLayer = null;
+let stage = null, bgLayer = null, overlayLayer = null, objectsLayer = null;
 let originalImage = null;
-let originalDataUrl = null;
 let detectedObjects = [];
 let labelsVisible = true;
 let initialPositions = [];
+let selectedStyle = 'modern';
+let restyleImageUrl = null;
 
-const STAGE_MAX_W = window.innerWidth - 272 - 40;
-const STAGE_MAX_H = window.innerHeight - 52 - 2 - 40;
+const STAGE_MAX_W = () => window.innerWidth - 260 - 32;
+const STAGE_MAX_H = () => window.innerHeight - 52 - 48 - 2 - 32;
 
 const LABEL_MAP = {
-  toilet: 'Унитаз',
-  sink: 'Раковина',
-  washbasin: 'Умывальник',
-  basin: 'Раковина',
-  bathtub: 'Ванна',
-  bath: 'Ванна',
-  shower: 'Душевая',
-  mirror: 'Зеркало',
-  vanity: 'Тумба',
-  cabinet: 'Тумба',
-  'towel warmer': 'Полотенцесушитель',
-  towel: 'Полотенцесушитель',
-  plant: 'Растение',
-  light: 'Светильник',
-  faucet: 'Смеситель',
-  tap: 'Смеситель',
+  toilet: 'Унитаз', sink: 'Раковина', washbasin: 'Умывальник', basin: 'Раковина',
+  bathtub: 'Ванна', bath: 'Ванна', shower: 'Душевая', mirror: 'Зеркало',
+  vanity: 'Тумба', cabinet: 'Тумба', 'towel warmer': 'Полотенцесушитель',
+  towel: 'Полотенцесушитель', plant: 'Растение', light: 'Светильник', faucet: 'Смеситель',
 };
 
-// ══════════════════════════════════════════════════════
-// Helpers
-// ══════════════════════════════════════════════════════
 function translateLabel(label) {
   const lower = String(label).toLowerCase();
   for (const [key, val] of Object.entries(LABEL_MAP)) {
@@ -475,45 +571,36 @@ function translateLabel(label) {
   }
   return label;
 }
-
 function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return { r, g, b };
+  return { r: parseInt(hex.slice(1,3),16), g: parseInt(hex.slice(3,5),16), b: parseInt(hex.slice(5,7),16) };
 }
-
-function setStatus(msg, type = 'idle', showSpinner = false) {
+function setStatus(msg, type='idle', spinner=false) {
   const el = document.getElementById('statusBar');
   el.className = `status-bar ${type}`;
-  el.innerHTML = showSpinner
-    ? `<div class="spinner"></div>${msg}`
-    : msg;
+  el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
 }
-
+function setRestyleStatus(msg, type='idle', spinner=false) {
+  const el = document.getElementById('restyleStatus');
+  el.className = `status-bar ${type}`;
+  el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
+}
 function setProgress(pct) {
   document.getElementById('progressBar').style.width = pct + '%';
 }
-
-function setToolbarSub(text) {
-  document.getElementById('toolbarSub').textContent = text;
+function setCanvasInfo(text) {
+  document.getElementById('canvasInfo').innerHTML = text;
 }
 
 // ══════════════════════════════════════════════════════
-// Stage init
+// Stage
 // ══════════════════════════════════════════════════════
 function initStage(w, h) {
   if (stage) stage.destroy();
-
   stage = new Konva.Stage({ container: 'canvas-container', width: w, height: h });
   bgLayer = new Konva.Layer();
   overlayLayer = new Konva.Layer();
   objectsLayer = new Konva.Layer();
-
-  stage.add(bgLayer);
-  stage.add(overlayLayer);
-  stage.add(objectsLayer);
-
+  stage.add(bgLayer); stage.add(overlayLayer); stage.add(objectsLayer);
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('canvas-container').style.display = '';
 }
@@ -524,73 +611,46 @@ function initStage(w, h) {
 function handleFileUpload(input) {
   const file = input.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = (e) => {
-    originalDataUrl = e.target.result;
     const img = new Image();
     img.onload = () => {
       originalImage = img;
-
-      const scale = Math.min(STAGE_MAX_W / img.width, STAGE_MAX_H / img.height, 1);
+      const scale = Math.min(STAGE_MAX_W() / img.width, STAGE_MAX_H() / img.height, 1);
       const w = Math.round(img.width * scale);
       const h = Math.round(img.height * scale);
-
       initStage(w, h);
-
-      const konvaImg = new Konva.Image({ image: img, width: w, height: h });
-      bgLayer.add(konvaImg);
+      bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
       bgLayer.draw();
-
-      detectedObjects = [];
-      initialPositions = [];
-      objectsLayer.destroyChildren();
-      objectsLayer.draw();
-      document.getElementById('objList').innerHTML =
-        '<div class="obj-hint">Нажмите «Найти объекты» для анализа.</div>';
-
-      setStatus('Изображение загружено. Нажмите «Найти объекты».', 'success');
-      setToolbarSub(`${img.width}×${img.height} px — объекты не обнаружены`);
-
-      // Apply current colors
+      detectedObjects = []; initialPositions = [];
+      objectsLayer.destroyChildren(); objectsLayer.draw();
+      document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
+      setStatus('Изображение загружено', 'success');
+      setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
       updateColors();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-
-  // Reset input to allow re-upload same file
   input.value = '';
 }
 
 // ══════════════════════════════════════════════════════
-// Replicate API
+// Replicate — object detection
 // ══════════════════════════════════════════════════════
 async function analyzeImage() {
-  if (!originalImage) {
-    setStatus('Сначала загрузите изображение.', 'error');
-    return;
-  }
-
+  if (!originalImage) { setStatus('Сначала загрузите изображение', 'error'); return; }
   setStatus('Отправка на анализ...', 'loading', true);
   setProgress(10);
 
-  // Downscale image for API to reduce payload
-  const maxApiW = 1024;
   const apiCanvas = document.createElement('canvas');
-  const apiScale = Math.min(maxApiW / originalImage.width, 1);
-  apiCanvas.width = Math.round(originalImage.width * apiScale);
-  apiCanvas.height = Math.round(originalImage.height * apiScale);
+  const scale = Math.min(1024 / originalImage.width, 1);
+  apiCanvas.width = Math.round(originalImage.width * scale);
+  apiCanvas.height = Math.round(originalImage.height * scale);
   apiCanvas.getContext('2d').drawImage(originalImage, 0, 0, apiCanvas.width, apiCanvas.height);
   const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
 
-  const query = [
-    'toilet', 'sink', 'washbasin', 'bathtub', 'shower',
-    'mirror', 'towel warmer', 'vanity cabinet', 'plant', 'faucet'
-  ].join(', ');
-
   try {
-    // Create prediction через прокси (ключ скрыт на сервере)
     const createRes = await fetch('/api/replicate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -598,320 +658,268 @@ async function analyzeImage() {
         version: 'efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa',
         input: {
           image: base64,
-          query,
-          box_threshold: 0.28,
-          text_threshold: 0.22,
+          query: 'toilet, sink, washbasin, bathtub, shower, mirror, towel warmer, vanity cabinet, plant, faucet',
+          box_threshold: 0.28, text_threshold: 0.22
         }
       })
     });
-
-    if (!createRes.ok) {
-      const err = await createRes.json();
-      setStatus(`Ошибка API: ${err.detail || createRes.status}`, 'error');
-      setProgress(0);
-      return;
-    }
-
-    const prediction = await createRes.json();
-    const predId = prediction.id;
-    setStatus(`Анализирую... (${predId.slice(0, 8)})`, 'loading', true);
+    if (!createRes.ok) { setStatus('Ошибка API', 'error'); setProgress(0); return; }
+    const { id: predId } = await createRes.json();
+    setStatus(`Анализирую...`, 'loading', true);
     setProgress(30);
 
-    // Poll for result
     let output = null;
     for (let i = 0; i < 45; i++) {
       await new Promise(r => setTimeout(r, 2000));
-      const pollRes = await fetch(`/api/replicate/${predId}`);
-      const data = await pollRes.json();
-
-      if (data.status === 'succeeded') {
-        output = data.output;
-        break;
-      }
+      const data = await (await fetch(`/api/replicate/${predId}`)).json();
+      if (data.status === 'succeeded') { output = data.output; break; }
       if (data.status === 'failed' || data.status === 'canceled') {
-        setStatus(`Ошибка анализа: ${data.error || 'неизвестная ошибка'}`, 'error');
-        setProgress(0);
-        return;
+        setStatus(`Ошибка: ${data.error || 'неизвестно'}`, 'error'); setProgress(0); return;
       }
-
       setProgress(30 + Math.min(i * 1.5, 55));
-      setStatus(`Обрабатываю... (${i + 1}/45)`, 'loading', true);
     }
+    if (!output) { setStatus('Превышено время ожидания', 'error'); setProgress(0); return; }
 
-    if (!output) {
-      setStatus('Превышено время ожидания. Попробуйте снова.', 'error');
-      setProgress(0);
-      return;
-    }
-
-    setProgress(90);
-
-    const labels = output.labels || [];
-    const boxes = output.boxes || [];
-
-    if (labels.length === 0) {
-      setStatus('Объекты не найдены. Попробуйте фото с чёткими элементами.', 'error');
-      setProgress(0);
-      return;
-    }
+    const labels = output.labels || [], boxes = output.boxes || [];
+    if (!labels.length) { setStatus('Объекты не найдены', 'error'); setProgress(0); return; }
 
     detectedObjects = labels.map((label, i) => ({
-      id: i,
-      label: translateLabel(label),
-      labelEn: label,
-      box: boxes[i],
+      id: i, label: translateLabel(label), labelEn: label, box: boxes[i]
     }));
 
     renderDetectedObjects();
     renderObjectList();
     setProgress(100);
-    setStatus(`Найдено объектов: ${detectedObjects.length}`, 'success');
-    setToolbarSub(`Обнаружено ${detectedObjects.length} объектов — перетаскивайте их`);
+    setStatus(`✓ Найдено: ${detectedObjects.length} объектов`, 'success');
+    setCanvasInfo(`<b>${originalImage.width}×${originalImage.height}</b> px · <b style="color:var(--lime)">${detectedObjects.length}</b> объектов`);
 
-    // Show hint
     const hint = document.getElementById('cornerHint');
     hint.classList.add('visible');
     setTimeout(() => hint.classList.remove('visible'), 4000);
-
     setTimeout(() => setProgress(0), 800);
 
-  } catch (err) {
-    setStatus(`Ошибка соединения: ${err.message}`, 'error');
-    setProgress(0);
-  }
+  } catch(e) { setStatus(`Ошибка: ${e.message}`, 'error'); setProgress(0); }
 }
 
 // ══════════════════════════════════════════════════════
-// Render detected objects on canvas
+// Render objects on canvas
 // ══════════════════════════════════════════════════════
 function renderDetectedObjects() {
   if (!stage || !originalImage) return;
   objectsLayer.destroyChildren();
   initialPositions = [];
-
-  const stageW = stage.width();
-  const stageH = stage.height();
+  const stageW = stage.width(), stageH = stage.height();
 
   detectedObjects.forEach((obj, idx) => {
     if (!obj.box) return;
     const [x1n, y1n, x2n, y2n] = obj.box;
-
-    const x = x1n * stageW;
-    const y = y1n * stageH;
+    const x = x1n * stageW, y = y1n * stageH;
     const w = Math.max((x2n - x1n) * stageW, 20);
     const h = Math.max((y2n - y1n) * stageH, 20);
 
-    // Crop the region from original image
-    const srcX = x1n * originalImage.width;
-    const srcY = y1n * originalImage.height;
-    const srcW = (x2n - x1n) * originalImage.width;
-    const srcH = (y2n - y1n) * originalImage.height;
-
     const offCanvas = document.createElement('canvas');
-    offCanvas.width = Math.max(Math.round(srcW), 1);
-    offCanvas.height = Math.max(Math.round(srcH), 1);
+    offCanvas.width = Math.max(Math.round((x2n - x1n) * originalImage.width), 1);
+    offCanvas.height = Math.max(Math.round((y2n - y1n) * originalImage.height), 1);
     offCanvas.getContext('2d').drawImage(
       originalImage,
-      srcX, srcY, srcW, srcH,
+      x1n * originalImage.width, y1n * originalImage.height,
+      offCanvas.width, offCanvas.height,
       0, 0, offCanvas.width, offCanvas.height
     );
 
     const cropImg = new Image();
     cropImg.onload = () => {
       const group = new Konva.Group({ x, y, draggable: true, id: `obj_${idx}` });
-
-      const konvaImg = new Konva.Image({ image: cropImg, width: w, height: h });
-
-      const border = new Konva.Rect({
-        width: w, height: h,
-        stroke: '#6c63ff',
-        strokeWidth: 1.5,
-        fill: 'transparent',
-        dash: [6, 3],
-        name: 'border',
-      });
-
-      const labelTag = new Konva.Label({ x: 6, y: 6, name: 'labelTag' });
-      labelTag.add(new Konva.Tag({
-        fill: 'rgba(108, 99, 255, 0.82)',
-        cornerRadius: 4,
+      group.add(new Konva.Image({ image: cropImg, width: w, height: h }));
+      group.add(new Konva.Rect({
+        width: w, height: h, stroke: '#CCFF00', strokeWidth: 1.5,
+        fill: 'transparent', dash: [6, 3], name: 'border'
       }));
-      labelTag.add(new Konva.Text({
-        text: obj.label,
-        fontSize: 11,
-        fontFamily: 'system-ui, sans-serif',
-        fill: 'white',
-        padding: 4,
-      }));
+      const lbl = new Konva.Label({ x: 5, y: 5, name: 'labelTag' });
+      lbl.add(new Konva.Tag({ fill: 'rgba(204,255,0,0.9)', cornerRadius: 4 }));
+      lbl.add(new Konva.Text({ text: obj.label, fontSize: 11, fontFamily: 'system-ui', fill: '#000', padding: 4 }));
+      group.add(lbl);
 
-      group.add(konvaImg);
-      group.add(border);
-      group.add(labelTag);
-
-      // Hover effects
-      group.on('mouseover', () => {
-        document.body.style.cursor = 'grab';
-        border.strokeWidth(2.5);
-        objectsLayer.draw();
-        highlightListItem(idx);
-      });
-      group.on('mouseout', () => {
-        document.body.style.cursor = 'default';
-        border.strokeWidth(1.5);
-        objectsLayer.draw();
-        highlightListItem(-1);
-      });
-      group.on('dragstart', () => {
-        document.body.style.cursor = 'grabbing';
-        group.moveToTop();
-        border.stroke('#a89fff');
-        objectsLayer.draw();
-      });
-      group.on('dragend', () => {
-        document.body.style.cursor = 'default';
-        border.stroke('#6c63ff');
-        objectsLayer.draw();
-      });
+      group.on('mouseover', () => { document.body.style.cursor = 'grab'; group.findOne('.border').strokeWidth(2.5); objectsLayer.draw(); highlightListItem(idx); });
+      group.on('mouseout', () => { document.body.style.cursor = 'default'; group.findOne('.border').strokeWidth(1.5); objectsLayer.draw(); highlightListItem(-1); });
+      group.on('dragstart', () => { document.body.style.cursor = 'grabbing'; group.moveToTop(); });
+      group.on('dragend', () => { document.body.style.cursor = 'default'; });
 
       objectsLayer.add(group);
       objectsLayer.draw();
     };
     cropImg.src = offCanvas.toDataURL();
-
     initialPositions.push({ id: idx, x, y });
   });
 }
 
 // ══════════════════════════════════════════════════════
-// Object list sidebar
+// Object list
 // ══════════════════════════════════════════════════════
 function renderObjectList() {
   const list = document.getElementById('objList');
-  if (!detectedObjects.length) {
-    list.innerHTML = '<div class="obj-hint">Объекты не найдены.</div>';
-    return;
-  }
-
+  if (!detectedObjects.length) { list.innerHTML = '<div class="obj-hint">Объекты не найдены</div>'; return; }
   list.innerHTML = detectedObjects.map((obj, i) => `
     <div class="obj-item" id="list-item-${i}" onclick="focusObject(${i})">
       <div class="obj-dot"></div>
       <span class="obj-name">${obj.label}</span>
-      <span class="obj-confidence">${obj.labelEn}</span>
+      <span class="obj-en">${obj.labelEn}</span>
     </div>
   `).join('');
 }
-
 function focusObject(idx) {
   const group = stage && stage.findOne(`#obj_${idx}`);
-  if (!group) return;
-  group.moveToTop();
-  objectsLayer.draw();
+  if (group) { group.moveToTop(); objectsLayer.draw(); }
   document.querySelectorAll('.obj-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`list-item-${idx}`)?.classList.add('active');
   setTimeout(() => document.getElementById(`list-item-${idx}`)?.classList.remove('active'), 1200);
 }
-
 function highlightListItem(idx) {
-  document.querySelectorAll('.obj-item').forEach((el, i) => {
-    el.classList.toggle('active', i === idx);
-  });
+  document.querySelectorAll('.obj-item').forEach((el, i) => el.classList.toggle('active', i === idx));
 }
 
 // ══════════════════════════════════════════════════════
-// Color overlays
+// Colors
 // ══════════════════════════════════════════════════════
 function updateColors() {
   if (!stage) return;
-
   const wallHex = document.getElementById('wallColor').value;
   const floorHex = document.getElementById('floorColor').value;
   const wallOp = parseInt(document.getElementById('wallOpacity').value) / 100;
   const floorOp = parseInt(document.getElementById('floorOpacity').value) / 100;
-
-  const stageW = stage.width();
-  const stageH = stage.height();
-
+  const W = stage.width(), H = stage.height();
   overlayLayer.destroyChildren();
-
   if (wallOp > 0) {
     const { r, g, b } = hexToRgb(wallHex);
-    overlayLayer.add(new Konva.Rect({
-      x: 0, y: 0,
-      width: stageW,
-      height: stageH * 0.68,
-      fill: `rgba(${r},${g},${b},${wallOp})`,
-      globalCompositeOperation: 'color',
-    }));
+    overlayLayer.add(new Konva.Rect({ x:0, y:0, width:W, height:H*0.68, fill:`rgba(${r},${g},${b},${wallOp})`, globalCompositeOperation:'color' }));
   }
-
   if (floorOp > 0) {
     const { r, g, b } = hexToRgb(floorHex);
-    overlayLayer.add(new Konva.Rect({
-      x: 0, y: stageH * 0.68,
-      width: stageW,
-      height: stageH * 0.32,
-      fill: `rgba(${r},${g},${b},${floorOp})`,
-      globalCompositeOperation: 'color',
-    }));
+    overlayLayer.add(new Konva.Rect({ x:0, y:H*0.68, width:W, height:H*0.32, fill:`rgba(${r},${g},${b},${floorOp})`, globalCompositeOperation:'color' }));
   }
-
   overlayLayer.draw();
 }
-
 function setWallColor(hex) {
   document.getElementById('wallColor').value = hex;
-  document.querySelectorAll('#wallSwatches .swatch').forEach(s => {
-    s.classList.toggle('active', s.style.background === hex || s.getAttribute('onclick').includes(hex));
-  });
+  document.querySelectorAll('#wallSwatches .swatch').forEach(s => s.classList.toggle('active', s.getAttribute('onclick').includes(hex)));
+  updateColors();
+}
+function setFloorColor(hex) {
+  document.getElementById('floorColor').value = hex;
+  document.querySelectorAll('#floorSwatches .swatch').forEach(s => s.classList.toggle('active', s.getAttribute('onclick').includes(hex)));
   updateColors();
 }
 
-function setFloorColor(hex) {
-  document.getElementById('floorColor').value = hex;
-  document.querySelectorAll('#floorSwatches .swatch').forEach(s => {
-    s.classList.toggle('active', s.getAttribute('onclick').includes(hex));
-  });
-  updateColors();
+// ══════════════════════════════════════════════════════
+// AI Restyle (homedesigns.ai)
+// ══════════════════════════════════════════════════════
+function selectStyle(style, el) {
+  selectedStyle = style;
+  document.querySelectorAll('.style-item').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function restyleRoom() {
+  if (!originalImage) { setRestyleStatus('Сначала загрузите рендер', 'error'); return; }
+  setRestyleStatus('Запрос к AI...', 'loading', true);
+
+  // Upload image to get URL (use renders server or convert to base64)
+  const apiCanvas = document.createElement('canvas');
+  const scale = Math.min(1024 / originalImage.width, 1);
+  apiCanvas.width = Math.round(originalImage.width * scale);
+  apiCanvas.height = Math.round(originalImage.height * scale);
+  apiCanvas.getContext('2d').drawImage(originalImage, 0, 0, apiCanvas.width, apiCanvas.height);
+  const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
+
+  try {
+    const resp = await fetch('/api/homedesigns/redesign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image: base64,
+        room_type: 'bathroom',
+        design_style: selectedStyle,
+      })
+    });
+    const data = await resp.json();
+
+    if (data.success === false) {
+      setRestyleStatus(`Сервис недоступен по тест-токену`, 'error');
+      return;
+    }
+
+    // Poll if async
+    const jobId = data.job_id || data.id || data.uuid;
+    if (jobId) {
+      setRestyleStatus('Генерация...', 'loading', true);
+      for (let i = 0; i < 30; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        const poll = await (await fetch(`/api/homedesigns/status/${jobId}`)).json();
+        if (poll.status === 'completed' || poll.output_url || poll.image_url) {
+          showRestyleResult(poll.output_url || poll.image_url);
+          setRestyleStatus('✓ Готово', 'success');
+          return;
+        }
+        if (poll.status === 'failed') { setRestyleStatus('Ошибка генерации', 'error'); return; }
+      }
+      setRestyleStatus('Превышено время ожидания', 'error');
+    } else if (data.output_url || data.image_url || data.result) {
+      showRestyleResult(data.output_url || data.image_url || data.result);
+      setRestyleStatus('✓ Готово', 'success');
+    } else {
+      setRestyleStatus('Неизвестный ответ API', 'error');
+    }
+  } catch(e) {
+    setRestyleStatus(`Ошибка: ${e.message}`, 'error');
+  }
+}
+
+function showRestyleResult(url) {
+  restyleImageUrl = url;
+  document.getElementById('restyleImg').src = url;
+  document.getElementById('restyleOverlay').classList.add('visible');
+}
+function closeRestyle() {
+  document.getElementById('restyleOverlay').classList.remove('visible');
+}
+function applyRestyleAsBackground() {
+  if (!restyleImageUrl || !stage) { closeRestyle(); return; }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    bgLayer.destroyChildren();
+    bgLayer.add(new Konva.Image({ image: img, width: stage.width(), height: stage.height() }));
+    bgLayer.draw();
+    closeRestyle();
+    setRestyleStatus('✓ Фон обновлён', 'success');
+  };
+  img.src = restyleImageUrl;
 }
 
 // ══════════════════════════════════════════════════════
 // Controls
 // ══════════════════════════════════════════════════════
 function resetPositions() {
-  if (!initialPositions.length || !stage) return;
+  if (!stage) return;
   initialPositions.forEach(({ id, x, y }) => {
-    const group = stage.findOne(`#obj_${id}`);
-    if (group) { group.x(x); group.y(y); }
+    const g = stage.findOne(`#obj_${id}`);
+    if (g) { g.x(x); g.y(y); }
   });
   objectsLayer.draw();
 }
-
 function toggleLabels() {
   if (!objectsLayer) return;
   labelsVisible = !labelsVisible;
-  objectsLayer.find('.labelTag').forEach(node => {
-    node.visible(labelsVisible);
-  });
+  objectsLayer.find('.labelTag').forEach(n => n.visible(labelsVisible));
   objectsLayer.draw();
 }
-
 function exportImage() {
-  if (!stage) {
-    alert('Нет изображения для экспорта.');
-    return;
-  }
-  const dataURL = stage.toDataURL({ pixelRatio: 2 });
+  if (!stage) { alert('Нет изображения'); return; }
   const a = document.createElement('a');
-  a.href = dataURL;
-  a.download = `zeno_constructor_${Date.now()}.png`;
+  a.href = stage.toDataURL({ pixelRatio: 2 });
+  a.download = `morrowlab_${Date.now()}.png`;
   a.click();
 }
-
-// ══════════════════════════════════════════════════════
-// Init empty canvas placeholder
-// ══════════════════════════════════════════════════════
-document.getElementById('canvas-container').style.display = 'none';
 </script>
-
 </body>
 </html>
