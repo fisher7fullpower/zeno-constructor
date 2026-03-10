@@ -416,6 +416,107 @@
     }
     .sampling-banner.visible { display: block; }
 
+    /* ── homedesigns.ai tool accordion ─────────────────── */
+    .hd-box {
+      background: rgba(204,255,0,0.03);
+      border: 1px solid rgba(204,255,0,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .hd-box-header {
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--lime);
+    }
+    .hd-badge {
+      font-size: 9px; font-weight: 600; background: var(--lime); color: var(--black);
+      padding: 2px 6px; border-radius: 10px; text-transform: none; letter-spacing: 0;
+    }
+    .hd-tool {
+      border-top: 1px solid rgba(204,255,0,0.1);
+    }
+    .hd-tool-header {
+      padding: 9px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer;
+      font-size: 12px; font-weight: 500; color: var(--white);
+      transition: background 0.1s;
+      user-select: none;
+    }
+    .hd-tool-header:hover { background: rgba(255,255,255,0.04); }
+    .hd-tool-header .hd-icon { font-size: 14px; margin-right: 7px; }
+    .hd-tool-header .hd-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
+    .hd-tool.open .hd-arrow { transform: rotate(180deg); }
+    .hd-tool-body {
+      display: none;
+      padding: 0 12px 12px;
+      border-top: 1px solid var(--gray2);
+    }
+    .hd-tool.open .hd-tool-body { display: block; }
+    .hd-note {
+      font-size: 10px; color: var(--muted); margin-bottom: 10px; margin-top: 8px;
+      line-height: 1.5;
+    }
+    .hd-note a { color: var(--lime); }
+    .hd-status { font-size: 11px; margin-top: 8px; line-height: 1.4; min-height: 14px; }
+    .hd-status.idle { color: var(--muted); }
+    .hd-status.loading { color: var(--warn); display: flex; align-items: center; gap: 5px; }
+    .hd-status.success { color: var(--lime); }
+    .hd-status.error { color: var(--error); }
+    .hd-result-img {
+      width: 100%; border-radius: 7px; margin-top: 8px;
+      border: 1px solid var(--gray2); cursor: pointer;
+      display: none;
+    }
+    .hd-result-img.visible { display: block; }
+    .hd-ai-level { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .hd-level-btn {
+      padding: 4px 9px; border-radius: 6px; border: 1px solid var(--gray2);
+      background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .hd-level-btn:hover { border-color: var(--lime); color: var(--white); }
+    .hd-level-btn.active { border-color: var(--lime); background: var(--lime-dim); color: var(--lime); font-weight: 600; }
+    .hd-select {
+      width: 100%; padding: 7px 8px; border-radius: 6px;
+      background: var(--gray); border: 1px solid var(--gray2);
+      color: var(--white); font-size: 11px; cursor: pointer;
+      margin-bottom: 8px; outline: none;
+    }
+    .hd-select:focus { border-color: var(--lime); }
+    .hd-advisor-input {
+      width: 100%; padding: 7px 9px; border-radius: 6px;
+      background: var(--gray); border: 1px solid var(--gray2);
+      color: var(--white); font-size: 11px; resize: none;
+      font-family: inherit; outline: none; line-height: 1.5;
+    }
+    .hd-advisor-input:focus { border-color: var(--lime); }
+    .hd-advisor-reply {
+      margin-top: 8px; font-size: 11px; color: var(--muted);
+      line-height: 1.6; background: var(--gray); border-radius: 6px;
+      padding: 8px; display: none;
+    }
+    .hd-advisor-reply.visible { display: block; }
+    .hd-use-btn {
+      margin-top: 7px; width: 100%; padding: 6px; border-radius: 6px;
+      background: var(--lime-dim); border: 1px solid var(--lime-border);
+      color: var(--lime); font-size: 11px; font-weight: 600;
+      cursor: pointer; display: none;
+    }
+    .hd-use-btn.visible { display: block; }
+    .hd-use-btn:hover { background: rgba(204,255,0,0.2); }
+
+    /* ── Manual draw mode ───────────────────────────────── */
+    .draw-banner {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,170,0,0.15); border: 1px solid var(--warn);
+      color: var(--warn); padding: 6px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; pointer-events: none;
+      white-space: nowrap; display: none; z-index: 20;
+    }
+    .draw-banner.visible { display: block; }
+
     /* AI Restyle result overlay */
     .restyle-overlay {
       display: none;
@@ -485,24 +586,211 @@
       <button class="btn btn-lime" onclick="analyzeImage()">
         ⬡ Найти объекты
       </button>
+      <button class="btn btn-ghost" onclick="toggleManualDraw()" id="btnManualDraw" style="margin-top:6px">
+        ✎ Добавить объект вручную
+      </button>
       <div id="statusBar" class="status-bar idle">Загрузите рендер</div>
     </div>
 
-    <!-- AI Restyle (homedesigns.ai) -->
+    <!-- homedesigns.ai ALL TOOLS BLOCK -->
     <div class="section">
-      <div class="section-title">AI — Изменить стиль</div>
-      <div class="style-grid" id="styleGrid">
-        <div class="style-item active" onclick="selectStyle('modern', this)">Модерн</div>
-        <div class="style-item" onclick="selectStyle('minimalist', this)">Минимализм</div>
-        <div class="style-item" onclick="selectStyle('scandinavian', this)">Скандинавский</div>
-        <div class="style-item" onclick="selectStyle('industrial', this)">Лофт</div>
-        <div class="style-item" onclick="selectStyle('japandi', this)">Japandi</div>
-        <div class="style-item" onclick="selectStyle('luxury', this)">Люкс</div>
-      </div>
-      <button class="btn btn-dark" onclick="restyleRoom()" style="margin-top:8px">
-        ✦ Применить стиль
-      </button>
-      <div id="restyleStatus" class="status-bar idle">Требует активации плана homedesigns.ai</div>
+      <div class="section-title" style="margin-bottom:8px">AI — Инструменты <span style="color:var(--lime);font-size:9px;background:var(--lime-dim);padding:2px 5px;border-radius:5px;margin-left:3px">homedesigns.ai</span></div>
+      <div class="hd-box">
+        <div class="hd-box-header">
+          Инструменты
+          <span class="hd-badge">платный план</span>
+        </div>
+
+        <!-- 1. Creative Redesign -->
+        <div class="hd-tool" id="hd-restyle">
+          <div class="hd-tool-header" onclick="toggleHdTool('restyle')">
+            <span><span class="hd-icon">✦</span>Применить стиль</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">Трансформация комнаты в выбранном стиле</div>
+            <div class="style-grid" id="styleGrid" style="margin-bottom:8px">
+              <div class="style-item active" onclick="selectStyle('Modern',this)">Модерн</div>
+              <div class="style-item" onclick="selectStyle('Minimalist',this)">Минимализм</div>
+              <div class="style-item" onclick="selectStyle('Scandinavian',this)">Скандинавский</div>
+              <div class="style-item" onclick="selectStyle('Industrial',this)">Лофт</div>
+              <div class="style-item" onclick="selectStyle('Japandi',this)">Japandi</div>
+              <div class="style-item" onclick="selectStyle('Luxury',this)">Люкс</div>
+            </div>
+            <div class="hd-note" style="margin-top:0">Вмешательство AI:</div>
+            <div class="hd-ai-level">
+              <button class="hd-level-btn" onclick="selectAiLevel('Very Low',this)">Минимально</button>
+              <button class="hd-level-btn active" onclick="selectAiLevel('Low',this)">Низкое</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Mid',this)">Среднее</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Extreme',this)">Кардинально</button>
+            </div>
+            <button class="btn btn-dark" onclick="hdCreativeRedesign()">✦ Применить стиль</button>
+            <div id="hd-restyle-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-restyle-use" onclick="applyHdResult('restyle')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-restyle-status">Требует активный план homedesigns.ai</div>
+          </div>
+        </div>
+
+        <!-- 2. Change Color & Textures -->
+        <div class="hd-tool" id="hd-colors">
+          <div class="hd-tool-header" onclick="toggleHdTool('colors')">
+            <span><span class="hd-icon">🎨</span>AI Перекраска материала</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">AI меняет цвет/материал только в выделенной зоне (снизу). Добавьте зону, затем нажмите.</div>
+            <select class="hd-select" id="hd-col-object">
+              <option value="wall">Стена</option>
+              <option value="floor">Пол</option>
+              <option value="ceiling">Потолок</option>
+              <option value="cabinet">Тумба / мебель</option>
+              <option value="door">Дверь</option>
+            </select>
+            <select class="hd-select" id="hd-col-color">
+              <option value="">— Цвет (опционально) —</option>
+              <option value="White">Белый</option>
+              <option value="Off White">Молочный</option>
+              <option value="Cream">Кремовый</option>
+              <option value="Beige">Бежевый</option>
+              <option value="Taupe">Тауп</option>
+              <option value="Light Gray">Светло-серый</option>
+              <option value="Medium Gray">Серый</option>
+              <option value="Charcoal Black">Антрацит</option>
+              <option value="Black">Чёрный</option>
+              <option value="Light Blue">Голубой</option>
+              <option value="Sage Green">Зелёный (шалфей)</option>
+              <option value="Terracotta">Терракота</option>
+              <option value="Navy Blue">Тёмно-синий</option>
+            </select>
+            <select class="hd-select" id="hd-col-material">
+              <option value="">— Материал (опционально) —</option>
+              <option value="Stone">Камень</option>
+              <option value="Ceramics and Porcelain">Керамика / Плитка</option>
+              <option value="Wood">Дерево</option>
+              <option value="Metal">Металл</option>
+              <option value="Glass">Стекло</option>
+              <option value="Fabrics">Ткань</option>
+              <option value="Composite Materials">Композит</option>
+            </select>
+            <select class="hd-select" id="hd-col-mtype">
+              <option value="">— Тип поверхности —</option>
+              <option value="Matte">Матовая</option>
+              <option value="Glossy">Глянцевая</option>
+              <option value="Textured">Фактурная</option>
+              <option value="Metallic paper">Металлик</option>
+            </select>
+            <button class="btn btn-dark" onclick="hdChangeColorTexture()">🎨 AI Перекрасить</button>
+            <div id="hd-colors-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-colors-use" onclick="applyHdResult('colors')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-colors-status">Выделите зону → выберите параметры → запустить</div>
+          </div>
+        </div>
+
+        <!-- 3. Paint Visualizer -->
+        <div class="hd-tool" id="hd-paint">
+          <div class="hd-tool-header" onclick="toggleHdTool('paint')">
+            <span><span class="hd-icon">🖌</span>Визуализатор краски</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">Перекрашивает стены точным RGB-цветом. Добавьте зону перекраски снизу.</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div style="position:relative;flex:0 0 40px;height:40px;border-radius:7px;overflow:hidden;border:1px solid var(--gray3)">
+                <input type="color" id="hd-paint-color" value="#e8e0d8" style="position:absolute;inset:-5px;width:calc(100%+10px);height:calc(100%+10px);cursor:pointer;border:none;background:none">
+              </div>
+              <div style="flex:1">
+                <div style="font-size:12px">Цвет краски</div>
+                <div style="font-size:10px;color:var(--muted)" id="hd-paint-hex">#e8e0d8</div>
+              </div>
+            </div>
+            <button class="btn btn-dark" onclick="hdPaintVisualizer()">🖌 Нанести краску</button>
+            <div id="hd-paint-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-paint-use" onclick="applyHdResult('paint')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-paint-status">Выделите зону → выберите цвет → запустить</div>
+          </div>
+        </div>
+
+        <!-- 4. Material Swap -->
+        <div class="hd-tool" id="hd-matswap">
+          <div class="hd-tool-header" onclick="toggleHdTool('matswap')">
+            <span><span class="hd-icon">🔄</span>Замена материала (плитка)</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">Загрузите фото плитки из каталога — AI применит её текстуру на выделенную зону.</div>
+            <div style="border:1px dashed var(--gray3);border-radius:7px;padding:10px;text-align:center;cursor:pointer;margin-bottom:8px;font-size:11px;color:var(--muted)"
+              onclick="document.getElementById('hd-texture-input').click()" id="hd-texture-drop">
+              📁 Загрузить фото плитки / текстуры
+            </div>
+            <input type="file" id="hd-texture-input" accept="image/*" style="display:none" onchange="previewTexture(this)">
+            <img id="hd-texture-preview" style="display:none;width:100%;border-radius:6px;margin-bottom:8px;border:1px solid var(--gray2)" alt="">
+            <select class="hd-select" id="hd-tex-count">
+              <option value="1 X 1">1×1 плитка</option>
+              <option value="2 X 2" selected>2×2 плитки</option>
+              <option value="3 X 3">3×3 плитки</option>
+              <option value="4 X 4">4×4 плитки</option>
+            </select>
+            <button class="btn btn-dark" onclick="hdMaterialSwap()">🔄 Заменить материал</button>
+            <div id="hd-matswap-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-matswap-use" onclick="applyHdResult('matswap')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-matswap-status">Выделите зону + загрузите текстуру → запустить</div>
+          </div>
+        </div>
+
+        <!-- 5. Furniture Removal -->
+        <div class="hd-tool" id="hd-removal">
+          <div class="hd-tool-header" onclick="toggleHdTool('removal')">
+            <span><span class="hd-icon">🗑</span>Удаление мебели / объектов</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">Удаляет объекты из выделенной зоны. Или очищает всю комнату.</div>
+            <button class="btn btn-dark" onclick="hdFurnitureRemoval(false)" style="margin-bottom:6px">🗑 Удалить из зоны</button>
+            <button class="btn btn-ghost" onclick="hdFurnitureRemoval(true)">🗑 Очистить всю комнату</button>
+            <div id="hd-removal-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-removal-use" onclick="applyHdResult('removal')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-removal-status">Добавьте зону для выборочного удаления</div>
+          </div>
+        </div>
+
+        <!-- 6. Fill Spaces -->
+        <div class="hd-tool" id="hd-fill">
+          <div class="hd-tool-header" onclick="toggleHdTool('fill')">
+            <span><span class="hd-icon">✧</span>Заполнение пространства</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">AI реалистично достраивает стену/пол в выделенной зоне (вместо размытия после перетаскивания).</div>
+            <select class="hd-select" id="hd-fill-style">
+              <option value="Modern">Модерн</option>
+              <option value="Minimalist">Минимализм</option>
+              <option value="Scandinavian">Скандинавский</option>
+              <option value="Industrial">Лофт</option>
+            </select>
+            <button class="btn btn-dark" onclick="hdFillSpaces()">✧ Заполнить зону</button>
+            <div id="hd-fill-result" class="hd-result-img"></div>
+            <button class="hd-use-btn" id="hd-fill-use" onclick="applyHdResult('fill')">↙ Использовать как фон</button>
+            <div class="hd-status idle" id="hd-fill-status">Выделите зону → запустить</div>
+          </div>
+        </div>
+
+        <!-- 7. Design Advisor -->
+        <div class="hd-tool" id="hd-advisor">
+          <div class="hd-tool-header" onclick="toggleHdTool('advisor')">
+            <span><span class="hd-icon">💬</span>AI Советник по дизайну</span>
+            <span class="hd-arrow">▾</span>
+          </div>
+          <div class="hd-tool-body">
+            <div class="hd-note">Задайте вопрос — AI ответит по дизайну интерьера.</div>
+            <textarea class="hd-advisor-input" id="hd-advisor-q" rows="3"
+              placeholder="Например: Какой стиль подойдёт для маленькой ванной?"></textarea>
+            <button class="btn btn-dark" onclick="hdDesignAdvisor()" style="margin-top:7px">💬 Спросить AI</button>
+            <div class="hd-advisor-reply" id="hd-advisor-reply"></div>
+            <div class="hd-status idle" id="hd-advisor-status"></div>
+          </div>
+        </div>
+
+      </div><!-- /hd-box -->
     </div>
 
     <!-- Material Recolor — professional click-to-select -->
@@ -544,6 +832,7 @@
 
     <div class="canvas-area" id="canvasArea">
       <div class="sampling-banner" id="samplingBanner">✎ Кликните на материал для выбора цвета — Esc для отмены</div>
+      <div class="draw-banner" id="drawBanner">✎ Нарисуйте рамку вокруг объекта — Esc для отмены</div>
       <div id="canvas-container" style="display:none"></div>
 
       <!-- Placeholder -->
@@ -591,7 +880,17 @@ let restyleImageUrl = null;
 // Material zones — professional color selection
 let zones = [];
 let activeSamplingZoneId = null;
-let originalImgData = null; // cached pixel data of original image
+let originalImgData = null;
+
+// homedesigns.ai results storage per tool
+const hdResults = {};
+let hdTextureBase64 = null;
+let selectedAiLevel = 'Low';
+
+// Manual draw mode
+let isDrawMode = false;
+let drawStart = null;
+let drawRect = null; // Konva.Rect for preview
 
 // API base: works both on server and locally
 const API_BASE = window.location.hostname === 'constructor.zenohome.by'
@@ -903,24 +1202,381 @@ function initStage(w, h) {
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('canvas-container').style.display = '';
 
-  // Canvas click — used for material sampling
+  // Canvas click — material sampling
   stage.on('click tap', (e) => {
     if (activeSamplingZoneId === null) return;
     const pos = stage.getPointerPosition();
     if (!pos || !originalImgData) return;
-    // Map stage coordinates → original image coordinates
     const scaleX = originalImgData.width  / stage.width();
     const scaleY = originalImgData.height / stage.height();
     sampleAtPoint(Math.round(pos.x * scaleX), Math.round(pos.y * scaleY));
     e.cancelBubble = true;
   });
+
+  // Manual draw bounding box
+  stage.on('mousedown', (e) => {
+    if (!isDrawMode) return;
+    drawStart = stage.getPointerPosition();
+    if (drawRect) drawRect.destroy();
+    drawRect = new Konva.Rect({
+      x: drawStart.x, y: drawStart.y, width: 0, height: 0,
+      stroke: '#FFAA00', strokeWidth: 2, dash: [5,3],
+      fill: 'rgba(255,170,0,0.08)', listening: false
+    });
+    objectsLayer.add(drawRect);
+    e.cancelBubble = true;
+  });
+
+  stage.on('mousemove', () => {
+    if (!isDrawMode || !drawStart || !drawRect) return;
+    const pos = stage.getPointerPosition();
+    drawRect.x(Math.min(pos.x, drawStart.x));
+    drawRect.y(Math.min(pos.y, drawStart.y));
+    drawRect.width(Math.abs(pos.x - drawStart.x));
+    drawRect.height(Math.abs(pos.y - drawStart.y));
+    objectsLayer.batchDraw();
+  });
+
+  stage.on('mouseup', (e) => {
+    if (!isDrawMode || !drawStart) return;
+    const pos = stage.getPointerPosition();
+    const x1n = Math.min(pos.x, drawStart.x) / stage.width();
+    const y1n = Math.min(pos.y, drawStart.y) / stage.height();
+    const x2n = Math.max(pos.x, drawStart.x) / stage.width();
+    const y2n = Math.max(pos.y, drawStart.y) / stage.height();
+    if ((x2n - x1n) * stage.width() < 10) { cancelManualDraw(); return; }
+
+    if (drawRect) { drawRect.destroy(); drawRect = null; }
+    cancelManualDraw();
+
+    const name = prompt('Название объекта (например: Ванна, Унитаз, Зеркало):', 'Объект');
+    if (!name) return;
+
+    const id = detectedObjects.length;
+    detectedObjects.push({ id, label: name, labelEn: name, box: [x1n, y1n, x2n, y2n] });
+    renderDetectedObjects();
+    renderObjectList();
+    setStatus(`✓ Добавлен: ${name}`, 'success');
+    e.cancelBubble = true;
+  });
 }
 
-// Esc cancels sampling
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cancelSampling(); });
+// Esc cancels sampling or draw
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { cancelSampling(); cancelManualDraw(); }
+});
 
 // Init zone list on load
 renderZonesList();
+
+// ══════════════════════════════════════════════════════
+// homedesigns.ai tool helpers
+// ══════════════════════════════════════════════════════
+
+function toggleHdTool(id) {
+  const el = document.getElementById(`hd-${id}`);
+  if (!el) return;
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.hd-tool').forEach(t => t.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+function selectAiLevel(level, el) {
+  selectedAiLevel = level;
+  document.querySelectorAll('.hd-level-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setHdStatus(tool, msg, type='idle', spinner=false) {
+  const el = document.getElementById(`hd-${tool}-status`);
+  if (!el) return;
+  el.className = `hd-status ${type}`;
+  el.innerHTML = spinner ? `<div class="spinner" style="border-color:var(--warn);border-top-color:transparent"></div>${msg}` : msg;
+}
+
+function showHdResult(tool, url) {
+  hdResults[tool] = url;
+  const img = document.getElementById(`hd-${tool}-result`);
+  const btn = document.getElementById(`hd-${tool}-use`);
+  if (img) { img.src = url; img.classList.add('visible'); img.onclick = () => window.open(url,'_blank'); }
+  if (btn) btn.classList.add('visible');
+}
+
+async function callHdApi(endpoint, payload) {
+  const resp = await fetch(`${API_BASE}/api/homedesigns/v2/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return await resp.json();
+}
+
+function getOriginalBase64(maxPx = 1024) {
+  if (!originalImage) return null;
+  const scale = Math.min(maxPx / originalImage.width, maxPx / originalImage.height, 1);
+  const c = document.createElement('canvas');
+  c.width = Math.round(originalImage.width * scale);
+  c.height = Math.round(originalImage.height * scale);
+  c.getContext('2d').drawImage(originalImage, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.88);
+}
+
+function getActiveMaskBase64() {
+  // Find first zone with a mask, or null
+  const z = zones.find(z => z.mask);
+  if (!z || !originalImgData) return null;
+  const { width, height } = originalImgData;
+  const c = document.createElement('canvas');
+  c.width = width; c.height = height;
+  const ctx = c.getContext('2d');
+  const imgd = ctx.createImageData(width, height);
+  for (let i = 0; i < z.mask.length; i++) {
+    const v = z.mask[i] ? 255 : 0;
+    imgd.data[i*4] = v; imgd.data[i*4+1] = v; imgd.data[i*4+2] = v; imgd.data[i*4+3] = 255;
+  }
+  ctx.putImageData(imgd, 0, 0);
+  const scale = Math.min(1024/width, 1024/height, 1);
+  if (scale < 1) {
+    const c2 = document.createElement('canvas');
+    c2.width = Math.round(width*scale); c2.height = Math.round(height*scale);
+    c2.getContext('2d').drawImage(c, 0, 0, c2.width, c2.height);
+    return c2.toDataURL('image/jpeg', 0.88);
+  }
+  return c.toDataURL('image/jpeg', 0.88);
+}
+
+function applyHdResult(tool) {
+  const url = hdResults[tool];
+  if (!url || !stage) return;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    bgLayer.destroyChildren();
+    bgLayer.add(new Konva.Image({ image: img, width: stage.width(), height: stage.height(), name: 'bgImage' }));
+    bgLayer.draw();
+    setHdStatus(tool, '✓ Применено как фон', 'success');
+  };
+  img.onerror = () => { window.open(url, '_blank'); };
+  img.src = url;
+}
+
+// 1. Creative Redesign
+async function hdCreativeRedesign() {
+  if (!originalImage) { setHdStatus('restyle','Загрузите рендер','error'); return; }
+  setHdStatus('restyle','Генерация стиля...','loading',true);
+  try {
+    const data = await callHdApi('creative_redesign', {
+      image: getOriginalBase64(),
+      design_type: 'Interior',
+      room_type: 'Bathroom',
+      design_style: selectedStyle,
+      ai_intervention: selectedAiLevel,
+      no_design: 1
+    });
+    if (data.output_images?.length) {
+      showHdResult('restyle', data.output_images[0]);
+      setHdStatus('restyle','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('restyle', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('restyle',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 2. Change Color & Textures
+async function hdChangeColorTexture() {
+  if (!originalImage) { setHdStatus('colors','Загрузите рендер','error'); return; }
+  const maskB64 = getActiveMaskBase64();
+  if (!maskB64) { setHdStatus('colors','Сначала добавьте зону и выделите область в изображении','error'); return; }
+  const color    = document.getElementById('hd-col-color').value;
+  const material = document.getElementById('hd-col-material').value;
+  const mtype    = document.getElementById('hd-col-mtype').value;
+  const obj      = document.getElementById('hd-col-object').value;
+  if (!color && !material) { setHdStatus('colors','Выберите цвет или материал','error'); return; }
+  setHdStatus('colors','AI перекрашивает...','loading',true);
+  const payload = { image: getOriginalBase64(), masked_image: maskB64, design_type: 'Interior', no_design: 1 };
+  if (color) payload.color = color;
+  if (material) payload.materials = material;
+  if (mtype) payload.materials_type = mtype;
+  if (obj) payload.object = obj;
+  try {
+    const data = await callHdApi('change_color_textures', payload);
+    if (data.output_images?.length) {
+      showHdResult('colors', data.output_images[0]);
+      setHdStatus('colors','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('colors', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('colors',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 3. Paint Visualizer
+async function hdPaintVisualizer() {
+  if (!originalImage) { setHdStatus('paint','Загрузите рендер','error'); return; }
+  const maskB64 = getActiveMaskBase64();
+  if (!maskB64) { setHdStatus('paint','Добавьте зону и выделите область','error'); return; }
+  const hex = document.getElementById('hd-paint-color').value;
+  const rgb = hexToRgb(hex);
+  setHdStatus('paint','Наношу краску...','loading',true);
+  try {
+    const data = await callHdApi('paint_visualizer', {
+      image: getOriginalBase64(), masked_image: maskB64,
+      rgb_color: `${rgb.r},${rgb.g},${rgb.b}`, no_design: 1
+    });
+    if (data.output_images?.length) {
+      showHdResult('paint', data.output_images[0]);
+      setHdStatus('paint','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('paint', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('paint',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 4. Material Swap
+async function hdMaterialSwap() {
+  if (!originalImage) { setHdStatus('matswap','Загрузите рендер','error'); return; }
+  const maskB64 = getActiveMaskBase64();
+  if (!maskB64) { setHdStatus('matswap','Добавьте зону и выделите область','error'); return; }
+  if (!hdTextureBase64) { setHdStatus('matswap','Загрузите фото плитки/текстуры','error'); return; }
+  const count = document.getElementById('hd-tex-count').value;
+  setHdStatus('matswap','Меняю материал...','loading',true);
+  try {
+    const data = await callHdApi('material_swap', {
+      image: getOriginalBase64(), masked_image: maskB64,
+      texture_image: hdTextureBase64, no_of_texture: count, no_design: 2
+    });
+    if (data.output_images?.length) {
+      showHdResult('matswap', data.output_images[0]);
+      setHdStatus('matswap','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('matswap', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('matswap',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 5. Furniture Removal
+async function hdFurnitureRemoval(clearAll) {
+  if (!originalImage) { setHdStatus('removal','Загрузите рендер','error'); return; }
+  setHdStatus('removal', clearAll?'Очищаю комнату...':'Удаляю объект из зоны...','loading',true);
+  const payload = { image: getOriginalBase64() };
+  if (!clearAll) {
+    const maskB64 = getActiveMaskBase64();
+    if (!maskB64) { setHdStatus('removal','Добавьте зону и выделите объект','error'); return; }
+    payload.masked_image = maskB64;
+  }
+  try {
+    const data = await callHdApi('furniture_removal', payload);
+    if (data.output_images?.length) {
+      showHdResult('removal', data.output_images[0]);
+      setHdStatus('removal','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('removal', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('removal',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 6. Fill Spaces
+async function hdFillSpaces() {
+  if (!originalImage) { setHdStatus('fill','Загрузите рендер','error'); return; }
+  const maskB64 = getActiveMaskBase64();
+  if (!maskB64) { setHdStatus('fill','Добавьте зону и выделите область','error'); return; }
+  const style = document.getElementById('hd-fill-style').value;
+  setHdStatus('fill','Заполняю пространство...','loading',true);
+  try {
+    const data = await callHdApi('fill_spaces', {
+      image: getOriginalBase64(), masked_image: maskB64,
+      design_type: 'Interior', room_type: 'Bathroom',
+      design_style: style, no_design: 1,
+      prompt: 'realistic tile wall background'
+    });
+    if (data.output_images?.length) {
+      showHdResult('fill', data.output_images[0]);
+      setHdStatus('fill','✓ Готово','success');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('fill', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('fill',`Ошибка: ${e.message}`,'error'); }
+}
+
+// 7. Design Advisor
+async function hdDesignAdvisor() {
+  const q = document.getElementById('hd-advisor-q').value.trim();
+  if (!q) return;
+  setHdStatus('advisor','Думаю...','loading',true);
+  const reply = document.getElementById('hd-advisor-reply');
+  reply.classList.remove('visible');
+  try {
+    const resp = await fetch(`${API_BASE}/api/homedesigns/advisor`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message: q })
+    });
+    const data = await resp.json();
+    if (data.data || data.success) {
+      reply.textContent = data.data || '✓';
+      reply.classList.add('visible');
+      setHdStatus('advisor','','idle');
+    } else {
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      setHdStatus('advisor', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+    }
+  } catch(e) { setHdStatus('advisor',`Ошибка: ${e.message}`,'error'); }
+}
+
+function isHdAuthError(msg) {
+  return msg && (msg.includes('Invalid API') || msg.includes('Did you mean') || msg.includes('Unauthenticated') || msg.includes('activate'));
+}
+function hdPaidPlanMsg() {
+  return 'Требует активный план <a href="https://homedesigns.ai/pricing" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>';
+}
+
+function previewTexture(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    hdTextureBase64 = e.target.result;
+    const img = document.getElementById('hd-texture-preview');
+    img.src = hdTextureBase64; img.style.display = 'block';
+    document.getElementById('hd-texture-drop').textContent = '✓ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Paint color hex display
+document.addEventListener('DOMContentLoaded', () => {
+  const pc = document.getElementById('hd-paint-color');
+  if (pc) pc.addEventListener('input', () => {
+    document.getElementById('hd-paint-hex').textContent = pc.value;
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// Manual draw mode — add objects by drawing bounding boxes
+// ══════════════════════════════════════════════════════
+
+function toggleManualDraw() {
+  if (!stage) { alert('Сначала загрузите рендер'); return; }
+  if (isDrawMode) { cancelManualDraw(); return; }
+  isDrawMode = true;
+  cancelSampling();
+  document.getElementById('drawBanner').classList.add('visible');
+  document.getElementById('btnManualDraw').textContent = '✕ Отменить';
+  document.body.style.cursor = 'crosshair';
+}
+
+function cancelManualDraw() {
+  isDrawMode = false;
+  drawStart = null;
+  if (drawRect) { drawRect.destroy(); drawRect = null; objectsLayer.batchDraw(); }
+  document.getElementById('drawBanner').classList.remove('visible');
+  const btn = document.getElementById('btnManualDraw');
+  if (btn) btn.textContent = '✎ Добавить объект вручную';
+  document.body.style.cursor = 'default';
+}
 
 // ══════════════════════════════════════════════════════
 // File upload
@@ -975,7 +1631,7 @@ async function analyzeImage() {
   const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
 
   try {
-    // Run Grounding DINO detection
+    // Run Grounding DINO detection (very low thresholds for renders)
     const gdinoRes = await fetch(`${API_BASE}/api/replicate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -983,28 +1639,36 @@ async function analyzeImage() {
         version: 'efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa',
         input: {
           image: base64,
-          query: 'toilet . sink . washbasin . bathtub . shower . mirror . towel rail . vanity unit . bathroom cabinet . faucet . tap',
-          box_threshold: 0.12,
-          text_threshold: 0.10
+          query: 'toilet . sink . bathtub . shower . mirror . cabinet . faucet . towel rail',
+          box_threshold: 0.05,
+          text_threshold: 0.05
         }
       })
     });
-    if (!gdinoRes.ok) { setStatus(`Ошибка API: ${gdinoRes.status}`, 'error'); setProgress(0); return; }
-    const { id: predId } = await gdinoRes.json();
-    setStatus(`Анализирую...`, 'loading', true);
+    if (!gdinoRes.ok) {
+      setStatus(`Ошибка соединения (${gdinoRes.status}). Попробуйте ещё раз или добавьте объект вручную.`, 'error');
+      setProgress(0); return;
+    }
+    const gdinoJson = await gdinoRes.json();
+    if (gdinoJson.detail || gdinoJson.error) {
+      setStatus(`Ошибка API. Добавьте объект вручную (кнопка ниже).`, 'error'); setProgress(0); return;
+    }
+    const predId = gdinoJson.id;
+    if (!predId) { setStatus('Нет ID предсказания. Добавьте объект вручную.','error'); setProgress(0); return; }
+    setStatus('Анализирую...', 'loading', true);
     setProgress(30);
 
     let output = null;
-    for (let i = 0; i < 45; i++) {
-      await new Promise(r => setTimeout(r, 2000));
+    for (let i = 0; i < 50; i++) {
+      await new Promise(r => setTimeout(r, 2500));
       const data = await (await fetch(`${API_BASE}/api/replicate/${predId}`)).json();
       if (data.status === 'succeeded') { output = data.output; break; }
       if (data.status === 'failed' || data.status === 'canceled') {
-        setStatus(`Ошибка: ${data.error || 'неизвестно'}`, 'error'); setProgress(0); return;
+        setStatus('Модель не справилась. Добавьте объекты вручную.', 'error'); setProgress(0); return;
       }
-      setProgress(30 + Math.min(i * 1.5, 40));
+      setProgress(30 + Math.min(i * 1.4, 45));
     }
-    if (!output) { setStatus('Превышено время ожидания', 'error'); setProgress(0); return; }
+    if (!output) { setStatus('Превышено время. Добавьте объект вручную.', 'error'); setProgress(0); return; }
 
     let labels = output.labels || [], boxes = output.boxes || [];
 
@@ -1040,7 +1704,7 @@ async function analyzeImage() {
     }
 
     if (!labels.length) {
-      setStatus('Объекты не найдены. Попробуйте рендер с чёткими санитарными объектами.', 'error');
+      setStatus('AI не нашёл объекты. Используйте «Добавить вручную» — нарисуйте рамку на объекте.', 'error');
       setProgress(0); return;
     }
 
@@ -1195,7 +1859,7 @@ function highlightListItem(idx) {
 
 
 // ══════════════════════════════════════════════════════
-// AI Restyle (homedesigns.ai)
+// AI Restyle helpers
 // ══════════════════════════════════════════════════════
 function selectStyle(style, el) {
   selectedStyle = style;
@@ -1203,86 +1867,30 @@ function selectStyle(style, el) {
   el.classList.add('active');
 }
 
-async function restyleRoom() {
-  if (!originalImage) { setRestyleStatus('Сначала загрузите рендер', 'error'); return; }
-  setRestyleStatus('Запрос к AI...', 'loading', true);
-
-  // Upload image to get URL (use renders server or convert to base64)
-  const apiCanvas = document.createElement('canvas');
-  const scale = Math.min(1024 / originalImage.width, 1);
-  apiCanvas.width = Math.round(originalImage.width * scale);
-  apiCanvas.height = Math.round(originalImage.height * scale);
-  apiCanvas.getContext('2d').drawImage(originalImage, 0, 0, apiCanvas.width, apiCanvas.height);
-  const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
-
-  try {
-    const resp = await fetch(`${API_BASE}/api/homedesigns/redesign`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image: base64,
-        room_type: 'bathroom',
-        design_style: selectedStyle,
-      })
-    });
-    const data = await resp.json();
-
-    if (data.success === false) {
-      const msg = data.message || '';
-      if (msg.includes('Invalid API') || msg.includes('redesign')) {
-        setRestyleStatus('API не активирован — нужен платный план <a href="https://homedesigns.ai/api" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>', 'error');
-      } else {
-        setRestyleStatus(`Ошибка: ${msg}`, 'error');
-      }
-      return;
-    }
-
-    // Poll if async
-    const jobId = data.job_id || data.id || data.uuid;
-    if (jobId) {
-      setRestyleStatus('Генерация...', 'loading', true);
-      for (let i = 0; i < 30; i++) {
-        await new Promise(r => setTimeout(r, 3000));
-        const poll = await (await fetch(`${API_BASE}/api/homedesigns/status/${jobId}`)).json();
-        if (poll.status === 'completed' || poll.output_url || poll.image_url) {
-          showRestyleResult(poll.output_url || poll.image_url);
-          setRestyleStatus('✓ Готово', 'success');
-          return;
-        }
-        if (poll.status === 'failed') { setRestyleStatus('Ошибка генерации', 'error'); return; }
-      }
-      setRestyleStatus('Превышено время ожидания', 'error');
-    } else if (data.output_url || data.image_url || data.result) {
-      showRestyleResult(data.output_url || data.image_url || data.result);
-      setRestyleStatus('✓ Готово', 'success');
-    } else {
-      setRestyleStatus('Неизвестный ответ API', 'error');
-    }
-  } catch(e) {
-    setRestyleStatus(`Ошибка: ${e.message}`, 'error');
-  }
-}
-
+// Legacy restyle overlay (kept for compatibility, hidden by default)
 function showRestyleResult(url) {
   restyleImageUrl = url;
-  document.getElementById('restyleImg').src = url;
-  document.getElementById('restyleOverlay').classList.add('visible');
+  const el = document.getElementById('restyleOverlay');
+  if (el) {
+    document.getElementById('restyleImg').src = url;
+    el.classList.add('visible');
+  }
 }
 function closeRestyle() {
-  document.getElementById('restyleOverlay').classList.remove('visible');
+  document.getElementById('restyleOverlay')?.classList.remove('visible');
 }
 function applyRestyleAsBackground() {
   if (!restyleImageUrl || !stage) { closeRestyle(); return; }
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
+  const img = new Image(); img.crossOrigin = 'anonymous';
   img.onload = () => {
     bgLayer.destroyChildren();
     bgLayer.add(new Konva.Image({ image: img, width: stage.width(), height: stage.height() }));
-    bgLayer.draw();
-    closeRestyle();
-    setRestyleStatus('✓ Фон обновлён', 'success');
+    bgLayer.draw(); closeRestyle();
   };
   img.src = restyleImageUrl;
+}
+function setRestyleStatus(msg, type='idle', spinner=false) {
+  // no-op — old status bar removed
 }
 
 // ══════════════════════════════════════════════════════
