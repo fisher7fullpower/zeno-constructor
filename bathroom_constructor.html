@@ -434,7 +434,7 @@
       <button class="btn btn-dark" onclick="restyleRoom()" style="margin-top:8px">
         ✦ Применить стиль
       </button>
-      <div id="restyleStatus" class="status-bar idle"></div>
+      <div id="restyleStatus" class="status-bar idle">Требует активации плана homedesigns.ai</div>
     </div>
 
     <!-- Wall color -->
@@ -546,13 +546,18 @@
 // ══════════════════════════════════════════════════════
 // State
 // ══════════════════════════════════════════════════════
-let stage = null, bgLayer = null, overlayLayer = null, objectsLayer = null;
+let stage = null, bgLayer = null, objectsLayer = null;
 let originalImage = null;
+let cleanBgImage = null; // background with blurred object areas
 let detectedObjects = [];
 let labelsVisible = true;
 let initialPositions = [];
 let selectedStyle = 'modern';
 let restyleImageUrl = null;
+
+// API base: works both on server and locally
+const API_BASE = window.location.hostname === 'constructor.zenohome.by'
+  ? '' : 'https://constructor.zenohome.by';
 
 const STAGE_MAX_W = () => window.innerWidth - 260 - 32;
 const STAGE_MAX_H = () => window.innerHeight - 52 - 48 - 2 - 32;
@@ -597,10 +602,10 @@ function setCanvasInfo(text) {
 function initStage(w, h) {
   if (stage) stage.destroy();
   stage = new Konva.Stage({ container: 'canvas-container', width: w, height: h });
-  bgLayer = new Konva.Layer();
-  overlayLayer = new Konva.Layer();
+  bgLayer = new Konva.Layer();    // bg image + color overlays (same layer = blend mode works)
   objectsLayer = new Konva.Layer();
-  stage.add(bgLayer); stage.add(overlayLayer); stage.add(objectsLayer);
+  stage.add(bgLayer);
+  stage.add(objectsLayer);
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('canvas-container').style.display = '';
 }
@@ -651,19 +656,22 @@ async function analyzeImage() {
   const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
 
   try {
-    const createRes = await fetch('/api/replicate', {
+    const createRes = await fetch(`${API_BASE}/api/replicate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         version: 'efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa',
         input: {
           image: base64,
-          query: 'toilet, sink, washbasin, bathtub, shower, mirror, towel warmer, vanity cabinet, plant, faucet',
-          box_threshold: 0.28, text_threshold: 0.22
+          query: 'toilet, sink, washbasin, bathtub, shower, shower cabin, mirror, towel warmer, vanity cabinet, faucet',
+          box_threshold: 0.20, text_threshold: 0.18  // lowered for better detection
         }
       })
     });
-    if (!createRes.ok) { setStatus('Ошибка API', 'error'); setProgress(0); return; }
+    if (!createRes.ok) {
+      const err = await createRes.text();
+      setStatus(`Ошибка API: ${createRes.status}`, 'error'); setProgress(0); return;
+    }
     const { id: predId } = await createRes.json();
     setStatus(`Анализирую...`, 'loading', true);
     setProgress(30);
@@ -671,7 +679,7 @@ async function analyzeImage() {
     let output = null;
     for (let i = 0; i < 45; i++) {
       await new Promise(r => setTimeout(r, 2000));
-      const data = await (await fetch(`/api/replicate/${predId}`)).json();
+      const data = await (await fetch(`${API_BASE}/api/replicate/${predId}`)).json();
       if (data.status === 'succeeded') { output = data.output; break; }
       if (data.status === 'failed' || data.status === 'canceled') {
         setStatus(`Ошибка: ${data.error || 'неизвестно'}`, 'error'); setProgress(0); return;
@@ -687,6 +695,8 @@ async function analyzeImage() {
       id: i, label: translateLabel(label), labelEn: label, box: boxes[i]
     }));
 
+    setStatus(`Очищаю фон...`, 'loading', true);
+    cleanBgImage = await createCleanBackground();
     renderDetectedObjects();
     renderObjectList();
     setProgress(100);
@@ -702,6 +712,48 @@ async function analyzeImage() {
 }
 
 // ══════════════════════════════════════════════════════
+// Clean background — blur/fill areas where objects were
+// ══════════════════════════════════════════════════════
+async function createCleanBackground() {
+  return new Promise(resolve => {
+    const c = document.createElement('canvas');
+    c.width = originalImage.width;
+    c.height = originalImage.height;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(originalImage, 0, 0);
+
+    detectedObjects.forEach(obj => {
+      if (!obj.box) return;
+      const [x1n, y1n, x2n, y2n] = obj.box;
+      const pad = 0.03; // expand a bit to cover edges
+      const x = Math.round(Math.max(0, x1n - pad) * c.width);
+      const y = Math.round(Math.max(0, y1n - pad) * c.height);
+      const w = Math.round(Math.min(1, x2n - x1n + pad * 2) * c.width);
+      const h = Math.round(Math.min(1, y2n - y1n + pad * 2) * c.height);
+
+      // Sample a ring of pixels around the object and fill inward
+      const borderSize = Math.min(40, Math.round(Math.min(w, h) * 0.25));
+      const temp = document.createElement('canvas');
+      temp.width = w; temp.height = h;
+      const tCtx = temp.getContext('2d');
+      // Draw surrounding area stretched to fill the hole
+      tCtx.drawImage(c,
+        Math.max(0, x - borderSize), Math.max(0, y - borderSize),
+        w + borderSize * 2, h + borderSize * 2,
+        0, 0, w, h
+      );
+      tCtx.filter = `blur(${Math.round(Math.min(w, h) / 4)}px)`;
+      tCtx.drawImage(temp, 0, 0);
+      ctx.drawImage(temp, x, y);
+    });
+
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = c.toDataURL('image/jpeg', 0.92);
+  });
+}
+
+// ══════════════════════════════════════════════════════
 // Render objects on canvas
 // ══════════════════════════════════════════════════════
 function renderDetectedObjects() {
@@ -710,6 +762,13 @@ function renderDetectedObjects() {
   initialPositions = [];
   const stageW = stage.width(), stageH = stage.height();
 
+  // Replace background with clean version (objects blurred out)
+  const bgSrc = cleanBgImage || originalImage;
+  bgLayer.destroyChildren();
+  bgLayer.add(new Konva.Image({ image: bgSrc, width: stageW, height: stageH, name: 'bgImage' }));
+  bgLayer.draw();
+  updateColors(); // reapply color overlays
+
   detectedObjects.forEach((obj, idx) => {
     if (!obj.box) return;
     const [x1n, y1n, x2n, y2n] = obj.box;
@@ -717,6 +776,7 @@ function renderDetectedObjects() {
     const w = Math.max((x2n - x1n) * stageW, 20);
     const h = Math.max((y2n - y1n) * stageH, 20);
 
+    // Crop from ORIGINAL image (not cleaned)
     const offCanvas = document.createElement('canvas');
     offCanvas.width = Math.max(Math.round((x2n - x1n) * originalImage.width), 1);
     offCanvas.height = Math.max(Math.round((y2n - y1n) * originalImage.height), 1);
@@ -735,18 +795,19 @@ function renderDetectedObjects() {
         width: w, height: h, stroke: '#CCFF00', strokeWidth: 1.5,
         fill: 'transparent', dash: [6, 3], name: 'border'
       }));
-      const lbl = new Konva.Label({ x: 5, y: 5, name: 'labelTag' });
+      // Label stored with name for easy toggle
+      const lbl = new Konva.Label({ x: 5, y: 5, name: 'lbl' });
       lbl.add(new Konva.Tag({ fill: 'rgba(204,255,0,0.9)', cornerRadius: 4 }));
       lbl.add(new Konva.Text({ text: obj.label, fontSize: 11, fontFamily: 'system-ui', fill: '#000', padding: 4 }));
       group.add(lbl);
 
-      group.on('mouseover', () => { document.body.style.cursor = 'grab'; group.findOne('.border').strokeWidth(2.5); objectsLayer.draw(); highlightListItem(idx); });
-      group.on('mouseout', () => { document.body.style.cursor = 'default'; group.findOne('.border').strokeWidth(1.5); objectsLayer.draw(); highlightListItem(-1); });
+      group.on('mouseover', () => { document.body.style.cursor = 'grab'; group.findOne('.border').strokeWidth(2.5); objectsLayer.batchDraw(); highlightListItem(idx); });
+      group.on('mouseout', () => { document.body.style.cursor = 'default'; group.findOne('.border').strokeWidth(1.5); objectsLayer.batchDraw(); highlightListItem(-1); });
       group.on('dragstart', () => { document.body.style.cursor = 'grabbing'; group.moveToTop(); });
-      group.on('dragend', () => { document.body.style.cursor = 'default'; });
+      group.on('dragend', () => { document.body.style.cursor = 'default'; objectsLayer.batchDraw(); });
 
       objectsLayer.add(group);
-      objectsLayer.draw();
+      objectsLayer.batchDraw();
     };
     cropImg.src = offCanvas.toDataURL();
     initialPositions.push({ id: idx, x, y });
@@ -779,7 +840,7 @@ function highlightListItem(idx) {
 }
 
 // ══════════════════════════════════════════════════════
-// Colors
+// Colors — overlays MUST be in same layer as bgImage for blend mode to work
 // ══════════════════════════════════════════════════════
 function updateColors() {
   if (!stage) return;
@@ -788,16 +849,27 @@ function updateColors() {
   const wallOp = parseInt(document.getElementById('wallOpacity').value) / 100;
   const floorOp = parseInt(document.getElementById('floorOpacity').value) / 100;
   const W = stage.width(), H = stage.height();
-  overlayLayer.destroyChildren();
+
+  // Remove old overlays (keep bgImage as first child)
+  bgLayer.find('.colorOverlay').forEach(n => n.destroy());
+
   if (wallOp > 0) {
     const { r, g, b } = hexToRgb(wallHex);
-    overlayLayer.add(new Konva.Rect({ x:0, y:0, width:W, height:H*0.68, fill:`rgba(${r},${g},${b},${wallOp})`, globalCompositeOperation:'color' }));
+    bgLayer.add(new Konva.Rect({
+      x: 0, y: 0, width: W, height: H * 0.68,
+      fill: `rgb(${r},${g},${b})`, opacity: wallOp,
+      globalCompositeOperation: 'color', name: 'colorOverlay'
+    }));
   }
   if (floorOp > 0) {
     const { r, g, b } = hexToRgb(floorHex);
-    overlayLayer.add(new Konva.Rect({ x:0, y:H*0.68, width:W, height:H*0.32, fill:`rgba(${r},${g},${b},${floorOp})`, globalCompositeOperation:'color' }));
+    bgLayer.add(new Konva.Rect({
+      x: 0, y: H * 0.68, width: W, height: H * 0.32,
+      fill: `rgb(${r},${g},${b})`, opacity: floorOp,
+      globalCompositeOperation: 'color', name: 'colorOverlay'
+    }));
   }
-  overlayLayer.draw();
+  bgLayer.batchDraw();
 }
 function setWallColor(hex) {
   document.getElementById('wallColor').value = hex;
@@ -832,7 +904,7 @@ async function restyleRoom() {
   const base64 = apiCanvas.toDataURL('image/jpeg', 0.85);
 
   try {
-    const resp = await fetch('/api/homedesigns/redesign', {
+    const resp = await fetch(`${API_BASE}/api/homedesigns/redesign`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -844,7 +916,12 @@ async function restyleRoom() {
     const data = await resp.json();
 
     if (data.success === false) {
-      setRestyleStatus(`Сервис недоступен по тест-токену`, 'error');
+      const msg = data.message || '';
+      if (msg.includes('Invalid API') || msg.includes('redesign')) {
+        setRestyleStatus('API не активирован — нужен платный план <a href="https://homedesigns.ai/api" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>', 'error');
+      } else {
+        setRestyleStatus(`Ошибка: ${msg}`, 'error');
+      }
       return;
     }
 
@@ -854,7 +931,7 @@ async function restyleRoom() {
       setRestyleStatus('Генерация...', 'loading', true);
       for (let i = 0; i < 30; i++) {
         await new Promise(r => setTimeout(r, 3000));
-        const poll = await (await fetch(`/api/homedesigns/status/${jobId}`)).json();
+        const poll = await (await fetch(`${API_BASE}/api/homedesigns/status/${jobId}`)).json();
         if (poll.status === 'completed' || poll.output_url || poll.image_url) {
           showRestyleResult(poll.output_url || poll.image_url);
           setRestyleStatus('✓ Готово', 'success');
@@ -910,8 +987,12 @@ function resetPositions() {
 function toggleLabels() {
   if (!objectsLayer) return;
   labelsVisible = !labelsVisible;
-  objectsLayer.find('.labelTag').forEach(n => n.visible(labelsVisible));
-  objectsLayer.draw();
+  // Traverse groups → find Label nodes by name
+  objectsLayer.getChildren().forEach(group => {
+    const lbl = group.findOne('.lbl');
+    if (lbl) lbl.visible(labelsVisible);
+  });
+  objectsLayer.batchDraw();
 }
 function exportImage() {
   if (!stage) { alert('Нет изображения'); return; }
