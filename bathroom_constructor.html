@@ -331,13 +331,10 @@
     <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
   </div>
 
-  <!-- API + Analyze -->
+  <!-- Analyze -->
   <div class="section">
     <div class="section-title">Анализ объектов</div>
-    <label class="field-label">Replicate API ключ</label>
-    <input type="password" id="apiKey" placeholder="r8_xxxxxxxxxxxxxxxx">
-    <br>
-    <button class="btn btn-primary" onclick="analyzeImage()" style="margin-top:8px">
+    <button class="btn btn-primary" onclick="analyzeImage()">
       🔍 Найти объекты
     </button>
     <div id="statusBar" class="status-bar idle">Загрузите рендер для начала работы</div>
@@ -574,13 +571,8 @@ async function analyzeImage() {
     setStatus('Сначала загрузите изображение.', 'error');
     return;
   }
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey) {
-    setStatus('Введите Replicate API ключ.', 'error');
-    return;
-  }
 
-  setStatus('Отправка в Replicate...', 'loading', true);
+  setStatus('Отправка на анализ...', 'loading', true);
   setProgress(10);
 
   // Downscale image for API to reduce payload
@@ -598,13 +590,10 @@ async function analyzeImage() {
   ].join(', ');
 
   try {
-    // Create prediction (Grounding DINO)
-    const createRes = await fetch('https://api.replicate.com/v1/predictions', {
+    // Create prediction через прокси (ключ скрыт на сервере)
+    const createRes = await fetch('/api/replicate', {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         version: 'efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa',
         input: {
@@ -632,9 +621,7 @@ async function analyzeImage() {
     let output = null;
     for (let i = 0; i < 45; i++) {
       await new Promise(r => setTimeout(r, 2000));
-      const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predId}`, {
-        headers: { 'Authorization': `Token ${apiKey}` }
-      });
+      const pollRes = await fetch(`/api/replicate/${predId}`);
       const data = await pollRes.json();
 
       if (data.status === 'succeeded') {
