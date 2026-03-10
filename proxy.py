@@ -102,10 +102,13 @@ def homedesigns_advisor():
     data = request.get_json(force=True) or {}
     hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
     try:
+        msg = data.get('message', '')
+        # Force Russian response
+        msg_ru = msg + '\n\nПожалуйста, ответь на русском языке.'
         resp = requests.post(
             'https://homedesigns.ai/api/v2/design_advisor',
             headers=hd_headers,
-            data={'custom_message': data.get('message', '')},
+            data={'custom_message': msg_ru},
             timeout=30
         )
         try:
@@ -114,6 +117,21 @@ def homedesigns_advisor():
             return jsonify({'success': False, 'message': resp.text[:300]}), resp.status_code
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/proxy-image', methods=['GET'])
+def proxy_image():
+    """Fetch external image (from homedesigns.ai results) and return with CORS headers."""
+    url = request.args.get('url', '')
+    if not url.startswith('https://'):
+        return jsonify({'error': 'invalid url'}), 400
+    try:
+        resp = requests.get(url, timeout=30)
+        from flask import Response as FlaskResponse
+        r = FlaskResponse(resp.content, content_type=resp.headers.get('content-type', 'image/png'))
+        r.headers['Access-Control-Allow-Origin'] = '*'
+        return r
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=3030)
