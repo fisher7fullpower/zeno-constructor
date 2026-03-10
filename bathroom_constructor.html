@@ -1183,6 +1183,56 @@ function applyNMS(dets, iouThresh) {
   }
   return kept;
 }
+
+// After NMS: merge same-label boxes that are adjacent or overlapping into one union bbox.
+// This prevents getting 4 separate "Душевая" boxes for one shower cabin.
+function mergeByLabel(dets) {
+  const groups = {};
+  dets.forEach(d => {
+    const key = d.label.toLowerCase().trim();
+    (groups[key] = groups[key] || []).push(d);
+  });
+
+  const result = [];
+  Object.values(groups).forEach(group => {
+    if (group.length === 1) { result.push(group[0]); return; }
+
+    // Build connected clusters: two boxes are "connected" if they overlap or
+    // their gap in both axes is less than 8% of the image
+    const GAP = 0.08;
+    const adj = (a, b) => {
+      const gapX = Math.max(0, Math.max(a[0],b[0]) - Math.min(a[2],b[2]));
+      const gapY = Math.max(0, Math.max(a[1],b[1]) - Math.min(a[3],b[3]));
+      return gapX < GAP && gapY < GAP;
+    };
+
+    const visited = new Array(group.length).fill(false);
+    const clusters = [];
+    for (let i = 0; i < group.length; i++) {
+      if (visited[i]) continue;
+      const cluster = [i];
+      visited[i] = true;
+      for (let j = i + 1; j < group.length; j++) {
+        if (!visited[j] && cluster.some(k => adj(group[k].box, group[j].box))) {
+          cluster.push(j);
+          visited[j] = true;
+        }
+      }
+      clusters.push(cluster.map(k => group[k]));
+    }
+
+    clusters.forEach(cluster => {
+      if (cluster.length === 1) { result.push(cluster[0]); return; }
+      const x1 = Math.min(...cluster.map(d => d.box[0]));
+      const y1 = Math.min(...cluster.map(d => d.box[1]));
+      const x2 = Math.max(...cluster.map(d => d.box[2]));
+      const y2 = Math.max(...cluster.map(d => d.box[3]));
+      result.push({ label: cluster[0].label, confidence: Math.max(...cluster.map(d => d.confidence)), box: [x1, y1, x2, y2] });
+    });
+  });
+  return result;
+}
+
 function boxIoU(a, b) {
   const ix1 = Math.max(a[0],b[0]), iy1 = Math.max(a[1],b[1]);
   const ix2 = Math.min(a[2],b[2]), iy2 = Math.min(a[3],b[3]);
@@ -2112,8 +2162,11 @@ async function analyzeImage() {
               d.bbox[2]/apiCanvas.width, d.bbox[3]/apiCanvas.height]
       }));
 
-    // NMS: remove duplicate/overlapping boxes
-    const nmsResult = applyNMS(rawDets, 0.4);
+    // NMS: remove clearly duplicate boxes first (high IoU)
+    const afterNMS = applyNMS(rawDets, 0.35);
+    // Then merge same-label adjacent/overlapping boxes into one union bbox
+    // (e.g. 4 partial "Душевая" boxes → 1 big box for the entire cabin)
+    const nmsResult = mergeByLabel(afterNMS);
 
     if (!nmsResult.length) {
       setStatus('AI не нашёл объекты. Используйте «Добавить вручную» — нарисуйте рамку на объекте.', 'error');
