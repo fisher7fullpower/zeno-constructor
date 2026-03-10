@@ -416,47 +416,48 @@
     }
     .sampling-banner.visible { display: block; }
 
-    /* ── homedesigns.ai tool accordion ─────────────────── */
-    .hd-box {
-      background: rgba(204,255,0,0.03);
-      border: 1px solid rgba(204,255,0,0.15);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .hd-box-header {
-      padding: 10px 12px;
-      display: flex; align-items: center; gap: 7px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1.2px; color: var(--lime);
-    }
-    .hd-badge {
-      font-size: 9px; font-weight: 600; background: var(--lime); color: var(--black);
-      padding: 2px 6px; border-radius: 10px; text-transform: none; letter-spacing: 0;
-    }
+    /* ── homedesigns.ai tools — redesigned ──────────────── */
     .hd-tool {
-      border-top: 1px solid rgba(204,255,0,0.1);
+      background: var(--gray);
+      border: 1px solid var(--gray2);
+      border-radius: 10px;
+      margin-bottom: 5px;
+      overflow: hidden;
+      transition: border-color 0.15s;
     }
+    .hd-tool:hover { border-color: var(--gray3); }
+    .hd-tool.open { border-color: rgba(204,255,0,0.3); }
+
     .hd-tool-header {
-      padding: 9px 12px;
-      display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer;
-      font-size: 12px; font-weight: 500; color: var(--white);
+      padding: 9px 10px;
+      display: flex; align-items: center; gap: 9px;
+      cursor: pointer; user-select: none;
       transition: background 0.1s;
-      user-select: none;
     }
-    .hd-tool-header:hover { background: rgba(255,255,255,0.04); }
-    .hd-tool-header .hd-icon { font-size: 14px; margin-right: 7px; }
-    .hd-tool-header .hd-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
-    .hd-tool.open .hd-arrow { transform: rotate(180deg); }
+    .hd-tool-header:hover { background: rgba(255,255,255,0.02); }
+
+    .hd-icon-box {
+      width: 30px; height: 30px; flex-shrink: 0;
+      border-radius: 8px;
+      background: rgba(204,255,0,0.09);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--lime);
+    }
+    .hd-tool.open .hd-icon-box { background: rgba(204,255,0,0.15); }
+    .hd-tool-label { font-size: 12px; font-weight: 500; flex: 1; color: var(--white); line-height: 1.3; }
+    .hd-chevron { flex-shrink: 0; color: var(--muted); transition: transform 0.2s; }
+    .hd-tool.open .hd-chevron { transform: rotate(180deg); color: var(--lime); }
+
     .hd-tool-body {
       display: none;
-      padding: 0 12px 12px;
+      padding: 0 10px 12px;
       border-top: 1px solid var(--gray2);
     }
     .hd-tool.open .hd-tool-body { display: block; }
+
     .hd-note {
-      font-size: 10px; color: var(--muted); margin-bottom: 10px; margin-top: 8px;
-      line-height: 1.5;
+      font-size: 10px; color: var(--muted);
+      margin: 8px 0 10px; line-height: 1.55;
     }
     .hd-note a { color: var(--lime); }
     .hd-status { font-size: 11px; margin-top: 8px; line-height: 1.4; min-height: 14px; }
@@ -464,48 +465,74 @@
     .hd-status.loading { color: var(--warn); display: flex; align-items: center; gap: 5px; }
     .hd-status.success { color: var(--lime); }
     .hd-status.error { color: var(--error); }
+
     .hd-result-img {
       width: 100%; border-radius: 7px; margin-top: 8px;
-      border: 1px solid var(--gray2); cursor: pointer;
-      display: none;
+      border: 1px solid var(--gray2); cursor: pointer; display: none;
     }
     .hd-result-img.visible { display: block; }
+
     .hd-ai-level { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
     .hd-level-btn {
-      padding: 4px 9px; border-radius: 6px; border: 1px solid var(--gray2);
-      background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
-      transition: all 0.15s;
+      padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gray2);
+      background: transparent; color: var(--muted); font-size: 10px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
     }
     .hd-level-btn:hover { border-color: var(--lime); color: var(--white); }
     .hd-level-btn.active { border-color: var(--lime); background: var(--lime-dim); color: var(--lime); font-weight: 600; }
+
     .hd-select {
-      width: 100%; padding: 7px 8px; border-radius: 6px;
-      background: var(--gray); border: 1px solid var(--gray2);
+      width: 100%; padding: 7px 8px; border-radius: 7px;
+      background: var(--black); border: 1px solid var(--gray2);
       color: var(--white); font-size: 11px; cursor: pointer;
-      margin-bottom: 8px; outline: none;
+      margin-bottom: 6px; outline: none; font-family: inherit;
     }
-    .hd-select:focus { border-color: var(--lime); }
+    .hd-select:focus { border-color: rgba(204,255,0,0.4); }
+
+    .hd-color-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .hd-color-swatch {
+      position: relative; width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px; overflow: hidden; border: 1px solid var(--gray3);
+    }
+    .hd-color-swatch input[type="color"] {
+      position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
+      border: none; background: none; cursor: pointer; padding: 0;
+    }
+
+    .hd-texture-drop {
+      border: 1.5px dashed var(--gray3); border-radius: 8px;
+      padding: 11px 8px; text-align: center; cursor: pointer;
+      margin-bottom: 7px; font-size: 11px; color: var(--muted);
+      transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .hd-texture-drop:hover { border-color: var(--lime); color: var(--lime); }
+    .hd-texture-drop.loaded { border-color: rgba(204,255,0,0.4); color: var(--lime); border-style: solid; }
+
     .hd-advisor-input {
-      width: 100%; padding: 7px 9px; border-radius: 6px;
-      background: var(--gray); border: 1px solid var(--gray2);
+      width: 100%; padding: 8px 9px; border-radius: 7px;
+      background: var(--black); border: 1px solid var(--gray2);
       color: var(--white); font-size: 11px; resize: none;
       font-family: inherit; outline: none; line-height: 1.5;
     }
-    .hd-advisor-input:focus { border-color: var(--lime); }
+    .hd-advisor-input:focus { border-color: rgba(204,255,0,0.4); }
     .hd-advisor-reply {
       margin-top: 8px; font-size: 11px; color: var(--muted);
-      line-height: 1.6; background: var(--gray); border-radius: 6px;
-      padding: 8px; display: none;
+      line-height: 1.6; background: var(--black); border-radius: 7px;
+      padding: 9px; display: none; border: 1px solid var(--gray2);
     }
     .hd-advisor-reply.visible { display: block; }
+
     .hd-use-btn {
-      margin-top: 7px; width: 100%; padding: 6px; border-radius: 6px;
+      margin-top: 7px; width: 100%; padding: 7px; border-radius: 7px;
       background: var(--lime-dim); border: 1px solid var(--lime-border);
       color: var(--lime); font-size: 11px; font-weight: 600;
-      cursor: pointer; display: none;
+      cursor: pointer; display: none; font-family: inherit;
+      transition: background 0.15s;
     }
     .hd-use-btn.visible { display: block; }
-    .hd-use-btn:hover { background: rgba(204,255,0,0.2); }
+    .hd-use-btn:hover { background: rgba(204,255,0,0.18); }
 
     /* ── Manual draw mode ───────────────────────────────── */
     .draw-banner {
@@ -594,18 +621,22 @@
 
     <!-- homedesigns.ai ALL TOOLS BLOCK -->
     <div class="section">
-      <div class="section-title" style="margin-bottom:8px">AI — Инструменты <span style="color:var(--lime);font-size:9px;background:var(--lime-dim);padding:2px 5px;border-radius:5px;margin-left:3px">homedesigns.ai</span></div>
-      <div class="hd-box">
-        <div class="hd-box-header">
-          Инструменты
-          <span class="hd-badge">платный план</span>
-        </div>
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        AI — Инструменты
+        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--lime);background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.2);padding:2px 7px;border-radius:20px;text-transform:none">homedesigns.ai</span>
+      </div>
 
         <!-- 1. Creative Redesign -->
         <div class="hd-tool" id="hd-restyle">
           <div class="hd-tool-header" onclick="toggleHdTool('restyle')">
-            <span><span class="hd-icon">✦</span>Применить стиль</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 1l1.5 3 3.5.5-2.5 2.4.6 3.4L8 8.8 4.9 10.3l.6-3.4L3 4.5 6.5 4z"/>
+                <path d="M2 13l1.5-1.5M12.5 13l1.5 1.5M14 2l-1.5 1.5"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Применить стиль</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
             <div class="hd-note">Трансформация комнаты в выбранном стиле</div>
@@ -617,28 +648,35 @@
               <div class="style-item" onclick="selectStyle('Japandi',this)">Japandi</div>
               <div class="style-item" onclick="selectStyle('Luxury',this)">Люкс</div>
             </div>
-            <div class="hd-note" style="margin-top:0">Вмешательство AI:</div>
+            <div class="hd-note" style="margin-top:0;margin-bottom:6px">Вмешательство AI</div>
             <div class="hd-ai-level">
-              <button class="hd-level-btn" onclick="selectAiLevel('Very Low',this)">Минимально</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Very Low',this)">Мин.</button>
               <button class="hd-level-btn active" onclick="selectAiLevel('Low',this)">Низкое</button>
               <button class="hd-level-btn" onclick="selectAiLevel('Mid',this)">Среднее</button>
-              <button class="hd-level-btn" onclick="selectAiLevel('Extreme',this)">Кардинально</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Extreme',this)">Макс.</button>
             </div>
-            <button class="btn btn-dark" onclick="hdCreativeRedesign()">✦ Применить стиль</button>
-            <div id="hd-restyle-result" class="hd-result-img"></div>
+            <button class="btn btn-dark" onclick="hdCreativeRedesign()">Применить стиль</button>
+            <img id="hd-restyle-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-restyle-use" onclick="applyHdResult('restyle')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-restyle-status">Требует активный план homedesigns.ai</div>
+            <div class="hd-status idle" id="hd-restyle-status"></div>
           </div>
         </div>
 
         <!-- 2. Change Color & Textures -->
         <div class="hd-tool" id="hd-colors">
           <div class="hd-tool-header" onclick="toggleHdTool('colors')">
-            <span><span class="hd-icon">🎨</span>AI Перекраска материала</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 14l4-4"/>
+                <path d="M4.5 11.5L11 5a2 2 0 0 1 2.8 2.8L7.5 13.5 4.5 14z"/>
+                <path d="M10 4.5l1.5-1.5"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Перекраска материала</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">AI меняет цвет/материал только в выделенной зоне (снизу). Добавьте зону, затем нажмите.</div>
+            <div class="hd-note">AI меняет цвет/фактуру в выделенной зоне. Создайте зону ниже, затем нажмите.</div>
             <select class="hd-select" id="hd-col-object">
               <option value="wall">Стена</option>
               <option value="floor">Пол</option>
@@ -647,7 +685,7 @@
               <option value="door">Дверь</option>
             </select>
             <select class="hd-select" id="hd-col-color">
-              <option value="">— Цвет (опционально) —</option>
+              <option value="">— Цвет —</option>
               <option value="White">Белый</option>
               <option value="Off White">Молочный</option>
               <option value="Cream">Кремовый</option>
@@ -658,139 +696,168 @@
               <option value="Charcoal Black">Антрацит</option>
               <option value="Black">Чёрный</option>
               <option value="Light Blue">Голубой</option>
-              <option value="Sage Green">Зелёный (шалфей)</option>
+              <option value="Sage Green">Шалфей</option>
               <option value="Terracotta">Терракота</option>
               <option value="Navy Blue">Тёмно-синий</option>
             </select>
             <select class="hd-select" id="hd-col-material">
-              <option value="">— Материал (опционально) —</option>
+              <option value="">— Материал —</option>
               <option value="Stone">Камень</option>
               <option value="Ceramics and Porcelain">Керамика / Плитка</option>
               <option value="Wood">Дерево</option>
               <option value="Metal">Металл</option>
               <option value="Glass">Стекло</option>
-              <option value="Fabrics">Ткань</option>
-              <option value="Composite Materials">Композит</option>
             </select>
             <select class="hd-select" id="hd-col-mtype">
-              <option value="">— Тип поверхности —</option>
+              <option value="">— Поверхность —</option>
               <option value="Matte">Матовая</option>
               <option value="Glossy">Глянцевая</option>
               <option value="Textured">Фактурная</option>
-              <option value="Metallic paper">Металлик</option>
             </select>
-            <button class="btn btn-dark" onclick="hdChangeColorTexture()">🎨 AI Перекрасить</button>
-            <div id="hd-colors-result" class="hd-result-img"></div>
+            <button class="btn btn-dark" onclick="hdChangeColorTexture()">Перекрасить</button>
+            <img id="hd-colors-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-colors-use" onclick="applyHdResult('colors')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-colors-status">Выделите зону → выберите параметры → запустить</div>
+            <div class="hd-status idle" id="hd-colors-status"></div>
           </div>
         </div>
 
         <!-- 3. Paint Visualizer -->
         <div class="hd-tool" id="hd-paint">
           <div class="hd-tool-header" onclick="toggleHdTool('paint')">
-            <span><span class="hd-icon">🖌</span>Визуализатор краски</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 2C5.8 4.5 4 7 4 9.5a4 4 0 0 0 8 0C12 7 10.2 4.5 8 2z"/>
+                <path d="M6 10.5a2 2 0 0 0 2 1.5"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Краска на стены</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Перекрашивает стены точным RGB-цветом. Добавьте зону перекраски снизу.</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-              <div style="position:relative;flex:0 0 40px;height:40px;border-radius:7px;overflow:hidden;border:1px solid var(--gray3)">
-                <input type="color" id="hd-paint-color" value="#e8e0d8" style="position:absolute;inset:-5px;width:calc(100%+10px);height:calc(100%+10px);cursor:pointer;border:none;background:none">
+            <div class="hd-note">Перекрашивает область точным цветом. Создайте зону ниже, затем нажмите.</div>
+            <div class="hd-color-row">
+              <div class="hd-color-swatch">
+                <input type="color" id="hd-paint-color" value="#e8e0d8">
               </div>
               <div style="flex:1">
-                <div style="font-size:12px">Цвет краски</div>
-                <div style="font-size:10px;color:var(--muted)" id="hd-paint-hex">#e8e0d8</div>
+                <div style="font-size:12px;font-weight:500">Цвет краски</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px" id="hd-paint-hex">#e8e0d8</div>
               </div>
             </div>
-            <button class="btn btn-dark" onclick="hdPaintVisualizer()">🖌 Нанести краску</button>
-            <div id="hd-paint-result" class="hd-result-img"></div>
+            <button class="btn btn-dark" onclick="hdPaintVisualizer()">Нанести краску</button>
+            <img id="hd-paint-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-paint-use" onclick="applyHdResult('paint')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-paint-status">Выделите зону → выберите цвет → запустить</div>
+            <div class="hd-status idle" id="hd-paint-status"></div>
           </div>
         </div>
 
         <!-- 4. Material Swap -->
         <div class="hd-tool" id="hd-matswap">
           <div class="hd-tool-header" onclick="toggleHdTool('matswap')">
-            <span><span class="hd-icon">🔄</span>Замена материала (плитка)</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="1" width="6" height="6" rx="1.5"/>
+                <rect x="9" y="1" width="6" height="6" rx="1.5"/>
+                <rect x="1" y="9" width="6" height="6" rx="1.5"/>
+                <rect x="9" y="9" width="6" height="6" rx="1.5"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Замена плитки</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Загрузите фото плитки из каталога — AI применит её текстуру на выделенную зону.</div>
-            <div style="border:1px dashed var(--gray3);border-radius:7px;padding:10px;text-align:center;cursor:pointer;margin-bottom:8px;font-size:11px;color:var(--muted)"
-              onclick="document.getElementById('hd-texture-input').click()" id="hd-texture-drop">
-              📁 Загрузить фото плитки / текстуры
+            <div class="hd-note">Загрузите фото плитки из каталога — AI наложит её текстуру на зону.</div>
+            <div class="hd-texture-drop" onclick="document.getElementById('hd-texture-input').click()" id="hd-texture-drop">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v8M4 6l3 3 3-3M1 10v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1"/></svg>
+              Загрузить фото плитки
             </div>
             <input type="file" id="hd-texture-input" accept="image/*" style="display:none" onchange="previewTexture(this)">
-            <img id="hd-texture-preview" style="display:none;width:100%;border-radius:6px;margin-bottom:8px;border:1px solid var(--gray2)" alt="">
+            <img id="hd-texture-preview" style="display:none;width:100%;border-radius:7px;margin-bottom:7px;border:1px solid var(--gray2)" alt="">
             <select class="hd-select" id="hd-tex-count">
               <option value="1 X 1">1×1 плитка</option>
               <option value="2 X 2" selected>2×2 плитки</option>
               <option value="3 X 3">3×3 плитки</option>
               <option value="4 X 4">4×4 плитки</option>
             </select>
-            <button class="btn btn-dark" onclick="hdMaterialSwap()">🔄 Заменить материал</button>
-            <div id="hd-matswap-result" class="hd-result-img"></div>
+            <button class="btn btn-dark" onclick="hdMaterialSwap()">Заменить плитку</button>
+            <img id="hd-matswap-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-matswap-use" onclick="applyHdResult('matswap')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-matswap-status">Выделите зону + загрузите текстуру → запустить</div>
+            <div class="hd-status idle" id="hd-matswap-status"></div>
           </div>
         </div>
 
         <!-- 5. Furniture Removal -->
         <div class="hd-tool" id="hd-removal">
           <div class="hd-tool-header" onclick="toggleHdTool('removal')">
-            <span><span class="hd-icon">🗑</span>Удаление мебели / объектов</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.7 8h4.6l.7-8"/>
+                <path d="M7 7v3M9 7v3"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Удаление объекта</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Удаляет объекты из выделенной зоны. Или очищает всю комнату.</div>
-            <button class="btn btn-dark" onclick="hdFurnitureRemoval(false)" style="margin-bottom:6px">🗑 Удалить из зоны</button>
-            <button class="btn btn-ghost" onclick="hdFurnitureRemoval(true)">🗑 Очистить всю комнату</button>
-            <div id="hd-removal-result" class="hd-result-img"></div>
+            <div class="hd-note">Удаляет объект из выделенной зоны или очищает всю комнату.</div>
+            <button class="btn btn-dark" onclick="hdFurnitureRemoval(false)" style="margin-bottom:6px">Удалить из зоны</button>
+            <button class="btn btn-ghost" onclick="hdFurnitureRemoval(true)">Очистить всю комнату</button>
+            <img id="hd-removal-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-removal-use" onclick="applyHdResult('removal')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-removal-status">Добавьте зону для выборочного удаления</div>
+            <div class="hd-status idle" id="hd-removal-status"></div>
           </div>
         </div>
 
         <!-- 6. Fill Spaces -->
         <div class="hd-tool" id="hd-fill">
           <div class="hd-tool-header" onclick="toggleHdTool('fill')">
-            <span><span class="hd-icon">✧</span>Заполнение пространства</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 6V1h5M10 1h5v5M15 10v5h-5M6 15H1v-5"/>
+                <circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Заполнение зоны</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">AI реалистично достраивает стену/пол в выделенной зоне (вместо размытия после перетаскивания).</div>
+            <div class="hd-note">AI достраивает стену или пол в выделенной зоне — реалистичнее, чем размытие.</div>
             <select class="hd-select" id="hd-fill-style">
               <option value="Modern">Модерн</option>
               <option value="Minimalist">Минимализм</option>
               <option value="Scandinavian">Скандинавский</option>
               <option value="Industrial">Лофт</option>
             </select>
-            <button class="btn btn-dark" onclick="hdFillSpaces()">✧ Заполнить зону</button>
-            <div id="hd-fill-result" class="hd-result-img"></div>
+            <button class="btn btn-dark" onclick="hdFillSpaces()">Заполнить зону</button>
+            <img id="hd-fill-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-fill-use" onclick="applyHdResult('fill')">↙ Использовать как фон</button>
-            <div class="hd-status idle" id="hd-fill-status">Выделите зону → запустить</div>
+            <div class="hd-status idle" id="hd-fill-status"></div>
           </div>
         </div>
 
         <!-- 7. Design Advisor -->
         <div class="hd-tool" id="hd-advisor">
           <div class="hd-tool-header" onclick="toggleHdTool('advisor')">
-            <span><span class="hd-icon">💬</span>AI Советник по дизайну</span>
-            <span class="hd-arrow">▾</span>
+            <div class="hd-icon-box">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h3l2 3 2-3h5a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+                <line x1="5" y1="6" x2="11" y2="6"/>
+                <line x1="5" y1="8.5" x2="8.5" y2="8.5"/>
+              </svg>
+            </div>
+            <span class="hd-tool-label">Советник по дизайну</span>
+            <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
             <div class="hd-note">Задайте вопрос — AI ответит по дизайну интерьера.</div>
             <textarea class="hd-advisor-input" id="hd-advisor-q" rows="3"
-              placeholder="Например: Какой стиль подойдёт для маленькой ванной?"></textarea>
-            <button class="btn btn-dark" onclick="hdDesignAdvisor()" style="margin-top:7px">💬 Спросить AI</button>
+              placeholder="Какой стиль подойдёт для маленькой ванной?"></textarea>
+            <button class="btn btn-dark" onclick="hdDesignAdvisor()" style="margin-top:7px">Спросить AI</button>
             <div class="hd-advisor-reply" id="hd-advisor-reply"></div>
             <div class="hd-status idle" id="hd-advisor-status"></div>
           </div>
         </div>
 
-      </div><!-- /hd-box -->
     </div>
 
     <!-- Material Recolor — professional click-to-select -->
