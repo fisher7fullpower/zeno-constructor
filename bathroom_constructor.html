@@ -235,6 +235,8 @@
     }
     .obj-item:hover { border-color: var(--lime); }
     .obj-item.active { border-color: var(--lime); background: var(--lime-dim); }
+    .obj-item.selected { border-color: var(--lime); background: rgba(204,255,0,0.1); }
+    .obj-item.selected .obj-name { font-weight: 600; color: var(--lime); }
     .obj-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); flex-shrink: 0; }
     .obj-name { flex: 1; }
     .obj-en { font-size: 10px; color: var(--muted); }
@@ -674,7 +676,7 @@
             <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">AI меняет цвет/фактуру в выделенной зоне. Создайте зону ниже, затем нажмите.</div>
+            <div class="hd-note" id="active-obj-badge" style="cursor:default">← Кликните на объект на холсте</div>
             <select class="hd-select" id="hd-col-object">
               <option value="Wall">Стена</option>
               <option value="Floor">Пол</option>
@@ -730,7 +732,7 @@
             <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Перекрашивает область точным цветом. Создайте зону ниже, затем нажмите.</div>
+            <div class="hd-note">Кликните объект на холсте → выберите цвет → нанести краску.</div>
             <div class="hd-color-row">
               <div class="hd-color-swatch">
                 <input type="color" id="hd-paint-color" value="#e8e0d8">
@@ -876,7 +878,11 @@
 
     <!-- Objects -->
     <div class="section" style="flex:1">
-      <div class="section-title">Объекты</div>
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+        Объекты
+        <span id="deselect-btn" onclick="selectObject(activeObjectId)" style="display:none;font-size:10px;font-weight:500;color:var(--muted);cursor:pointer;padding:2px 6px;border:1px solid var(--gray2);border-radius:8px">✕ Снять</span>
+      </div>
+      <div class="obj-hint" style="margin-bottom:6px;font-size:10px">Нажмите на объект на холсте, чтобы выбрать для AI-инструментов</div>
       <div class="obj-list" id="objList">
         <div class="obj-hint">Загрузите рендер и нажмите «Найти объекты»</div>
       </div>
@@ -935,6 +941,7 @@ let stage = null, bgLayer = null, objectsLayer = null;
 let originalImage = null;
 let cleanBgImage = null;
 let detectedObjects = [];
+let activeObjectId = null; // which object is selected for AI masking (null = none)
 let labelsVisible = true;
 let initialPositions = [];
 let selectedStyle = 'modern';
@@ -1430,20 +1437,18 @@ function getActiveMaskBase64() {
     return _scaleToMax(c, 1024);
   }
 
-  // Priority 2: bounding boxes of detected/drawn objects (fill ALL added objects as white regions)
-  const objsWithBox = detectedObjects.filter(o => o.box);
-  if (objsWithBox.length) {
+  // Priority 2: ONLY the actively selected object (click on canvas to select)
+  if (activeObjectId !== null && detectedObjects[activeObjectId]?.box) {
+    const obj = detectedObjects[activeObjectId];
     const c = document.createElement('canvas');
     c.width = width; c.height = height;
     const ctx = c.getContext('2d');
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#fff';
-    objsWithBox.forEach(obj => {
-      const [x1n, y1n, x2n, y2n] = obj.box;
-      ctx.fillRect(Math.round(x1n*width), Math.round(y1n*height),
-                   Math.round((x2n-x1n)*width), Math.round((y2n-y1n)*height));
-    });
+    const [x1n, y1n, x2n, y2n] = obj.box;
+    ctx.fillRect(Math.round(x1n*width), Math.round(y1n*height),
+                 Math.round((x2n-x1n)*width), Math.round((y2n-y1n)*height));
     return _scaleToMax(c, 1024);
   }
 
@@ -1504,7 +1509,7 @@ async function hdCreativeRedesign() {
 async function hdChangeColorTexture() {
   if (!originalImage) { setHdStatus('colors','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('colors','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
+  if (!maskB64) { setHdStatus('colors','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   const color    = document.getElementById('hd-col-color').value;
   const material = document.getElementById('hd-col-material').value;
   const mtype    = document.getElementById('hd-col-mtype').value;
@@ -1512,10 +1517,13 @@ async function hdChangeColorTexture() {
   if (!color && !material) { setHdStatus('colors','Выберите цвет или материал','error'); return; }
   if (material && !mtype) { setHdStatus('colors','Выберите тип поверхности (матовая/глянцевая)','error'); return; }
   setHdStatus('colors','AI перекрашивает...','loading',true);
+  // Use detected object's English name if one is selected on canvas
+  const activeObjLabel = activeObjectId !== null ? detectedObjects[activeObjectId]?.labelEn : null;
+  const effectiveObj = activeObjLabel || obj;
   const payload = { image: getOriginalBase64(), masked_image: maskB64, design_type: 'Interior', no_design: 1 };
   if (color) payload.color = color;
   if (material) { payload.materials = material; payload.materials_type = mtype; }
-  if (obj) payload.object = obj;
+  if (effectiveObj) payload.object = effectiveObj;
   try {
     const data = await callHdApi('change_color_textures', payload);
     if (data._url) {
@@ -1532,7 +1540,7 @@ async function hdChangeColorTexture() {
 async function hdPaintVisualizer() {
   if (!originalImage) { setHdStatus('paint','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('paint','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
+  if (!maskB64) { setHdStatus('paint','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   const hex = document.getElementById('hd-paint-color').value;
   const rgb = hexToRgb(hex);
   setHdStatus('paint','Наношу краску...','loading',true);
@@ -1555,7 +1563,7 @@ async function hdPaintVisualizer() {
 async function hdMaterialSwap() {
   if (!originalImage) { setHdStatus('matswap','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('matswap','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
+  if (!maskB64) { setHdStatus('matswap','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   if (!hdTextureBase64) { setHdStatus('matswap','Загрузите фото плитки/текстуры','error'); return; }
   const count = document.getElementById('hd-tex-count').value;
   setHdStatus('matswap','Меняю материал...','loading',true);
@@ -1581,7 +1589,7 @@ async function hdFurnitureRemoval(clearAll) {
   const payload = { image: getOriginalBase64() };
   if (!clearAll) {
     const maskB64 = getActiveMaskBase64();
-    if (!maskB64) { setHdStatus('removal','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
+    if (!maskB64) { setHdStatus('removal','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
     payload.masked_image = maskB64;
   }
   try {
@@ -1600,7 +1608,7 @@ async function hdFurnitureRemoval(clearAll) {
 async function hdFillSpaces() {
   if (!originalImage) { setHdStatus('fill','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('fill','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
+  if (!maskB64) { setHdStatus('fill','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   const style = document.getElementById('hd-fill-style').value;
   setHdStatus('fill','Заполняю пространство...','loading',true);
   try {
@@ -1712,7 +1720,7 @@ function handleFileUpload(input) {
       initStage(w, h);
       bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
       bgLayer.draw();
-      detectedObjects = []; initialPositions = [];
+      detectedObjects = []; initialPositions = []; activeObjectId = null;
       objectsLayer.destroyChildren(); objectsLayer.draw();
       document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
       setStatus('Изображение загружено', 'success');
@@ -1737,6 +1745,8 @@ function handleFileUpload(input) {
 // ══════════════════════════════════════════════════════
 async function analyzeImage() {
   if (!originalImage) { setStatus('Сначала загрузите изображение', 'error'); return; }
+  activeObjectId = null;
+  detectedObjects = [];
   setStatus('Отправка на анализ...', 'loading', true);
   setProgress(10);
 
@@ -1870,18 +1880,34 @@ async function createCleanBackground() {
 // ══════════════════════════════════════════════════════
 // Render objects on canvas
 // ══════════════════════════════════════════════════════
+function selectObject(idx) {
+  activeObjectId = (activeObjectId === idx) ? null : idx;
+  renderDetectedObjects();
+  renderObjectList();
+  updateActiveObjectIndicators();
+}
+
+function updateActiveObjectIndicators() {
+  const obj = activeObjectId !== null ? detectedObjects[activeObjectId] : null;
+  const badge = document.getElementById('active-obj-badge');
+  if (badge) {
+    badge.textContent = obj ? `✓ Выбран: ${obj.label}` : '← Кликните на объект на холсте';
+    badge.style.color = obj ? 'var(--lime)' : 'var(--muted)';
+  }
+  const deselectBtn = document.getElementById('deselect-btn');
+  if (deselectBtn) deselectBtn.style.display = obj ? 'inline' : 'none';
+}
+
 function renderDetectedObjects() {
   if (!stage || !originalImage) return;
   objectsLayer.destroyChildren();
   initialPositions = [];
   const stageW = stage.width(), stageH = stage.height();
 
-  // Replace background with clean version (objects blurred out)
   const bgSrc = cleanBgImage || originalImage;
   bgLayer.destroyChildren();
   bgLayer.add(new Konva.Image({ image: bgSrc, width: stageW, height: stageH, name: 'bgImage' }));
   bgLayer.draw();
-  // Re-apply zone colors on top of clean background
   if (zones.some(z => z.mask)) applyZonesToCanvas();
 
   detectedObjects.forEach((obj, idx) => {
@@ -1891,7 +1917,6 @@ function renderDetectedObjects() {
     const w = Math.max((x2n - x1n) * stageW, 20);
     const h = Math.max((y2n - y1n) * stageH, 20);
 
-    // Crop from ORIGINAL image (not cleaned)
     const offCanvas = document.createElement('canvas');
     offCanvas.width = Math.max(Math.round((x2n - x1n) * originalImage.width), 1);
     offCanvas.height = Math.max(Math.round((y2n - y1n) * originalImage.height), 1);
@@ -1904,20 +1929,34 @@ function renderDetectedObjects() {
 
     const cropImg = new Image();
     cropImg.onload = () => {
+      const isActive = activeObjectId === idx;
       const group = new Konva.Group({ x, y, draggable: true, id: `obj_${idx}` });
-      group.add(new Konva.Image({ image: cropImg, width: w, height: h }));
+
+      group.add(new Konva.Image({ image: cropImg, width: w, height: h, opacity: isActive ? 1 : 0.7 }));
       group.add(new Konva.Rect({
-        width: w, height: h, stroke: '#CCFF00', strokeWidth: 1.5,
-        fill: 'transparent', dash: [6, 3], name: 'border'
+        width: w, height: h,
+        stroke: isActive ? '#CCFF00' : '#CCFF00',
+        strokeWidth: isActive ? 2.5 : 1,
+        fill: isActive ? 'rgba(204,255,0,0.06)' : 'transparent',
+        dash: isActive ? [] : [6, 3],
+        name: 'border', opacity: isActive ? 1 : 0.45
       }));
-      // Label stored with name for easy toggle
-      const lbl = new Konva.Label({ x: 5, y: 5, name: 'lbl' });
-      lbl.add(new Konva.Tag({ fill: 'rgba(204,255,0,0.9)', cornerRadius: 4 }));
+      const lbl = new Konva.Label({ x: 4, y: 4, name: 'lbl', opacity: isActive ? 1 : 0.55 });
+      lbl.add(new Konva.Tag({ fill: isActive ? 'rgba(204,255,0,0.95)' : 'rgba(204,255,0,0.55)', cornerRadius: 4 }));
       lbl.add(new Konva.Text({ text: obj.label, fontSize: 11, fontFamily: 'system-ui', fill: '#000', padding: 4 }));
       group.add(lbl);
 
-      group.on('mouseover', () => { document.body.style.cursor = 'grab'; group.findOne('.border').strokeWidth(2.5); objectsLayer.batchDraw(); highlightListItem(idx); });
-      group.on('mouseout', () => { document.body.style.cursor = 'default'; group.findOne('.border').strokeWidth(1.5); objectsLayer.batchDraw(); highlightListItem(-1); });
+      group.on('click tap', () => { selectObject(idx); });
+      group.on('mouseover', () => {
+        if (activeObjectId !== idx) { document.body.style.cursor = 'pointer'; group.findOne('.border').opacity(0.75); objectsLayer.batchDraw(); }
+        else document.body.style.cursor = 'grab';
+        highlightListItem(idx);
+      });
+      group.on('mouseout', () => {
+        document.body.style.cursor = 'default';
+        group.findOne('.border').opacity(isActive ? 1 : 0.45);
+        objectsLayer.batchDraw(); highlightListItem(-1);
+      });
       group.on('dragstart', () => { document.body.style.cursor = 'grabbing'; group.moveToTop(); });
       group.on('dragend', () => { document.body.style.cursor = 'default'; objectsLayer.batchDraw(); });
 
@@ -1936,19 +1975,35 @@ function renderObjectList() {
   const list = document.getElementById('objList');
   if (!detectedObjects.length) { list.innerHTML = '<div class="obj-hint">Объекты не найдены</div>'; return; }
   list.innerHTML = detectedObjects.map((obj, i) => `
-    <div class="obj-item" id="list-item-${i}" onclick="focusObject(${i})">
-      <div class="obj-dot"></div>
+    <div class="obj-item ${i === activeObjectId ? 'selected' : ''}" id="list-item-${i}" onclick="selectObject(${i})">
+      <div class="obj-dot" style="${i === activeObjectId ? 'background:var(--lime)' : ''}"></div>
       <span class="obj-name">${obj.label}</span>
-      <span class="obj-en">${obj.labelEn}</span>
+      <span class="obj-en">${i === activeObjectId ? '✓' : obj.labelEn}</span>
     </div>
   `).join('');
+
+  // Also populate hd-col-object with detected object names
+  const sel = document.getElementById('hd-col-object');
+  if (sel) {
+    // Remove previous detected-obj options
+    [...sel.options].filter(o => o.dataset.detected).forEach(o => o.remove());
+    if (detectedObjects.length) {
+      const sep = document.createElement('option');
+      sep.disabled = true; sep.textContent = '── Найденные объекты ──'; sep.dataset.detected = '1';
+      sel.insertBefore(sep, sel.options[0]);
+      detectedObjects.forEach((obj, i) => {
+        const opt = document.createElement('option');
+        opt.value = obj.labelEn; opt.textContent = obj.label; opt.dataset.detected = '1';
+        sel.insertBefore(opt, sel.options[i + 1]);
+      });
+    }
+  }
+  updateActiveObjectIndicators();
 }
+
 function focusObject(idx) {
   const group = stage && stage.findOne(`#obj_${idx}`);
   if (group) { group.moveToTop(); objectsLayer.draw(); }
-  document.querySelectorAll('.obj-item').forEach(el => el.classList.remove('active'));
-  document.getElementById(`list-item-${idx}`)?.classList.add('active');
-  setTimeout(() => document.getElementById(`list-item-${idx}`)?.classList.remove('active'), 1200);
 }
 function highlightListItem(idx) {
   document.querySelectorAll('.obj-item').forEach((el, i) => el.classList.toggle('active', i === idx));
