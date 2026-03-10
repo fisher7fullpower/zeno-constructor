@@ -680,37 +680,98 @@
             <select class="hd-select" id="hd-col-object">
               <option value="Wall">Стена</option>
               <option value="Floor">Пол</option>
+              <option value="Ceiling">Потолок</option>
               <option value="Cabinet">Тумба / мебель</option>
+              <option value="Furniture">Мебель</option>
+              <option value="Countertop">Столешница</option>
+              <option value="Backsplash">Фартук / панель</option>
+              <option value="Bathtub">Ванна</option>
+              <option value="Shower">Душевая</option>
+              <option value="Sink">Раковина</option>
+              <option value="Toilet">Унитаз</option>
+              <option value="Mirror">Зеркало</option>
               <option value="Door">Дверь</option>
             </select>
             <select class="hd-select" id="hd-col-color">
               <option value="">— Цвет —</option>
-              <option value="White">Белый</option>
-              <option value="Off White">Молочный</option>
-              <option value="Cream">Кремовый</option>
-              <option value="Beige">Бежевый</option>
-              <option value="Taupe">Тауп</option>
-              <option value="Light Gray">Светло-серый</option>
-              <option value="Medium Gray">Серый</option>
-              <option value="Charcoal Black">Антрацит</option>
-              <option value="Black">Чёрный</option>
-              <option value="Light Blue">Голубой</option>
-              <option value="Sage Green">Шалфей</option>
-              <option value="Terracotta">Терракота</option>
-              <option value="Navy Blue">Тёмно-синий</option>
+              <optgroup label="Нейтральные">
+                <option value="White">Белый</option>
+                <option value="Warm White">Тёплый белый</option>
+                <option value="Off White">Молочный</option>
+                <option value="Ivory">Слоновая кость</option>
+                <option value="Cream">Кремовый</option>
+                <option value="Beige">Бежевый</option>
+                <option value="Taupe">Тауп</option>
+                <option value="Light Gray">Светло-серый</option>
+                <option value="Medium Gray">Серый</option>
+                <option value="Charcoal">Антрацит</option>
+                <option value="Charcoal Brown">Тёмно-коричневый</option>
+                <option value="Black">Чёрный</option>
+              </optgroup>
+              <optgroup label="Коричневые">
+                <option value="Light Brown">Светло-коричневый</option>
+                <option value="Chocolate Brown">Шоколадный</option>
+                <option value="Espresso">Эспрессо</option>
+              </optgroup>
+              <optgroup label="Синие / Зелёные">
+                <option value="Navy Blue">Тёмно-синий</option>
+                <option value="Denim Blue">Джинсовый</option>
+                <option value="Slate Blue">Сланцевый синий</option>
+                <option value="Periwinkle">Голубой вьюнок</option>
+                <option value="Sky Blue">Небесно-голубой</option>
+                <option value="Pale Blue">Бледно-голубой</option>
+                <option value="Teal">Бирюзово-зелёный</option>
+                <option value="Turquoise">Бирюзовый</option>
+                <option value="Seafoam Green">Морская пена</option>
+                <option value="Mint Green">Мятный</option>
+                <option value="Sage Green">Шалфей</option>
+                <option value="Olive Green">Оливковый</option>
+                <option value="Forest Green">Тёмно-зелёный</option>
+              </optgroup>
+              <optgroup label="Тёплые / Яркие">
+                <option value="Pale Yellow">Бледно-жёлтый</option>
+                <option value="Canary Yellow">Канарейка</option>
+                <option value="Mustard Yellow">Горчичный</option>
+                <option value="Chartreuse">Шартрёз</option>
+                <option value="Soft Pink">Нежно-розовый</option>
+                <option value="Blush Pink">Румяный розовый</option>
+                <option value="Dusty Rose">Пыльная роза</option>
+                <option value="Coral">Коралловый</option>
+                <option value="Peach">Персиковый</option>
+                <option value="Terracotta">Терракота</option>
+                <option value="Burnt Orange">Жжёный апельсин</option>
+                <option value="Rust">Ржавый</option>
+                <option value="Burgundy">Бордо</option>
+                <option value="Deep Red">Тёмно-красный</option>
+              </optgroup>
+              <optgroup label="Фиолетовые">
+                <option value="Lavender">Лавандовый</option>
+                <option value="Lilac">Сиреневый</option>
+                <option value="Plum">Сливовый</option>
+                <option value="Mauve">Мов</option>
+              </optgroup>
+              <optgroup label="Металлические">
+                <option value="Gold">Золотой</option>
+                <option value="Silver">Серебристый</option>
+                <option value="Bronze">Бронзовый</option>
+                <option value="Copper">Медный</option>
+              </optgroup>
             </select>
-            <select class="hd-select" id="hd-col-material">
+            <select class="hd-select" id="hd-col-material" onchange="updateMaterialTypes()">
               <option value="">— Материал —</option>
-              <option value="Stone">Камень</option>
+              <option value="Stone">Камень / Натуральный камень</option>
               <option value="Ceramics and Porcelain">Керамика / Плитка</option>
               <option value="Wood">Дерево</option>
+              <option value="Metal">Металл</option>
               <option value="Glass">Стекло</option>
+              <option value="Composite Materials">Композит / Инженерный камень</option>
+              <option value="Fabrics">Ткань</option>
+              <option value="Natural Fibers">Натуральные волокна</option>
+              <option value="Plastics and Polymers">Пластик / Акрил</option>
+              <option value="Paper and Cardboard">Обои / Бумага</option>
             </select>
             <select class="hd-select" id="hd-col-mtype">
-              <option value="">— Поверхность —</option>
-              <option value="Matte">Матовая</option>
-              <option value="Glossy">Глянцевая</option>
-              <option value="Textured">Фактурная</option>
+              <option value="">— Выберите материал сначала —</option>
             </select>
             <button class="btn btn-dark" onclick="hdChangeColorTexture()">Перекрасить</button>
             <img id="hd-colors-result" class="hd-result-img" alt="">
@@ -975,6 +1036,85 @@ const LABEL_MAP = {
   vanity: 'Тумба', cabinet: 'Тумба', 'towel warmer': 'Полотенцесушитель',
   towel: 'Полотенцесушитель', plant: 'Растение', light: 'Светильник', faucet: 'Смеситель',
 };
+
+// Material sub-types per material (exact API-validated values)
+const MATERIAL_TYPES = {
+  'Stone': [
+    ['Marble','Мрамор'],['Granite','Гранит'],['Travertine','Травертин'],['Limestone','Известняк'],
+    ['Slate','Сланец'],['Sandstone','Песчаник'],['Quartz','Кварц'],['Onyx','Оникс'],
+    ['Basalt','Базальт'],['Terrazzo','Терраццо'],['Bluestone','Серый камень'],
+    ['Bricks','Кирпич'],['Red Bricks','Красный кирпич'],['Quartzite','Кварцит'],
+    ['Dolomite','Доломит'],['Soapstone','Мыльный камень'],['Gneiss','Гнейс']
+  ],
+  'Ceramics and Porcelain': [
+    ['Porcelain','Фарфор'],['Glazed','Глазурованная'],['Matte','Матовая'],['Polished','Полированная'],
+    ['Textured','Фактурная'],['Mosaic','Мозаика'],['Terracotta','Терракота'],
+    ['Stoneware','Каменная керамика'],['Earthenware','Фаянс'],
+    ['Hand-painted','Ручная роспись'],['Bone China','Костяной фарфор'],
+    ['Vitreous China','Витрифицированный фарфор']
+  ],
+  'Wood': [
+    ['Oak','Дуб'],['Walnut','Орех'],['Teak','Тик'],['Mahogany','Красное дерево'],
+    ['Cherry','Вишня'],['Maple','Клён'],['Pine','Сосна'],['Bamboo','Бамбук'],
+    ['Birch','Берёза'],['Rosewood','Палисандр'],['Ash','Ясень'],['Cedar','Кедр'],
+    ['Hickory','Гикори'],['Alder','Ольха'],['Ebony','Эбонит']
+  ],
+  'Metal': [
+    ['Stainless Steel','Нерж. сталь'],['Chrome','Хром'],['Brass','Латунь'],
+    ['Aluminum','Алюминий'],['Steel','Сталь'],['Copper','Медь'],['Bronze','Бронза'],
+    ['Gold','Золото'],['Silver','Серебро'],['Titanium','Титан'],
+    ['Wrought Iron','Кованое железо'],['Nickel','Никель'],['Zinc','Цинк'],
+    ['Pewter','Олово'],['Lead','Свинец']
+  ],
+  'Glass': [
+    ['Clear','Прозрачное'],['Frosted','Матовое'],['Tempered','Закалённое'],
+    ['Mirrored','Зеркальное'],['Textured','Фактурное'],['Stained','Витраж'],
+    ['Smoked','Тонированное'],['Etched','Матовый рисунок'],['Colored','Цветное'],
+    ['Patterned','С узором'],['Seeded','Пузырчатое'],['Beveled','Фацетное'],
+    ['Laminated','Ламинированное'],['Obscured','Непрозрачное']
+  ],
+  'Composite Materials': [
+    ['Engineered stone','Инженерный камень'],['Quartz composite','Кварцевый композит'],
+    ['Corian','Кориан'],['Concrete','Бетон'],['Terrazzo','Терраццо'],
+    ['Laminate','Ламинат'],['MDF','МДФ'],['Plywood','Фанера'],
+    ['Fiberglass','Стеклопластик'],['Particleboard','ДСП'],
+    ['Vinyl composite tile','Виниловая плитка']
+  ],
+  'Fabrics': [
+    ['Cotton','Хлопок'],['Linen','Лён'],['Velvet','Бархат'],['Silk','Шёлк'],
+    ['Wool','Шерсть'],['Leather','Кожа'],['Suede','Замша'],['Satin','Атлас'],
+    ['Chenille','Шенилл'],['Cashmere','Кашемир'],['Tweed','Твид'],
+    ['Jacquard','Жаккард'],['Polyester','Полиэстер'],['Nylon','Нейлон']
+  ],
+  'Natural Fibers': [
+    ['Jute','Джут'],['Bamboo fiber','Бамбуковое волокно'],['Sisal','Сизаль'],
+    ['Hemp','Конопля'],['Seagrass','Морская трава'],['Coir','Кокосовое волокно'],
+    ['Wool','Шерсть'],['Cotton','Хлопок'],['Linen','Лён'],['Silk','Шёлк']
+  ],
+  'Plastics and Polymers': [
+    ['Acrylic','Акрил'],['PVC','ПВХ'],['Polycarbonate','Поликарбонат'],
+    ['Vinyl','Винил'],['Melamine','Меламин'],['Epoxy','Эпоксид'],
+    ['Silicone','Силикон'],['Fiberglass','Стеклопластик'],
+    ['Polyethylene','Полиэтилен'],['ABS','АБС-пластик']
+  ],
+  'Paper and Cardboard': [
+    ['Wallpaper','Обои'],['Textured','Фактурные обои'],['Foil embossed','Тиснёные'],
+    ['Flocked paper','Флоковые обои'],['Metallic paper','Металлик'],
+    ['Handmade paper','Ручная бумага'],['Vellum','Велум']
+  ]
+};
+
+function updateMaterialTypes() {
+  const mat = document.getElementById('hd-col-material').value;
+  const sel = document.getElementById('hd-col-mtype');
+  sel.innerHTML = '';
+  if (!mat || !MATERIAL_TYPES[mat]) {
+    sel.innerHTML = '<option value="">— Выберите материал сначала —</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Тип/сорт —</option>' +
+    MATERIAL_TYPES[mat].map(([v, ru]) => `<option value="${v}">${ru}</option>`).join('');
+}
 
 function applyNMS(dets, iouThresh) {
   dets.sort((a, b) => b.confidence - a.confidence);
@@ -1515,7 +1655,7 @@ async function hdChangeColorTexture() {
   const mtype    = document.getElementById('hd-col-mtype').value;
   const obj      = document.getElementById('hd-col-object').value;
   if (!color && !material) { setHdStatus('colors','Выберите цвет или материал','error'); return; }
-  if (material && !mtype) { setHdStatus('colors','Выберите тип поверхности (матовая/глянцевая)','error'); return; }
+  if (material && !mtype) { setHdStatus('colors','Выберите тип/сорт материала','error'); return; }
   setHdStatus('colors','AI перекрашивает...','loading',true);
   // Use detected object's English name if one is selected on canvas
   const activeObjLabel = activeObjectId !== null ? detectedObjects[activeObjectId]?.labelEn : null;
