@@ -621,10 +621,7 @@
 
     <!-- homedesigns.ai ALL TOOLS BLOCK -->
     <div class="section">
-      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        AI — Инструменты
-        <span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--lime);background:rgba(204,255,0,0.08);border:1px solid rgba(204,255,0,0.2);padding:2px 7px;border-radius:20px;text-transform:none">homedesigns.ai</span>
-      </div>
+      <div class="section-title" style="margin-bottom:10px">AI — Инструменты</div>
 
         <!-- 1. Creative Redesign -->
         <div class="hd-tool" id="hd-restyle">
@@ -1375,7 +1372,13 @@ async function callHdApi(endpoint, payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-  return await resp.json();
+  const data = await resp.json();
+  // Normalize response: API returns {success:{generated_image:[...]}} or {output_images:[...]}
+  const imgs = data?.success?.generated_image
+             || data?.success?.output_images
+             || data?.output_images;
+  if (imgs?.length) data._url = imgs[0];
+  return data;
 }
 
 function getOriginalBase64(maxPx = 1024) {
@@ -1389,27 +1392,54 @@ function getOriginalBase64(maxPx = 1024) {
 }
 
 function getActiveMaskBase64() {
-  // Find first zone with a mask, or null
-  const z = zones.find(z => z.mask);
-  if (!z || !originalImgData) return null;
+  if (!originalImgData) return null;
   const { width, height } = originalImgData;
-  const c = document.createElement('canvas');
-  c.width = width; c.height = height;
-  const ctx = c.getContext('2d');
-  const imgd = ctx.createImageData(width, height);
-  for (let i = 0; i < z.mask.length; i++) {
-    const v = z.mask[i] ? 255 : 0;
-    imgd.data[i*4] = v; imgd.data[i*4+1] = v; imgd.data[i*4+2] = v; imgd.data[i*4+3] = 255;
+
+  // Priority 1: material zone with precise pixel mask
+  const z = zones.find(z => z.mask);
+  if (z) {
+    const c = document.createElement('canvas');
+    c.width = width; c.height = height;
+    const ctx = c.getContext('2d');
+    const imgd = ctx.createImageData(width, height);
+    for (let i = 0; i < z.mask.length; i++) {
+      const v = z.mask[i] ? 255 : 0;
+      imgd.data[i*4] = v; imgd.data[i*4+1] = v; imgd.data[i*4+2] = v; imgd.data[i*4+3] = 255;
+    }
+    ctx.putImageData(imgd, 0, 0);
+    return _scaleToMax(c, 1024);
   }
-  ctx.putImageData(imgd, 0, 0);
-  const scale = Math.min(1024/width, 1024/height, 1);
+
+  // Priority 2: bounding boxes of detected/drawn objects (fill ALL added objects as white regions)
+  const objsWithBox = detectedObjects.filter(o => o.box);
+  if (objsWithBox.length) {
+    const c = document.createElement('canvas');
+    c.width = width; c.height = height;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#fff';
+    objsWithBox.forEach(obj => {
+      const [x1n, y1n, x2n, y2n] = obj.box;
+      ctx.fillRect(Math.round(x1n*width), Math.round(y1n*height),
+                   Math.round((x2n-x1n)*width), Math.round((y2n-y1n)*height));
+    });
+    return _scaleToMax(c, 1024);
+  }
+
+  return null;
+}
+
+function _scaleToMax(canvas, maxPx) {
+  const scale = Math.min(maxPx / canvas.width, maxPx / canvas.height, 1);
   if (scale < 1) {
     const c2 = document.createElement('canvas');
-    c2.width = Math.round(width*scale); c2.height = Math.round(height*scale);
-    c2.getContext('2d').drawImage(c, 0, 0, c2.width, c2.height);
+    c2.width = Math.round(canvas.width * scale);
+    c2.height = Math.round(canvas.height * scale);
+    c2.getContext('2d').drawImage(canvas, 0, 0, c2.width, c2.height);
     return c2.toDataURL('image/jpeg', 0.88);
   }
-  return c.toDataURL('image/jpeg', 0.88);
+  return canvas.toDataURL('image/jpeg', 0.88);
 }
 
 function applyHdResult(tool) {
@@ -1440,11 +1470,11 @@ async function hdCreativeRedesign() {
       ai_intervention: selectedAiLevel,
       no_design: 1
     });
-    if (data.output_images?.length) {
-      showHdResult('restyle', data.output_images[0]);
+    if (data._url) {
+      showHdResult('restyle', data._url);
       setHdStatus('restyle','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('restyle', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('restyle',`Ошибка: ${e.message}`,'error'); }
@@ -1454,7 +1484,7 @@ async function hdCreativeRedesign() {
 async function hdChangeColorTexture() {
   if (!originalImage) { setHdStatus('colors','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('colors','Сначала добавьте зону и выделите область в изображении','error'); return; }
+  if (!maskB64) { setHdStatus('colors','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
   const color    = document.getElementById('hd-col-color').value;
   const material = document.getElementById('hd-col-material').value;
   const mtype    = document.getElementById('hd-col-mtype').value;
@@ -1468,11 +1498,11 @@ async function hdChangeColorTexture() {
   if (obj) payload.object = obj;
   try {
     const data = await callHdApi('change_color_textures', payload);
-    if (data.output_images?.length) {
-      showHdResult('colors', data.output_images[0]);
+    if (data._url) {
+      showHdResult('colors', data._url);
       setHdStatus('colors','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('colors', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('colors',`Ошибка: ${e.message}`,'error'); }
@@ -1482,7 +1512,7 @@ async function hdChangeColorTexture() {
 async function hdPaintVisualizer() {
   if (!originalImage) { setHdStatus('paint','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('paint','Добавьте зону и выделите область','error'); return; }
+  if (!maskB64) { setHdStatus('paint','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
   const hex = document.getElementById('hd-paint-color').value;
   const rgb = hexToRgb(hex);
   setHdStatus('paint','Наношу краску...','loading',true);
@@ -1491,11 +1521,11 @@ async function hdPaintVisualizer() {
       image: getOriginalBase64(), masked_image: maskB64,
       rgb_color: `${rgb.r},${rgb.g},${rgb.b}`, no_design: 1
     });
-    if (data.output_images?.length) {
-      showHdResult('paint', data.output_images[0]);
+    if (data._url) {
+      showHdResult('paint', data._url);
       setHdStatus('paint','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('paint', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('paint',`Ошибка: ${e.message}`,'error'); }
@@ -1505,7 +1535,7 @@ async function hdPaintVisualizer() {
 async function hdMaterialSwap() {
   if (!originalImage) { setHdStatus('matswap','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('matswap','Добавьте зону и выделите область','error'); return; }
+  if (!maskB64) { setHdStatus('matswap','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
   if (!hdTextureBase64) { setHdStatus('matswap','Загрузите фото плитки/текстуры','error'); return; }
   const count = document.getElementById('hd-tex-count').value;
   setHdStatus('matswap','Меняю материал...','loading',true);
@@ -1514,11 +1544,11 @@ async function hdMaterialSwap() {
       image: getOriginalBase64(), masked_image: maskB64,
       texture_image: hdTextureBase64, no_of_texture: count, no_design: 2
     });
-    if (data.output_images?.length) {
-      showHdResult('matswap', data.output_images[0]);
+    if (data._url) {
+      showHdResult('matswap', data._url);
       setHdStatus('matswap','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('matswap', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('matswap',`Ошибка: ${e.message}`,'error'); }
@@ -1531,16 +1561,16 @@ async function hdFurnitureRemoval(clearAll) {
   const payload = { image: getOriginalBase64() };
   if (!clearAll) {
     const maskB64 = getActiveMaskBase64();
-    if (!maskB64) { setHdStatus('removal','Добавьте зону и выделите объект','error'); return; }
+    if (!maskB64) { setHdStatus('removal','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
     payload.masked_image = maskB64;
   }
   try {
     const data = await callHdApi('furniture_removal', payload);
-    if (data.output_images?.length) {
-      showHdResult('removal', data.output_images[0]);
+    if (data._url) {
+      showHdResult('removal', data._url);
       setHdStatus('removal','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('removal', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('removal',`Ошибка: ${e.message}`,'error'); }
@@ -1550,7 +1580,7 @@ async function hdFurnitureRemoval(clearAll) {
 async function hdFillSpaces() {
   if (!originalImage) { setHdStatus('fill','Загрузите рендер','error'); return; }
   const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('fill','Добавьте зону и выделите область','error'); return; }
+  if (!maskB64) { setHdStatus('fill','Нарисуйте объект вручную или добавьте зону ниже','error'); return; }
   const style = document.getElementById('hd-fill-style').value;
   setHdStatus('fill','Заполняю пространство...','loading',true);
   try {
@@ -1560,11 +1590,11 @@ async function hdFillSpaces() {
       design_style: style, no_design: 1,
       prompt: 'realistic tile wall background'
     });
-    if (data.output_images?.length) {
-      showHdResult('fill', data.output_images[0]);
+    if (data._url) {
+      showHdResult('fill', data._url);
       setHdStatus('fill','✓ Готово','success');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
+      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
       setHdStatus('fill', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('fill',`Ошибка: ${e.message}`,'error'); }
@@ -1737,37 +1767,17 @@ async function analyzeImage() {
     }
     if (!output) { setStatus('Превышено время. Добавьте объект вручную.', 'error'); setProgress(0); return; }
 
-    let labels = output.labels || [], boxes = output.boxes || [];
-
-    // If GDINO found nothing — try YOLO as silent fallback
-    if (!labels.length) {
-      setStatus('Анализирую...', 'loading', true);
-      try {
-        const yoloRes = await fetch(`${API_BASE}/api/replicate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            version: 'eb4661d1e7b23e335cdb058b18e12406170b43e8657c7a42fb8355c125c06a9e',
-            input: { image: base64 }
-          })
-        });
-        if (yoloRes.ok) {
-          const { id: yoloId } = await yoloRes.json();
-          for (let i = 0; i < 30; i++) {
-            await new Promise(r => setTimeout(r, 2000));
-            const d = await (await fetch(`${API_BASE}/api/replicate/${yoloId}`)).json();
-            if (d.status === 'succeeded') {
-              const preds = d.output?.predictions || [];
-              labels = preds.map(p => p.class || p.name || '');
-              boxes  = preds.map(p => [p.x/apiCanvas.width, p.y/apiCanvas.height,
-                                       (p.x+p.width)/apiCanvas.width, (p.y+p.height)/apiCanvas.height]);
-              break;
-            }
-            if (d.status === 'failed') break;
-            setProgress(70 + Math.min(i * 1, 20));
-          }
-        }
-      } catch(e) { /* silent */ }
+    // Parse new output format: output.detections[{bbox:[x1,y1,x2,y2],label,confidence}]
+    // bbox is in ABSOLUTE pixels of the uploaded image (apiCanvas.width × apiCanvas.height)
+    const detections = output.detections || [];
+    let labels = [], boxes = [];
+    const minConf = 0.08;
+    for (const d of detections) {
+      if (!d.label || d.confidence < minConf) continue;
+      const [x1, y1, x2, y2] = d.bbox;
+      labels.push(d.label);
+      boxes.push([x1 / apiCanvas.width, y1 / apiCanvas.height,
+                  x2 / apiCanvas.width, y2 / apiCanvas.height]);
     }
 
     if (!labels.length) {

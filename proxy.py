@@ -12,8 +12,6 @@ UPLOAD_DIR = '/var/www/constructor.zenohome.by/uploads'
 UPLOAD_URL = 'https://constructor.zenohome.by/uploads'
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-IMAGE_KEYS = ['image', 'masked_image', 'texture_image', 'color_image']
-
 def cors(r):
     r.headers['Access-Control-Allow-Origin'] = '*'
     r.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
@@ -22,18 +20,13 @@ def cors(r):
 
 app.after_request(cors)
 
-def b64_to_bytes(data_url):
-    """Convert base64 data URI → (bytes, extension)"""
+def save_base64_image(data_url):
+    """Save base64 data URI to uploads dir, return public URL."""
     m = re.match(r'data:(image/[\w+]+);base64,(.+)', data_url, re.DOTALL)
     if not m:
-        return None, None
-    ext = m.group(1).split('/')[-1].replace('jpeg', 'jpg')
-    return base64.b64decode(m.group(2)), ext
-
-def save_base64_image(data_url):
-    img_bytes, ext = b64_to_bytes(data_url)
-    if not img_bytes:
         return None
+    ext = m.group(1).split('/')[-1].replace('jpeg', 'jpg')
+    img_bytes = base64.b64decode(m.group(2))
     filename = str(uuid.uuid4()) + '.' + ext
     path = os.path.join(UPLOAD_DIR, filename)
     with open(path, 'wb') as f:
@@ -41,15 +34,22 @@ def save_base64_image(data_url):
     return UPLOAD_URL + '/' + filename
 
 # ── Replicate ────────────────────────────────────────────────────────
+# Auto-converts base64 image inputs to hosted URLs before sending to Replicate
+# (Grounding DINO returns empty results with base64, needs URL)
 
 @app.route('/api/replicate', methods=['POST', 'OPTIONS'])
 def replicate_create():
     if request.method == 'OPTIONS': return '', 204
+    data = request.get_json(force=True) or {}
+    inp = data.get('input', {})
+    # Convert base64 image → hosted URL
+    if isinstance(inp.get('image'), str) and inp['image'].startswith('data:'):
+        url = save_base64_image(inp['image'])
+        if url:
+            inp['image'] = url
     resp = requests.post(
         'https://api.replicate.com/v1/predictions',
-        json=request.get_json(),
-        headers=REPLICATE_HDRS,
-        timeout=30
+        json=data, headers=REPLICATE_HDRS, timeout=30
     )
     return jsonify(resp.json()), resp.status_code
 
@@ -57,62 +57,44 @@ def replicate_create():
 def replicate_status(pred_id):
     resp = requests.get(
         'https://api.replicate.com/v1/predictions/' + pred_id,
-        headers=REPLICATE_HDRS,
-        timeout=30
+        headers=REPLICATE_HDRS, timeout=30
     )
     return jsonify(resp.json()), resp.status_code
 
 # ── homedesigns.ai generic v2 proxy ──────────────────────────────────
-# Accepts JSON from frontend {image: "data:...", masked_image: "data:...", ...other fields}
-# Converts to multipart/form-data for homedesigns.ai API
+# Sends ALL fields (including base64 images) as form-data STRING values.
+# The API accepts "base64 Image string" directly — no file upload needed.
 
 @app.route('/api/homedesigns/v2/<path:endpoint>', methods=['POST', 'OPTIONS'])
 def homedesigns_v2(endpoint):
     if request.method == 'OPTIONS': return '', 204
-
     data = request.get_json(force=True) or {}
     form_fields = {}
-    files = {}
-
     for key, value in data.items():
-        if key in IMAGE_KEYS and isinstance(value, str) and value.startswith('data:'):
-            img_bytes, ext = b64_to_bytes(value)
-            if img_bytes:
-                mime = 'image/jpeg' if ext in ('jpg', 'jpeg') else 'image/png'
-                files[key] = (f'{key}.{ext}', img_bytes, mime)
+        if isinstance(value, bool):
+            form_fields[key] = 'True' if value else 'False'
+        elif isinstance(value, (int, float)):
+            form_fields[key] = str(value)
         else:
-            form_fields[key] = str(value) if not isinstance(value, str) else value
-
+            form_fields[key] = value   # base64 strings sent as-is
     hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
-
     try:
-        if files:
-            resp = requests.post(
-                f'https://homedesigns.ai/api/v2/{endpoint}',
-                headers=hd_headers,
-                data=form_fields,
-                files=files,
-                timeout=120
-            )
-        else:
-            resp = requests.post(
-                f'https://homedesigns.ai/api/v2/{endpoint}',
-                headers=hd_headers,
-                data=form_fields,
-                timeout=120
-            )
-
+        resp = requests.post(
+            f'https://homedesigns.ai/api/v2/{endpoint}',
+            headers=hd_headers,
+            data=form_fields,
+            timeout=120
+        )
         try:
             return jsonify(resp.json()), resp.status_code
         except Exception:
             return jsonify({'success': False, 'message': resp.text[:300]}), resp.status_code
-
     except requests.Timeout:
-        return jsonify({'success': False, 'message': 'Превышено время ожидания (120 сек)'}), 504
+        return jsonify({'success': False, 'message': 'Timeout (120s)'}), 504
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-# ── design_advisor (text only, no images) ────────────────────────────
+# ── design_advisor ────────────────────────────────────────────────────
 
 @app.route('/api/homedesigns/advisor', methods=['POST', 'OPTIONS'])
 def homedesigns_advisor():
