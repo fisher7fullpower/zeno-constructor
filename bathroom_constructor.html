@@ -604,10 +604,10 @@
     <!-- Upload -->
     <div class="section">
       <div class="section-title">Рендер</div>
-      <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
+      <label class="btn btn-ghost" for="fileInput" style="cursor:pointer;display:block;text-align:center;user-select:none">
         ↑ Загрузить изображение
-      </button>
-      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+      </label>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleFileUpload(this)">
     </div>
 
     <!-- Detect objects -->
@@ -1019,11 +1019,18 @@
       <div id="canvas-container" style="display:none"></div>
 
       <!-- Placeholder -->
-      <div class="placeholder" id="placeholder">
+      <div class="placeholder" id="placeholder"
+           ondragover="event.preventDefault();this.style.borderColor='var(--lime)'"
+           ondragleave="this.style.borderColor=''"
+           ondrop="event.preventDefault();this.style.borderColor='';const f=event.dataTransfer.files[0];if(f)loadImageFile(f)">
         <div class="placeholder-icon">🛁</div>
         <h3>Загрузите рендер</h3>
         <p>AI обнаружит объекты — ванну, душ, унитаз, раковину — и сделает их перетаскиваемыми. Также можно изменить стиль комнаты через AI.</p>
-        <div class="placeholder-steps">
+        <label style="display:inline-block;margin:12px 0 4px;padding:8px 22px;background:rgba(204,255,0,0.1);border:1px solid var(--lime);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--lime)" for="fileInput">
+          ↑ Выбрать файл
+        </label>
+        <p style="font-size:11px;color:var(--muted);margin:0">или перетащите изображение сюда</p>
+        <div class="placeholder-steps" style="margin-top:16px">
           <div class="step"><b>1</b> Загрузить</div>
           <div class="step"><b>2</b> Найти объекты</div>
           <div class="step"><b>3</b> Перетащить</div>
@@ -2061,37 +2068,52 @@ function addCustomItem(input) {
 // ══════════════════════════════════════════════════════
 // File upload
 // ══════════════════════════════════════════════════════
-function handleFileUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
+function loadImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    setStatus('Выберите файл изображения (JPG, PNG, WebP)', 'error'); return;
+  }
+  setStatus('Загрузка...', 'loading', true);
   const reader = new FileReader();
+  reader.onerror = () => setStatus('Ошибка чтения файла', 'error');
   reader.onload = (e) => {
     const img = new Image();
+    img.onerror = () => setStatus('Не удалось открыть изображение', 'error');
     img.onload = () => {
-      originalImage = img;
-      const scale = Math.min(STAGE_MAX_W() / img.width, STAGE_MAX_H() / img.height, 1);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      initStage(w, h);
-      bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
-      bgLayer.draw();
-      detectedObjects = []; initialPositions = []; activeObjectId = null; savedPositions = {};
-      objectsLayer.destroyChildren(); objectsLayer.draw();
-      document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
-      setStatus('Изображение загружено', 'success');
-      setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
-      // Cache original pixels for zone-based recoloring
-      const cacheC = document.createElement('canvas');
-      cacheC.width = img.width; cacheC.height = img.height;
-      cacheC.getContext('2d').drawImage(img, 0, 0);
-      originalImgData = cacheC.getContext('2d').getImageData(0, 0, img.width, img.height);
-      // Clear all zones and reset zone UI
-      zones = [];
-      renderZonesList();
+      try {
+        originalImage = img;
+        const maxW = Math.max(STAGE_MAX_W(), 300);
+        const maxH = Math.max(STAGE_MAX_H(), 300);
+        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        const w = Math.max(Math.round(img.width * scale), 100);
+        const h = Math.max(Math.round(img.height * scale), 100);
+        initStage(w, h);
+        bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
+        bgLayer.draw();
+        detectedObjects = []; initialPositions = []; activeObjectId = null; savedPositions = {};
+        customItems = [];
+        objectsLayer.destroyChildren(); objectsLayer.draw();
+        document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
+        setStatus('✓ Изображение загружено', 'success');
+        setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
+        const cacheC = document.createElement('canvas');
+        cacheC.width = img.width; cacheC.height = img.height;
+        cacheC.getContext('2d').drawImage(img, 0, 0);
+        originalImgData = cacheC.getContext('2d').getImageData(0, 0, img.width, img.height);
+        zones = [];
+        renderZonesList();
+      } catch(err) {
+        setStatus('Ошибка загрузки: ' + err.message, 'error');
+        console.error('handleFileUpload error', err);
+      }
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (file) loadImageFile(file);
   input.value = '';
 }
 
