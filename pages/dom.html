@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-дизайн загородного дома — Morrow Lab</title>
+  <meta name="description" content="Загрузите фото дома или комнаты в частном доме — получите AI-дизайн за 2 минуты.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --lime:#d1fe17; --lime-dim:rgba(209,254,23,.07); --lime-border:rgba(209,254,23,.2);
+      --bg:#000; --card:#0a0a0a; --card2:#111; --border:#1c1c1c; --border2:#242424;
+      --gray:#666; --muted:rgba(255,255,255,.45);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1a2003;border-radius:4px}
+
+    /* HEADER */
+    .header{position:fixed;top:0;left:0;right:0;z-index:1000;height:60px;display:flex;align-items:center;padding:0 40px;background:rgba(4,4,4,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:border-color .3s}
+    .header.scrolled{border-color:var(--border2)}
+    .logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:2px}
+    .nav-item{position:relative}
+    .nav-link{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;cursor:pointer;background:none;border:none;font-family:inherit}
+    .nav-link:hover,.nav-link.cur{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-link.cur{color:var(--lime)}
+    .nav-dot{width:4px;height:4px;background:var(--lime);border-radius:50%;flex-shrink:0}
+    .dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);background:#0d0d0d;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:420px;display:grid;grid-template-columns:1fr 1fr;gap:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+    .nav-item:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+    .dd-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;text-decoration:none;color:#fff;transition:background .2s}
+    .dd-item:hover{background:rgba(255,255,255,.05)}
+    .dd-icon{width:34px;height:34px;border-radius:8px;background:var(--lime-dim);border:1px solid var(--lime-border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .dd-text{display:flex;flex-direction:column;gap:2px}
+    .dd-name{font-size:13px;font-weight:600}
+    .dd-desc{font-size:12px;color:var(--gray);line-height:1.4}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .btn-ghost{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;background:transparent;border:1px solid var(--border2);color:rgba(255,255,255,.55);cursor:pointer;text-decoration:none;transition:all .2s;font-family:inherit}
+    .btn-ghost:hover{border-color:var(--lime-border);color:var(--lime)}
+    .btn-lime{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;background:var(--lime);color:#000;border:none;cursor:pointer;text-decoration:none;transition:all .2s;font-family:inherit;white-space:nowrap}
+    .btn-lime:hover{background:#bcf000;transform:translateY(-1px);box-shadow:0 4px 20px rgba(209,254,23,.3)}
+    .burger{display:none;flex-direction:column;gap:4px;padding:8px;background:none;border:none;cursor:pointer}
+    .burger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}
+    .mob-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+    .mob-menu.open{display:flex}
+    .mob-menu a{font-size:20px;font-weight:700;color:rgba(255,255,255,.65);text-decoration:none;padding:10px 24px;transition:color .2s}
+    .mob-menu a:hover{color:var(--lime)}
+    .mob-close{position:absolute;top:18px;right:20px;background:none;border:none;color:var(--gray);font-size:26px;cursor:pointer}
+
+    /* HERO */
+    .page-hero{padding:88px 32px 0;max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;min-height:100vh}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border:1px solid var(--lime-border);border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:20px}
+    .hero-tag-dot{width:5px;height:5px;background:var(--lime);border-radius:50%}
+    .page-h1{font-size:clamp(32px,4.5vw,60px);font-weight:800;letter-spacing:-2px;line-height:1.08;margin-bottom:16px}
+    .page-h1 span{color:var(--lime)}
+    .page-sub{font-size:16px;color:var(--muted);line-height:1.65;max-width:440px;margin-bottom:28px}
+    .hero-features{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+    .hero-feat{display:flex;align-items:center;gap:10px;font-size:13.5px;color:rgba(255,255,255,.7)}
+    .hero-feat-dot{width:6px;height:6px;background:var(--lime);border-radius:50%;flex-shrink:0}
+
+    /* FORM CARD */
+    .form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:sticky;top:72px}
+    .form-title{font-size:17px;font-weight:700;margin-bottom:6px}
+    .form-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+
+    /* UPLOAD ZONE */
+    .upload-zone{border:2px dashed var(--border2);border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;margin-bottom:20px}
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--lime-border);background:var(--lime-dim)}
+    .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-icon{font-size:28px;margin-bottom:8px}
+    .upload-text{font-size:13.5px;font-weight:600;color:#fff;margin-bottom:4px}
+    .upload-hint{font-size:12px;color:var(--gray)}
+    .upload-preview{width:100%;border-radius:10px;display:none;margin-bottom:10px;max-height:200px;object-fit:cover}
+    .upload-preview.visible{display:block}
+    .upload-name{font-size:12px;color:var(--lime);text-align:center;margin-bottom:8px;display:none}
+    .upload-name.visible{display:block}
+
+    /* FORM FIELDS */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .form-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.3px}
+    .form-input,.form-select{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:#fff;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .2s;width:100%}
+    .form-input:focus,.form-select:focus{border-color:var(--lime-border)}
+    .form-input::placeholder{color:#444}
+    .form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+    .form-select option{background:#111}
+
+    /* CHIPS */
+    .chips{display:flex;flex-wrap:wrap;gap:7px}
+    .chip{padding:6px 14px;border:1px solid var(--border2);border-radius:8px;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .2s;user-select:none}
+    .chip:hover{border-color:var(--lime-border);color:var(--lime)}
+    .chip.sel{border-color:var(--lime);background:var(--lime-dim);color:var(--lime);font-weight:600}
+
+    /* PACKAGE SELECTOR */
+    .pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+    .pkg-opt{border:1px solid var(--border2);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s}
+    .pkg-opt:hover{border-color:var(--lime-border)}
+    .pkg-opt.sel{border-color:var(--lime);background:var(--lime-dim)}
+    .pkg-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+    .pkg-price{font-size:13px;font-weight:800;color:#fff}
+    .pkg-opt.sel .pkg-name,.pkg-opt.sel .pkg-price{color:var(--lime)}
+
+    /* SUBMIT */
+    .btn-submit{width:100%;padding:14px;background:var(--lime);color:#000;font-size:15px;font-weight:700;border:none;border-radius:11px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-submit:hover{background:#bcf000;transform:translateY(-1px);box-shadow:0 6px 24px rgba(209,254,23,.3)}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .form-note{font-size:11px;color:#444;text-align:center;margin-top:10px;line-height:1.5}
+
+    /* PROGRESS */
+    .progress-wrap{display:none;flex-direction:column;align-items:center;gap:16px;padding:24px 0}
+    .progress-wrap.visible{display:flex}
+    .progress-spinner{width:52px;height:52px}
+    .pl-a{animation:plr 10s linear infinite;transform-box:fill-box;transform-origin:center;opacity:.5}
+    .pl-b{animation:plr 3s linear infinite reverse;transform-box:fill-box;transform-origin:center}
+    .pl-c{animation:plr 1.6s linear infinite;transform-box:fill-box;transform-origin:center}
+    .pl-d{animation:pld 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+    @keyframes plr{to{transform:rotate(360deg)}}
+    @keyframes pld{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(2.2);opacity:1}}
+    .progress-text{font-size:14px;color:rgba(255,255,255,.7);text-align:center}
+    .progress-bar-wrap{width:100%;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:var(--lime);border-radius:2px;transition:width .5s ease;width:0}
+
+    /* SUCCESS */
+    .success-wrap{display:none;flex-direction:column;align-items:center;gap:16px;padding:24px 0;text-align:center}
+    .success-wrap.visible{display:flex}
+    .success-icon{font-size:48px}
+    .success-title{font-size:18px;font-weight:700}
+    .success-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:300px}
+    .success-email{color:var(--lime);font-weight:600}
+
+    /* SECTIONS */
+    .section-wrap{max-width:1400px;margin:0 auto;padding:80px 32px;border-top:1px solid var(--border)}
+    .section-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:14px}
+    .section-h2{font-size:clamp(24px,3vw,40px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:12px}
+    .section-sub{font-size:16px;color:var(--muted);max-width:480px;line-height:1.65}
+
+    /* EXAMPLES */
+    .ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
+    .ex-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .25s}
+    .ex-card:hover{border-color:var(--lime-border);transform:translateY(-3px)}
+    .ex-img{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:48px;border-bottom:1px solid var(--border);background:var(--card2)}
+    .ex-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .ex-body{padding:14px 16px}
+    .ex-tag{display:inline-block;padding:3px 9px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--lime);text-transform:uppercase;margin-bottom:7px}
+    .ex-title{font-size:13.5px;font-weight:600;line-height:1.45}
+
+    /* EXAMPLES — Before/After */
+    .ba-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .25s}
+    .ba-card:hover{border-color:var(--lime-border);transform:translateY(-3px)}
+    .ba-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;cursor:col-resize;user-select:none}
+    .ba-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+    .ba-wrap .ba-after{clip-path:inset(0 0 0 50%)}
+    .ba-slider{position:absolute;top:0;bottom:0;width:3px;background:var(--lime);left:50%;transform:translateX(-50%);z-index:2;pointer-events:none}
+    .ba-slider::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:var(--lime);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:700;pointer-events:none}
+    .ba-label{position:absolute;bottom:10px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;z-index:3;letter-spacing:.5px}
+    .ba-label-before{left:10px;background:rgba(0,0,0,.7);color:#fff}
+    .ba-label-after{right:10px;background:var(--lime);color:#000}
+    .ba-body{padding:14px 16px}
+    .ba-tag{display:inline-block;padding:3px 9px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--lime);text-transform:uppercase;margin-bottom:7px}
+    .ba-title{font-size:13.5px;font-weight:600;line-height:1.45}
+
+    /* PRICING */
+    .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:36px}
+    .p-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px;display:flex;flex-direction:column;gap:16px;position:relative;transition:all .32s cubic-bezier(.2,.8,.2,1);cursor:pointer}
+    .p-card:hover{transform:translateY(-7px) scale(1.015);border-color:rgba(209,254,23,.5);box-shadow:0 0 0 1px rgba(209,254,23,.18),0 24px 64px rgba(0,0,0,.65),0 0 70px rgba(209,254,23,.07);background:linear-gradient(158deg,rgba(209,254,23,.06),var(--card))!important}
+    .p-card:hover .p-val{color:var(--lime)}
+    .p-card.pop:hover{border-color:rgba(209,254,23,.75);box-shadow:0 0 0 1px rgba(209,254,23,.3),0 24px 64px rgba(0,0,0,.65),0 0 100px rgba(209,254,23,.12)}
+    .p-card.pop{border-color:var(--lime-border);background:linear-gradient(145deg,rgba(209,254,23,.04),#0a0a0a)}
+    .p-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--lime);color:#000;font-size:10px;font-weight:700;padding:3px 12px;border-radius:999px;white-space:nowrap}
+    .p-name{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--gray)}
+    .p-num{display:flex;align-items:baseline;gap:4px}
+    .p-val{font-size:32px;font-weight:800;letter-spacing:-1.5px}
+    .p-unit{font-size:13px;color:var(--gray)}
+    .p-feats{display:flex;flex-direction:column;gap:8px;flex:1}
+    .p-feat{display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.65);line-height:1.4;align-items:flex-start}
+    .p-feat .c{color:var(--lime);flex-shrink:0}
+    .p-feat.dim{opacity:.3}
+    .btn-p{display:block;text-align:center;padding:10px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;border:none;font-family:inherit;transition:all .2s}
+    .btn-p-lime{background:var(--lime);color:#000}
+    .btn-p-lime:hover{background:#bcf000}
+    .btn-p-ghost{background:transparent;border:1px solid var(--border2);color:rgba(255,255,255,.5)}
+    .btn-p-ghost:hover{border-color:var(--lime-border);color:var(--lime)}
+
+    /* AI-КОНСУЛЬТАНТ ТИЗЕР */
+    .consult-card{background:#0a0a0a;border:1px solid #2a3305;border-radius:16px;overflow:hidden;margin-top:20px;cursor:pointer;transition:all .22s}
+    .consult-card:hover{border-color:var(--lime-border);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.5)}
+    .cc-head{padding:12px 16px;border-bottom:1px solid #1a2003;display:flex;align-items:center;gap:8px}
+    .cc-dot{width:7px;height:7px;background:var(--lime);border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+    .cc-title{font-size:13.5px;font-weight:600;color:#fff;flex:1}
+    .cc-badge{font-size:10px;color:var(--lime);border:1px solid #3f4c07;border-radius:999px;padding:2px 9px;letter-spacing:.5px;text-transform:uppercase}
+    .cc-body{padding:12px 16px 14px}
+    .cc-msg-wrap{background:#151515;border:1px solid #222;border-radius:11px;border-bottom-left-radius:3px;padding:9px 13px;font-size:13px;color:#ccc;line-height:1.55;margin-bottom:10px}
+    .cc-typing-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+    .cc-typing-dots{display:flex;gap:4px}
+    .cc-typing-dots span{width:5px;height:5px;background:var(--lime);border-radius:50%;display:inline-block;animation:cpt .6s infinite alternate}
+    .cc-typing-dots span:nth-child(2){animation-delay:.15s}.cc-typing-dots span:nth-child(3){animation-delay:.3s}
+    .cc-typing-label{font-size:11px;color:var(--gray)}
+    .cc-cta{font-size:12.5px;color:var(--lime);font-weight:600;display:flex;align-items:center;gap:4px}
+
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+    /* FOOTER */
+    .footer-wrap{border-top:1px solid var(--border);max-width:1400px;margin:0 auto;padding:48px 32px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+    .footer-logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+    .footer-desc{font-size:13px;color:var(--gray);line-height:1.6;max-width:240px}
+    .footer-copy{font-size:12px;color:#333;margin-top:14px}
+    .fc-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+    .footer-links{display:flex;flex-direction:column;gap:8px}
+    .footer-links a{font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#fff}
+
+    /* CHAT FAB */
+    #chatFab{position:fixed;bottom:24px;right:24px;height:42px;padding:0 16px 0 12px;background:var(--lime);border:none;border-radius:21px;cursor:pointer;z-index:9999;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(209,254,23,.3);transition:all .2s;font-family:inherit}
+    #chatFab:hover{transform:scale(1.04);box-shadow:0 6px 28px rgba(209,254,23,.45)}
+    #chatFab span{font-size:12.5px;font-weight:700;color:#000}
+    #chatPanel{position:fixed;bottom:76px;right:24px;width:350px;max-height:500px;background:#0a0a0a;border:1px solid #2a3305;border-radius:16px;z-index:9998;display:none;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,.65);font-family:inherit}
+    #chatPanel.on{display:flex}
+    .cp-head{padding:13px 16px;border-bottom:1px solid #1a2003;display:flex;align-items:center;gap:9px}
+    .cp-dot{width:7px;height:7px;background:var(--lime);border-radius:50%;flex-shrink:0}
+    .cp-title{font-size:13.5px;color:#fff;font-weight:600;flex:1}
+    .cp-badge{font-size:10px;color:var(--lime);border:1px solid #3f4c07;border-radius:999px;padding:3px 8px;letter-spacing:.5px;text-transform:uppercase}
+    .cp-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:160px;max-height:300px}
+    .cp-body::-webkit-scrollbar{width:3px}.cp-body::-webkit-scrollbar-thumb{background:#2a3305;border-radius:3px}
+    .cp-msg{max-width:86%;padding:9px 13px;border-radius:11px;font-size:13px;line-height:1.6;word-wrap:break-word}
+    .cp-msg.user{align-self:flex-end;background:#1a2003;color:var(--lime);border-bottom-right-radius:3px}
+    .cp-msg.ai{align-self:flex-start;background:#151515;color:#ccc;border:1px solid #222;border-bottom-left-radius:3px}
+    .cp-typing{align-self:flex-start;padding:9px 13px;background:#151515;border:1px solid #222;border-radius:11px;border-bottom-left-radius:3px;display:flex;gap:4px;align-items:center}
+    .cp-typing span{width:5px;height:5px;background:var(--lime);border-radius:50%;display:inline-block;animation:cpt .6s infinite alternate}
+    .cp-typing span:nth-child(2){animation-delay:.15s}.cp-typing span:nth-child(3){animation-delay:.3s}
+    @keyframes cpt{0%{opacity:.3;transform:translateY(0)}100%{opacity:1;transform:translateY(-3px)}}
+    .cp-foot{padding:10px 12px;border-top:1px solid #1a2003}
+    .cp-row{display:flex;gap:7px;align-items:flex-end}
+    .cp-input{flex:1;background:#111;border:1px solid #222;border-radius:9px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.4;transition:border-color .2s;max-height:80px}
+    .cp-input:focus{border-color:var(--lime)}
+    .cp-input::placeholder{color:#444}
+    .cp-send{width:34px;height:34px;background:var(--lime);border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s}
+    .cp-send:disabled{opacity:.3;cursor:default}
+
+    @media(max-width:960px){.page-hero{grid-template-columns:1fr;padding-top:80px;min-height:auto}.form-card{position:relative;top:0}.nav-center,.btn-lime{display:none}.burger{display:flex}}
+    @media(max-width:640px){.ex-grid{grid-template-columns:1fr}.pricing-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}.section-wrap{padding:56px 20px}.page-hero{padding:80px 20px 32px;gap:32px}.form-card{padding:24px}.header{padding:0 20px}.form-row{grid-template-columns:1fr}}
+  
+    /* ── DROPDOWN BRIDGE ── */
+    .dropdown::before {
+      content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+    }
+
+    /* ── COOKIE POPUP ── */
+    .cookie-overlay {
+      position: fixed; bottom: 20px; right: 20px; z-index: 99998;
+      animation: ckSlideIn .35s ease both; max-width: 520px; width: calc(100% - 40px);
+    }
+    .cookie-overlay.hidden { display: none; }
+    @keyframes ckSlideIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .cookie-modal {
+      background: #111; border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+      padding: 16px 18px; display: flex; align-items: flex-start; gap: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.7);
+    }
+    
+    .cookie-left { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+    .cookie-icon { font-size: 18px; flex-shrink: 0; }
+    .cookie-info { min-width: 0; }
+    .cookie-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .cookie-text { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.5; white-space: normal; }
+    .cookie-text a { color: #d1fe17; text-decoration: none; }
+    .cookie-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .cookie-btn-ok {
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      background: #d1fe17; color: #000; border: none; cursor: pointer; white-space: nowrap; transition: all .2s;
+    }
+    .cookie-btn-ok:hover { background: #bcf000; transform: translateY(-1px); }
+    .cookie-btn-decline {
+      padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      background: transparent; color: rgba(255,255,255,.55); border: 1px solid rgba(255,255,255,.15); cursor: pointer; white-space: nowrap; transition: all .2s;
+    }
+    .cookie-btn-decline:hover { background: rgba(255,255,255,.07); color: #fff; }
+  
+    /* ── MASTERS IN CHAT ── */
+    .cp-head-btn{background:none;border:1px solid rgba(209,254,23,.25);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;color:rgba(209,254,23,.7);cursor:pointer;font-family:inherit;transition:all .2s;margin-left:auto;flex-shrink:0}
+    .cp-head-btn:hover{border-color:var(--lime);color:var(--lime)}
+    .cp-specialists{display:none;flex-direction:column;gap:8px;padding:14px 14px;overflow-y:auto;max-height:420px;flex:1}
+    .cp-specialists.vis{display:flex}
+    .cp-spec-back{background:none;border:none;color:#666;cursor:pointer;font-size:11px;font-family:inherit;padding:0 0 6px;text-align:left;transition:color .2s}
+    .cp-spec-back:hover{color:var(--lime)}
+    .cp-spec-title{font-size:14px;color:#fff;font-weight:700;margin:0 0 2px}
+    .cp-spec-sub{font-size:12px;color:#555;margin:0 0 10px;line-height:1.4}
+    .cp-spec-card{background:#111;border:1px solid #222;border-radius:10px;padding:12px;display:flex;gap:10px;align-items:flex-start;transition:border-color .2s}
+    .cp-spec-card:hover{border-color:#2a3305}
+    .cp-spec-avatar{width:40px;height:40px;border-radius:50%;background:#1a2003;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .cp-spec-info{flex:1;min-width:0}
+    .cp-spec-name{font-size:13px;color:#fff;font-weight:600;margin:0 0 2px}
+    .cp-spec-role{font-size:11px;color:#777;margin:0 0 4px}
+    .cp-spec-rating{font-size:11px;color:var(--lime);margin:0 0 7px}
+    .cp-spec-links{display:flex;gap:5px}
+    .cp-spec-link{display:inline-flex;align-items:center;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:opacity .2s}
+    .cp-spec-link:hover{opacity:.85}
+    .cp-spec-link.tg{background:#2AABEE;color:#fff}
+    .cp-spec-link.vb{background:#7360F2;color:#fff}
+    .cp-spec-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 12px;gap:8px}
+    .cp-spec-empty-icon{font-size:32px;margin-bottom:4px}
+    .cp-spec-empty-title{font-size:14px;color:#fff;font-weight:700}
+    .cp-spec-empty-text{font-size:12px;color:#555;line-height:1.5;max-width:220px}
+    .cp-spec-invite-btn{display:inline-block;margin-top:8px;padding:9px 18px;background:var(--lime);color:#000;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s}
+    .cp-spec-invite-btn:hover{background:#bcf000;transform:translateY(-1px)}
+    .cp-spec-price{margin:4px 0 0;padding:8px 12px;background:#0a0a0a;border:1px solid #1a2003;border-radius:8px;text-align:center}
+    .cp-spec-price p{font-size:12px;color:#777;margin:0}
+    .cp-spec-price strong{color:var(--lime)}
+        .logo-icon{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0}
+    .logo-icon-sm{width:22px;height:22px;border-radius:6px;object-fit:cover;flex-shrink:0}
+    .ex-cms-img{display:none;width:100%;height:100%;object-fit:cover}
+    .ex-cms-img[src]:not([src=""]){display:block}
+    .ex-cms-img[src]:not([src=""])+.ex-emoji{display:none}
+</style>
+
+<script src="/content-loader.js" defer></script>
+</head>
+<body data-page="dom">
+
+<header class="header" id="hdr">
+  <a href="/" class="logo"><img src="/logo.png" class="logo-icon" alt="Morrow Lab">Morrow Lab</a>
+  <nav class="nav-center">
+    <div class="nav-item">
+      <button class="nav-link">Пространства <span class="nav-dot"></span></button>
+      <div class="dropdown">
+        <a href="/sanuzel/" class="dd-item"><div class="dd-icon">🚿</div><div class="dd-text"><div class="dd-name">Санузел</div><div class="dd-desc">Ванная, туалет, душевая</div></div></a>
+        <a href="/kitchen/" class="dd-item"><div class="dd-icon">🍳</div><div class="dd-text"><div class="dd-name">Кухня</div><div class="dd-desc">Кухня-гостиная, столовая</div></div></a>
+        <a href="/room/" class="dd-item"><div class="dd-icon">🛋️</div><div class="dd-text"><div class="dd-name">Комната</div><div class="dd-desc">Гостиная, спальня, кабинет</div></div></a>
+        <a href="/business/" class="dd-item"><div class="dd-icon">💼</div><div class="dd-text"><div class="dd-name">Бизнес</div><div class="dd-desc">Офис, кафе, магазин</div></div></a>
+        <a href="/dom/" class="dd-item"><div class="dd-icon">🏡</div><div class="dd-text"><div class="dd-name">Дом</div><div class="dd-desc">Загородный, коттедж</div></div></a>
+        <a href="/constructor/" class="dd-item"><div class="dd-icon">📐</div><div class="dd-text"><div class="dd-name">Конструктор</div><div class="dd-desc">Планировка помещения</div></div></a>
+      </div>
+    </div>
+    <a href="/#examples" class="nav-link">Примеры</a>
+    <a href="#pricing" class="nav-link">Тарифы</a>
+    <a href="/#faq" class="nav-link">FAQ</a>
+    <a href="/blog/" class="nav-link">Блог</a>
+    <a href="/masters/" class="nav-link">Мастера</a>
+  </nav>
+  <div class="nav-right">
+    <a href="/" class="nav-link" style="opacity:.7">← Главная</a>
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="/">Главная</a>
+  <a href="/sanuzel/" style="color:var(--lime)">Санузел</a>
+  <a href="/kitchen/">Кухня</a>
+  <a href="/room/">Комната</a>
+  <a href="/business/">Бизнес</a>
+  <a href="/dom/">Дом</a>
+  <a href="/blog/">Блог</a>
+</div>
+
+<!-- HERO + FORM -->
+<div style="max-width:1400px;margin:0 auto" id="form">
+  <div class="page-hero">
+    <!-- LEFT -->
+    <div>
+      <div class="hero-tag"><span class="hero-tag-dot"></span><span data-cms="hero_badge">Дом · AI-дизайн</span></div>
+      <h1 class="page-h1" data-cms="hero_title">Дизайн <span>загородного дома</span><br>за 2 минуты</h1>
+      <p class="page-sub" data-cms="hero_sub">Гостиная, кухня или любая комната в частном доме — AI создаст уютный дизайн.</p>
+      <div class="hero-features">
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat1">Результат на email за 1–2 минуты</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat2">Список материалов с ценами и магазинами РБ</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat3">Пошаговый план ремонта</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat4">Первый рендер бесплатно</span></div>
+      </div>
+      <div class="consult-card" onclick="chatOpen()">
+        <div class="cc-head">
+          <span class="cc-dot"></span>
+          <span class="cc-title">Эксперт по домам</span>
+          <span class="cc-badge">AI · Онлайн</span>
+        </div>
+        <div class="cc-body">
+          <div class="cc-msg-wrap">Привет! Помогу с дизайном дома или коттеджа — гостиная, кухня, любая комната 🏡</div>
+          <div class="cc-typing-row">
+            <div class="cc-typing-dots"><span></span><span></span><span></span></div>
+            <div class="cc-typing-label">уже думает над следующим советом...</div>
+          </div>
+          <div class="cc-cta">Задать вопрос →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card" id="formCard">
+      <div class="form-title" data-cms="form_title">Создать AI-дизайн</div>
+      <div class="form-sub" data-cms="form_sub">Заполните форму — результат придёт на email</div>
+
+      <!-- UPLOAD -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="photoInput" accept="image/*" onchange="handleFile(this.files[0])">
+        <img id="photoPreview" class="upload-preview" alt="Preview">
+        <div id="uploadContent">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">Загрузить фото помещения</div>
+          <div class="upload-hint">JPEG или PNG · до 10 МБ</div>
+        </div>
+      </div>
+      <div class="upload-name" id="fileName"></div>
+
+      <!-- STATE -->
+      <div class="form-group">
+        <div class="form-label">Состояние помещения</div>
+        <div class="chips" id="stateChips">
+          <div class="chip sel" onclick="selChip('stateChips',this,'empty')">Черновая / пустая</div>
+          <div class="chip" onclick="selChip('stateChips',this,'furnished')">Текущий дизайн</div>
+        </div>
+      </div>
+
+      <!-- NICHE -->
+      <div class="form-group">
+        <div class="form-label">Тип помещения</div>
+        <div class="chips" id="nicheChips">
+          <div class="chip sel" onclick="selChip('nicheChips',this,'гостиная')">Гостиная</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'кухня')">Кухня</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'спальня')">Спальня</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'детская')">Детская</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'прихожая')">Прихожая</div>
+        </div>
+      </div>
+
+      <!-- STYLE -->
+      <div class="form-group">
+        <div class="form-label">Стиль дизайна</div>
+        <div class="chips" id="styleChips">
+          <div class="chip sel" onclick="selChip('styleChips',this,'минимализм')">Минимализм</div>
+          <div class="chip" onclick="selChip('styleChips',this,'современный')">Современный</div>
+          <div class="chip" onclick="selChip('styleChips',this,'скандинавский')">Скандинавский</div>
+          <div class="chip" onclick="selChip('styleChips',this,'лофт')">Лофт</div>
+          <div class="chip" onclick="selChip('styleChips',this,'классический')">Классический</div>
+          <div class="chip" onclick="selChip('styleChips',this,'барокко')">Барокко</div>
+        </div>
+      </div>
+
+      <!-- NAME + CITY -->
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <div class="form-label">Имя</div>
+          <input class="form-input" id="nameInput" placeholder="Иван" type="text">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <div class="form-label">Город</div>
+          <input class="form-input" id="cityInput" placeholder="Минск" type="text">
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="form-group" style="margin-top:14px">
+        <div class="form-label">Email для результата</div>
+        <input class="form-input" id="emailInput" placeholder="you@example.com" type="email">
+      </div>
+
+      <!-- PACKAGE -->
+      <div class="form-group">
+        <div class="form-label">Тариф</div>
+        <div class="pkg-grid">
+          <div class="pkg-opt sel" onclick="selPkg(this,'free')"><div class="pkg-name" data-cms-price-name="free">Free</div><div class="pkg-price" data-cms-price-val="free">0 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'basic')"><div class="pkg-name" data-cms-price-name="basic">Basic</div><div class="pkg-price" data-cms-price-val="basic">29 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'pro')"><div class="pkg-name" data-cms-price-name="pro">Pro</div><div class="pkg-price" data-cms-price-val="pro">79 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'business')"><div class="pkg-name" data-cms-price-name="business">Biz</div><div class="pkg-price" data-cms-price-val="business">199 BYN</div></div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap" id="progressWrap">
+        <svg class="progress-spinner" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <circle cx="30" cy="30" r="27" stroke="#1a2003" stroke-width="1.2" stroke-dasharray="3 9" class="pl-a"/>
+          <circle cx="30" cy="30" r="20" stroke="#d1fe17" stroke-width="1.5" stroke-dasharray="12 6" class="pl-b"/>
+          <circle cx="30" cy="30" r="12" stroke="#d1fe17" stroke-width="3" stroke-dasharray="20 25" stroke-linecap="round" class="pl-c"/>
+          <circle cx="30" cy="30" r="3.5" fill="#d1fe17" class="pl-d"/>
+        </svg>
+        <div class="progress-text" id="progressText">Загружаем фото...</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-wrap" id="successWrap">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Заявка отправлена!</div>
+        <div class="success-sub">Рендер будет готов через 1–2 минуты и придёт на <span class="success-email" id="successEmail"></span></div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Отправить на рендер
+      </button>
+      <div class="form-note">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных</div>
+    </div>
+  </div>
+</div>
+
+<!-- EXAMPLES -->
+<section class="section-wrap" id="examples">
+  <div class="reveal">
+    <div class="section-tag">→ Примеры работ</div>
+    <h2 class="section-h2">Реальные AI-рендеры домов</h2>
+    <p class="section-sub">AI-визуализация загородных домов и коттеджей за 30 секунд</p>
+  </div>
+  <div class="ex-grid">
+    <div class="ba-card reveal d1">
+      <div class="ba-wrap" onmousedown="baStart(event,this)" ontouchstart="baStart(event,this)">
+        <img src="/images/portfolio_dom_1.jpg" alt="До" class="ba-before">
+        <img data-cms="ex_img1" src="/images/portfolio_dom_1.jpg" alt="После" class="ba-after">
+        <div class="ba-slider"></div>
+        <span class="ba-label ba-label-before">До</span>
+        <span class="ba-label ba-label-after">После</span>
+      </div>
+      <div class="ba-body"><div class="ba-tag" data-cms="ex_tag1">Скандинавский</div><div class="ba-title" data-cms="ex_title1">Гостиная с деревянными балками и панорамой</div></div>
+    </div>
+    <div class="ba-card reveal d2">
+      <div class="ba-wrap" onmousedown="baStart(event,this)" ontouchstart="baStart(event,this)">
+        <img src="/images/portfolio_dom_1.jpg" alt="До" class="ba-before">
+        <img data-cms="ex_img2" src="/images/portfolio_dom_1.jpg" alt="После" class="ba-after">
+        <div class="ba-slider"></div>
+        <span class="ba-label ba-label-before">До</span>
+        <span class="ba-label ba-label-after">После</span>
+      </div>
+      <div class="ba-body"><div class="ba-tag" data-cms="ex_tag2">Классический</div><div class="ba-title" data-cms="ex_title2">Кухня в доме с обеденным столом и люстрой</div></div>
+    </div>
+    <div class="ba-card reveal d3">
+      <div class="ba-wrap" onmousedown="baStart(event,this)" ontouchstart="baStart(event,this)">
+        <img src="/images/portfolio_dom_1.jpg" alt="До" class="ba-before">
+        <img data-cms="ex_img3" src="/images/portfolio_dom_1.jpg" alt="После" class="ba-after">
+        <div class="ba-slider"></div>
+        <span class="ba-label ba-label-before">До</span>
+        <span class="ba-label ba-label-after">После</span>
+      </div>
+      <div class="ba-body"><div class="ba-tag" data-cms="ex_tag3">Современный</div><div class="ba-title" data-cms="ex_title3">Спальня с видом на сад и натуральными материалами</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <div class="footer-grid">
+    <div>
+      <a href="/" class="footer-logo"><img src="/logo.png" class="logo-icon-sm" alt="Morrow Lab">Morrow Lab</a>
+      <p class="footer-desc">AI-дизайн интерьеров за 2 минуты. Загрузите фото — получите рендер.</p>
+      <p class="footer-copy">© 2026 ООО «Морроу Лаб» · <a href="/privacy/" style="color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#d4f72c'" onmouseout="this.style.color='rgba(255,255,255,.35)'">Политика конфиденциальности</a></p>
+    </div>
+    <div><div class="fc-title">Пространства</div><div class="footer-links"><a href="/sanuzel/">Санузел</a><a href="/kitchen/">Кухня</a><a href="/room/">Комната</a><a href="/business/">Бизнес</a><a href="/dom/">Дом</a></div></div>
+    <div><div class="fc-title">Сервис</div><div class="footer-links"><a href="/#pricing">Тарифы</a><a href="/#examples">Примеры</a><a href="/#faq">FAQ</a><a href="/blog/">Блог</a><a href="/constructor/">Конструктор</a></div></div>
+    <div><div class="fc-title">Контакты</div><div class="footer-links"><a href="mailto:hello@morrowlab.by">hello@morrowlab.by</a><a href="https://t.me/morrowlab" target="_blank">Telegram</a></div></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<button id="chatFab" onclick="chatToggle()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  <span>AI-консультант</span>
+</button>
+<div id="chatPanel">
+  <div class="cp-head"><span class="cp-dot"></span><span class="cp-title">Эксперт по домам</span><span class="cp-badge">AI · Онлайн</span><button class="cp-head-btn" onclick="cpShowMasters()">Мастер</button></div>
+  <div class="cp-body" id="cpBody">
+    <div class="cp-msg ai">Привет! Помогу с дизайном загородного дома, подбором материалов для фасада или внутренней отделки. 🏡</div>
+  </div>
+  <div class="cp-foot"><div class="cp-row">
+    <textarea class="cp-input" id="cpInput" placeholder="Как оформить гостиную в загородном доме?" rows="1" onkeydown="cpKey(event)"></textarea>
+    <button class="cp-send" id="cpSend" onclick="cpSend()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2" fill="#000" stroke="none"/></svg></button>
+  </div></div>
+</div>
+  <div class="cp-specialists" id="cpMasters">
+    <button class="cp-spec-back" onclick="cpHideMasters()">← Вернуться в чат</button>
+    <div class="cp-spec-title">Консультация с мастером</div>
+    <div class="cp-spec-sub">Покажите мастеру ваш рендер — он поможет с замерами, материалами и сроками</div>
+    <div class="cp-spec-card">
+      <div class="cp-spec-avatar">🏠</div>
+      <div class="cp-spec-info">
+        <div class="cp-spec-name">Игорь</div>
+        <div class="cp-spec-role">Загородные дома, коттеджи под ключ</div>
+        <div class="cp-spec-rating">★ 4.9 · 15 лет опыта</div>
+        <div class="cp-spec-links">
+          <a class="cp-spec-link tg" href="https://t.me/master_igor_zeno" target="_blank">Telegram</a>
+          <a class="cp-spec-link vb" href="viber://chat?number=+375295556677" target="_blank">Viber</a>
+        </div>
+      </div>
+    </div>
+    <div class="cp-spec-card">
+      <div class="cp-spec-avatar">🪚</div>
+      <div class="cp-spec-info">
+        <div class="cp-spec-name">Павел</div>
+        <div class="cp-spec-role">Отделка, утепление, кровля</div>
+        <div class="cp-spec-rating">★ 4.8 · 12 лет опыта</div>
+        <div class="cp-spec-links">
+          <a class="cp-spec-link tg" href="https://t.me/master_pavel_zeno" target="_blank">Telegram</a>
+          <a class="cp-spec-link vb" href="viber://chat?number=+375443334455" target="_blank">Viber</a>
+        </div>
+      </div>
+    </div>
+    <div class="cp-spec-price"><p>Консультация 30 мин — <strong>29 BYN</strong><br>Оплата напрямую мастеру</p></div>
+  </div>
+
+<script>
+  // Before/After slider
+  function baStart(e, wrap) {
+    e.preventDefault();
+    const move = (ev) => {
+      const rect = wrap.getBoundingClientRect();
+      const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+      const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      wrap.querySelector('.ba-after').style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+      wrap.querySelector('.ba-slider').style.left = pct + '%';
+    };
+    const end = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', end); document.removeEventListener('touchmove', move); document.removeEventListener('touchend', end); };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchmove', move, {passive:false});
+    document.addEventListener('touchend', end);
+    move(e);
+  }
+
+  const WEBHOOK = 'https://n8n.zenohome.by/webhook/morrow-render';
+  const CHAT_WEBHOOK = 'https://n8n.zenohome.by/webhook/morrow-chat';
+
+  // header scroll
+  window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', scrollY > 10));
+  document.getElementById('burger').onclick = () => document.getElementById('mobMenu').classList.add('open');
+  document.getElementById('mobClose').onclick = () => document.getElementById('mobMenu').classList.remove('open');
+
+  // reveal
+  const obs = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // form state
+  let uploadedUrl = '', selectedState = 'empty', selectedNiche = 'гостиная', selectedStyle = 'минимализм', selectedPkg = 'free';
+
+  function selChip(groupId, el, val) {
+    document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    if (groupId === 'stateChips') selectedState = val;
+    if (groupId === 'nicheChips') selectedNiche = val;
+    if (groupId === 'styleChips') selectedStyle = val;
+  }
+
+  function selPkg(el, val) {
+    document.querySelectorAll('.pkg-opt').forEach(p => p.classList.remove('sel'));
+    el.classList.add('sel'); selectedPkg = val;
+  }
+
+  function selPkgScroll(val) {
+    const opts = document.querySelectorAll('.pkg-opt');
+    const map = { free:0, basic:1, pro:2, business:3 };
+    opts.forEach(p => p.classList.remove('sel'));
+    opts[map[val]].classList.add('sel'); selectedPkg = val;
+    document.getElementById('form').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // file upload
+  function handleFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('photoPreview');
+      prev.src = e.target.result; prev.classList.add('visible');
+      document.getElementById('uploadContent').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileName').classList.add('visible');
+  }
+
+  // drag & drop
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) { document.getElementById('photoInput').files = e.dataTransfer.files; handleFile(f); } });
+
+  // progress helpers
+  function setProgress(pct, text) {
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressText').textContent = text;
+  }
+
+  // submit
+  async function submitForm() {
+    const email = document.getElementById('emailInput').value.trim();
+    const name = document.getElementById('nameInput').value.trim() || 'Клиент';
+    const city = document.getElementById('cityInput').value.trim();
+    const fileInput = document.getElementById('photoInput');
+
+    if (!email || !email.includes('@')) { alert('Введите корректный email'); return; }
+    if (!fileInput.files[0]) { alert('Загрузите фото помещения'); return; }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const progressWrap = document.getElementById('progressWrap');
+
+    submitBtn.style.display = 'none';
+    progressWrap.classList.add('visible');
+    setProgress(10, 'Загружаем фото...');
+
+    try {
+      // Upload to Morrow Lab server
+      const reader = new FileReader();
+      const fileDataUrl = await new Promise((res, rej) => { reader.onload = e => res(e.target.result); reader.onerror = rej; reader.readAsDataURL(fileInput.files[0]); });
+      const fname = Date.now() + '_' + fileInput.files[0].name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
+      setProgress(30, 'Загружаем фото...');
+      const clRes = await fetch('/webhook/admin-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: fname, data: fileDataUrl })
+      });
+      if (!clRes.ok) throw new Error('Upload failed');
+      const clData = await clRes.json();
+      uploadedUrl = 'https://morrowlab.by' + clData.url;
+
+      setProgress(60, 'Отправляем на рендер...');
+
+      // Submit to n8n
+      const payload = {
+        Email: email, Name: name, city, style: selectedStyle,
+        package: selectedPkg, vertical: 'dom', niche: selectedNiche,
+        room_state: selectedState, file_url: uploadedUrl
+      };
+
+      const res = await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      setProgress(100, 'Готово!');
+      await new Promise(r => setTimeout(r, 500));
+
+      progressWrap.classList.remove('visible');
+      document.getElementById('successEmail').textContent = email;
+      document.getElementById('successWrap').classList.add('visible');
+
+    } catch (err) {
+      progressWrap.classList.remove('visible');
+      submitBtn.style.display = 'flex';
+      alert('Ошибка: ' + err.message + '. Попробуйте ещё раз.');
+    }
+  }
+
+  // chat
+  let chatOn = false, hist = [];
+  function chatToggle() {
+    chatOn = !chatOn;
+    document.getElementById('chatPanel').classList.toggle('on', chatOn);
+    sessionStorage.setItem('chat_interacted', '1');
+  }
+  function chatOpen() {
+    if (!chatOn) { chatOn = true; document.getElementById('chatPanel').classList.add('on'); }
+    document.getElementById('chatPanel').querySelector('.cp-input')?.focus();
+  }
+  // proactive auto-open after 15s (once per session)
+  setTimeout(function() {
+    if (!sessionStorage.getItem('chat_interacted')) {
+      sessionStorage.setItem('chat_interacted', '1');
+      chatOpen();
+      setTimeout(function() { addMsg('Помогу выбрать стиль дома или рассчитать бюджет. Есть вопрос? 💡', 'ai'); }, 500);
+    }
+  }, 15000);
+  function cpKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); cpSend(); } }
+  async function cpSend() {
+    const inp = document.getElementById('cpInput'), msg = inp.value.trim();
+    if (!msg) return;
+    inp.value = ''; addMsg(msg, 'user'); hist.push({ role: 'user', content: msg });
+    const t = addTyping(); document.getElementById('cpSend').disabled = true;
+    try {
+      const res = await fetch(CHAT_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg, history: hist.slice(-6), page: 'house' }) });
+      const d = await res.json(); t.remove();
+      const reply = d.reply || 'Не удалось получить ответ.';
+      addMsg(reply, 'ai'); hist.push({ role: 'assistant', content: reply });
+    } catch { t.remove(); addMsg('Ошибка соединения.', 'ai'); }
+    document.getElementById('cpSend').disabled = false;
+  }
+  function addMsg(txt, role) { const b = document.getElementById('cpBody'), el = document.createElement('div'); el.className = 'cp-msg ' + role; el.textContent = txt; b.appendChild(el); b.scrollTop = b.scrollHeight; return el; }
+  function addTyping() { const b = document.getElementById('cpBody'), el = document.createElement('div'); el.className = 'cp-typing'; el.innerHTML = '<span></span><span></span><span></span>'; b.appendChild(el); b.scrollTop = b.scrollHeight; return el; }
+
+  // ── Cookie consent ──
+  document.addEventListener('DOMContentLoaded', function(){
+    if (!localStorage.getItem('cookie_ok')) {
+      document.getElementById('cookieBar').classList.remove('hidden');
+    }
+  });
+  function cookieAccept() { localStorage.setItem('cookie_ok','1'); document.getElementById('cookieBar').classList.add('hidden'); }
+  function cookieDecline() { document.getElementById('cookieBar').classList.add('hidden'); }
+
+  function cpShowMasters() {
+    document.getElementById('cpBody').style.display = 'none';
+    document.querySelector('.cp-foot').style.display = 'none';
+    document.getElementById('cpMasters').classList.add('vis');
+  }
+  function cpHideMasters() {
+    document.getElementById('cpBody').style.display = 'flex';
+    document.querySelector('.cp-foot').style.display = 'flex';
+    document.getElementById('cpMasters').classList.remove('vis');
+  }
+</script>
+
+<!-- ── COOKIE POPUP ── -->
+<div class="cookie-overlay hidden" id="cookieBar">
+  <div class="cookie-modal">
+    <div class="cookie-left">
+      <span class="cookie-icon">🍪</span>
+      <div class="cookie-info">
+        <div class="cookie-title">Мы используем cookies</div>
+        <div class="cookie-text">Мы используем cookie-файлы для аналитики, улучшения работы сайта и персонализации. Нажимая «Принять», вы соглашаетесь с нашей <a href="/privacy/" target="_blank">политикой конфиденциальности</a>.</div>
+      </div>
+    </div>
+    <div class="cookie-btns">
+      <button class="cookie-btn-ok" onclick="cookieAccept()">Принять</button>
+      <button class="cookie-btn-decline" onclick="cookieDecline()">Отклонить</button>
+    </div>
+  </div>
+</div>
+<script src="/support-widget.js"></script>
+</body>
+</html>
