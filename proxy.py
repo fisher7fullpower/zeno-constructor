@@ -144,7 +144,7 @@ def replicate_create():
 @app.route('/api/replicate/<pred_id>', methods=['GET'])
 def replicate_status(pred_id):
     # Validate prediction ID format (alphanumeric, reasonable length)
-    if not re.match(r'^[a-z0-9]{10,40}$', pred_id):
+    if not re.match(r'^[a-zA-Z0-9]{10,40}$', pred_id):
         return jsonify({'error': 'Invalid prediction ID'}), 400
     try:
         resp = requests.get(
