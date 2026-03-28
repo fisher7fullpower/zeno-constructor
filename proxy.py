@@ -9,7 +9,8 @@ HOMEDESIGNS_TOKEN = os.environ.get('HOMEDESIGNS_TOKEN', '')
 
 if not REPLICATE_TOKEN or not HOMEDESIGNS_TOKEN:
     import sys
-    print("WARNING: REPLICATE_TOKEN and/or HOMEDESIGNS_TOKEN not set in environment", file=sys.stderr)
+    print("FATAL: REPLICATE_TOKEN and/or HOMEDESIGNS_TOKEN not set in environment", file=sys.stderr)
+    sys.exit(1)
 
 REPLICATE_HDRS = {'Authorization': 'Token ' + REPLICATE_TOKEN, 'Content-Type': 'application/json'}
 
@@ -63,6 +64,14 @@ HOMEDESIGNS_ALLOWED_ENDPOINTS = {
     'floor_plan_to_render',
 }
 
+# ── Security: HomeDesigns allowed form fields ──
+HOMEDESIGNS_ALLOWED_FIELDS = {
+    'image', 'image_url', 'mask', 'mask_url', 'prompt', 'negative_prompt',
+    'room_type', 'design_style', 'design_theme', 'num_images', 'resolution',
+    'mode', 'scale', 'seed', 'strength', 'guidance_scale',
+    'custom_message', 'color_scheme', 'material', 'furniture_style',
+}
+
 # ── Security: max base64 image size (10 MB decoded) ──
 MAX_BASE64_BYTES = 10 * 1024 * 1024
 
@@ -72,8 +81,18 @@ def save_base64_image(data_url):
     if not m:
         return None
     ext = m.group(1).split('/')[-1].replace('jpeg', 'jpg')
+    # Security: only allow safe image extensions (no SVG — can contain JS)
+    if ext not in ('png', 'jpg', 'gif', 'webp'):
+        return None
     img_bytes = base64.b64decode(m.group(2))
     if len(img_bytes) > MAX_BASE64_BYTES:
+        return None
+    # Security: validate magic bytes match declared type
+    MAGIC = {
+        'png': b'\x89PNG', 'jpg': b'\xff\xd8\xff',
+        'gif': b'GIF8', 'webp': b'RIFF',
+    }
+    if ext in MAGIC and not img_bytes[:len(MAGIC[ext])].startswith(MAGIC[ext]):
         return None
     filename = str(uuid.uuid4()) + '.' + ext
     path = os.path.join(UPLOAD_DIR, filename)
@@ -104,7 +123,12 @@ def replicate_create():
         'input': inp,
     }
     if 'webhook' in data:
-        safe_data['webhook'] = data['webhook']
+        wh_parsed = urlparse(data['webhook'])
+        if wh_parsed.hostname and any(
+            wh_parsed.hostname == d or wh_parsed.hostname.endswith('.' + d)
+            for d in ('morrowlab.by', 'zenohome.by')
+        ):
+            safe_data['webhook'] = data['webhook']
     try:
         resp = requests.post(
             'https://api.replicate.com/v1/predictions',
@@ -117,7 +141,7 @@ def replicate_create():
 @app.route('/api/replicate/<pred_id>', methods=['GET'])
 def replicate_status(pred_id):
     # Validate prediction ID format (alphanumeric, reasonable length)
-    if not re.match(r'^[a-z0-9]{20,30}$', pred_id):
+    if not re.match(r'^[a-z0-9]{10,40}$', pred_id):
         return jsonify({'error': 'Invalid prediction ID'}), 400
     try:
         resp = requests.get(
@@ -141,6 +165,9 @@ def homedesigns_v2(endpoint):
     data = request.get_json(force=True) or {}
     form_fields = {}
     for key, value in data.items():
+        # Security: only forward known fields to upstream API
+        if key not in HOMEDESIGNS_ALLOWED_FIELDS:
+            continue
         if isinstance(value, bool):
             form_fields[key] = 'True' if value else 'False'
         elif isinstance(value, (int, float)):
