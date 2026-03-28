@@ -230,6 +230,8 @@ def proxy_image():
         return jsonify({'error': 'Domain not allowed'}), 403
     try:
         resp = requests.get(url, timeout=30, allow_redirects=False)
+        if resp.status_code != 200:
+            return jsonify({'error': 'Image not available'}), 502
         from flask import Response as FlaskResponse
         content_type = resp.headers.get('content-type', 'image/png')
         # Only proxy image content types
