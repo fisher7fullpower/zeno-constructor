@@ -24,12 +24,12 @@
     .logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
     .nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:2px}
-    .nav-item{position:relative}
+    .nav-item{position:relative;padding-bottom:12px;margin-bottom:-12px}
     .nav-link{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;cursor:pointer;background:none;border:none;font-family:inherit}
     .nav-link:hover,.nav-link.cur{color:#fff;background:rgba(255,255,255,.06)}
     .nav-link.cur{color:var(--lime)}
     .nav-dot{width:4px;height:4px;background:var(--lime);border-radius:50%;flex-shrink:0}
-    .dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);background:#0d0d0d;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:420px;display:grid;grid-template-columns:1fr 1fr;gap:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+    .dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);background:#0d0d0d;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:420px;display:grid;grid-template-columns:1fr 1fr;gap:2px;opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease;box-shadow:0 20px 60px rgba(0,0,0,.6)}
     .nav-item:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
     .dd-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;text-decoration:none;color:#fff;transition:background .2s}
     .dd-item:hover{background:rgba(255,255,255,.05)}
@@ -243,12 +243,13 @@
     .cp-send{width:34px;height:34px;background:var(--lime);border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s}
     .cp-send:disabled{opacity:.3;cursor:default}
 
-    @media(max-width:960px){.page-hero{grid-template-columns:1fr;padding-top:80px;min-height:auto}.form-card{position:relative;top:0}.nav-center,.btn-lime{display:none}.burger{display:flex}}
+    @media(max-width:1100px){.nav-center{display:none}.burger{display:flex}.nav-back{display:none}}
+    @media(max-width:960px){.page-hero{grid-template-columns:1fr;padding-top:80px;min-height:auto}.form-card{position:relative;top:0}.btn-lime{display:none}}
     @media(max-width:640px){.ex-grid{grid-template-columns:1fr}.pricing-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}.section-wrap{padding:56px 20px}.page-hero{padding:80px 20px 32px;gap:32px}.form-card{padding:24px}.header{padding:0 20px}.form-row{grid-template-columns:1fr}}
   
     /* ── DROPDOWN BRIDGE ── */
     .dropdown::before {
-      content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+      content: ''; position: absolute; top: -20px; left: -10px; right: -10px; height: 24px;
     }
 
     /* ── COOKIE POPUP ── */
@@ -338,13 +339,13 @@
       </div>
     </div>
     <a href="/#examples" class="nav-link">Примеры</a>
-    <a href="#pricing" class="nav-link">Тарифы</a>
+    <a href="/#pricing" class="nav-link">Тарифы</a>
     <a href="/#faq" class="nav-link">FAQ</a>
     <a href="/blog/" class="nav-link">Блог</a>
     <a href="/masters/" class="nav-link">Мастера</a>
   </nav>
   <div class="nav-right">
-    <a href="/" class="nav-link" style="opacity:.7">← Главная</a>
+    <a href="/" class="nav-link nav-back" style="opacity:.7">← Главная</a>
     <button class="burger" id="burger"><span></span><span></span><span></span></button>
   </div>
 </header>
@@ -367,11 +368,11 @@
     <div>
       <div class="hero-tag"><span class="hero-tag-dot"></span><span data-cms="hero_badge">Санузел · AI-дизайн</span></div>
       <h1 class="page-h1" data-cms="hero_title">Быстрый и <span>красивый</span><br>дизайн санузла</h1>
-      <p class="page-sub" data-cms="hero_sub">Загрузите фото и получите профессиональный рендер за 2 минуты. Ванная, туалет, душевая — любое помещение.</p>
+      <p class="page-sub" data-cms="hero_sub">1 фото санузла → готовый дизайн + плитка, сантехника с ценами из магазинов РБ. Без дизайнеров.</p>
       <div class="hero-features">
-        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat1">Результат на email за 1–2 минуты</span></div>
-        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat2">Список материалов с ценами и магазинами РБ</span></div>
-        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat3">Пошаговый план ремонта</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat1">Результат на email за 2 минуты</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat2">Плитка, сантехника — с ценами и ссылками</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat3">План ремонта с этапами и стоимостью</span></div>
         <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat4">Первый рендер бесплатно</span></div>
       </div>
       <div class="consult-card" onclick="chatOpen()">
@@ -686,7 +687,7 @@
       const fname = Date.now() + '_' + fileInput.files[0].name.replace(/[^a-zA-Z0-9._-]/g,'_');
 
       setProgress(30, 'Загружаем фото...');
-      const clRes = await fetch('/webhook/admin-upload', {
+      const clRes = await fetch('/webhook/photo-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: fname, data: fileDataUrl })

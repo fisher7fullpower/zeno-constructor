@@ -8,7 +8,11 @@ SECURITY_AUDIT.md
 DIAGNOSIS.md
 integrations.env.example
 ml-upload-updated.py
+ml-upload.py
 migrate/ssh_run.py
+.claude/worktrees/
+patch_*.py
+n8n_*.json
 
 # IDE
 .idea/
