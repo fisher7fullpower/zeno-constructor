@@ -1,0 +1,34 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.env
+CLOUD_INTEGRATION_KEYS.md
+SECURITY_AUDIT.md
+DIAGNOSIS.md
+integrations.env.example
+ml-upload-updated.py
+migrate/ssh_run.py
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

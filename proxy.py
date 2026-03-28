@@ -3,8 +3,12 @@ import requests, base64, uuid, os, re
 
 app = Flask(__name__)
 
-REPLICATE_TOKEN   = '***REDACTED_REPLICATE_TOKEN***'
-HOMEDESIGNS_TOKEN = '***REDACTED_HOMEDESIGNS_TOKEN***'
+REPLICATE_TOKEN   = os.environ.get('REPLICATE_TOKEN', '')
+HOMEDESIGNS_TOKEN = os.environ.get('HOMEDESIGNS_TOKEN', '')
+
+if not REPLICATE_TOKEN or not HOMEDESIGNS_TOKEN:
+    import sys
+    print("WARNING: REPLICATE_TOKEN and/or HOMEDESIGNS_TOKEN not set in environment", file=sys.stderr)
 
 REPLICATE_HDRS = {'Authorization': 'Token ' + REPLICATE_TOKEN, 'Content-Type': 'application/json'}
 
