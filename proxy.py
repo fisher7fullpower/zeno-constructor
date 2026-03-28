@@ -90,9 +90,12 @@ def save_base64_image(data_url):
     # Security: validate magic bytes match declared type
     MAGIC = {
         'png': b'\x89PNG', 'jpg': b'\xff\xd8\xff',
-        'gif': b'GIF8', 'webp': b'RIFF',
+        'gif': b'GIF8',
     }
-    if ext in MAGIC and not img_bytes[:len(MAGIC[ext])].startswith(MAGIC[ext]):
+    if ext in MAGIC and not img_bytes.startswith(MAGIC[ext]):
+        return None
+    # WebP: check RIFF header AND WEBP signature at offset 8
+    if ext == 'webp' and (not img_bytes.startswith(b'RIFF') or img_bytes[8:12] != b'WEBP'):
         return None
     filename = str(uuid.uuid4()) + '.' + ext
     path = os.path.join(UPLOAD_DIR, filename)
