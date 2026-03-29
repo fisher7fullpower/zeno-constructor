@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О проекте — Morrow Lab · AI-дизайн интерьера</title>
+  <meta name="description" content="Morrow Lab — первый в Беларуси AI-сервис дизайна интерьера. Рендер за 1 минуту, 19 стилей, цены в BYN.">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--lime:#d1fe17;--bg:#040406;--surface:#0c0c0e;--border:rgba(255,255,255,.06);--gray:rgba(255,255,255,.45)}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+    a{color:inherit;text-decoration:none}
+
+    /* HEADER */
+    .header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:14px 28px;background:rgba(10,10,10,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    .logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#fff;text-decoration:none}
+    .logo-icon{width:28px;height:28px;border-radius:6px}
+    .nav-center{display:flex;align-items:center;gap:2px;margin:0 auto}
+    .nav-link{background:none;border:none;color:var(--gray);font-size:13px;font-weight:500;cursor:pointer;padding:7px 12px;border-radius:7px;transition:color .2s,background .2s;text-decoration:none;font-family:inherit;white-space:nowrap}
+    .nav-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+    .nav-item{position:relative}
+    .nav-dot{display:inline-block;width:4px;height:4px;background:var(--lime);border-radius:50%;margin-left:3px;vertical-align:middle}
+    .dropdown{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#141414;border:1px solid var(--border);border-radius:12px;padding:6px;min-width:260px;display:none;grid-template-columns:1fr 1fr;gap:2px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+    .nav-item:hover .dropdown{display:grid}
+    .dropdown::before{content:'';position:absolute;top:-20px;left:-10px;right:-10px;height:24px}
+    .dd-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;text-decoration:none;transition:background .15s}
+    .dd-item:hover{background:rgba(255,255,255,.04)}
+    .badge-soon{font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(209,254,23,.12);color:var(--lime);font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:5px}
+    .dd-soon-item{opacity:.55;cursor:default;pointer-events:none}
+    .dd-icon{font-size:18px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.04);flex-shrink:0}
+    .dd-text{display:flex;flex-direction:column;gap:1px}
+    .dd-name{font-size:13px;font-weight:600;color:#fff}
+    .dd-desc{font-size:11px;color:var(--gray)}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .burger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:6px}
+    .burger span{width:20px;height:2px;background:#fff;border-radius:2px}
+    .mob-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+    .mob-menu.open{display:flex}
+    .mob-menu a{font-size:20px;font-weight:700;color:rgba(255,255,255,.65);text-decoration:none;padding:10px 24px;transition:color .2s}
+    .mob-menu a:hover{color:var(--lime)}
+    .mob-close{position:absolute;top:18px;right:20px;background:none;border:none;color:var(--gray);font-size:26px;cursor:pointer}
+
+    .wrap{max-width:900px;margin:0 auto;padding:120px 32px 80px}
+    .hero{text-align:center;margin-bottom:80px}
+    .hero h1{font-size:clamp(28px,5vw,44px);font-weight:900;letter-spacing:-1px;line-height:1.15;margin-bottom:16px}
+    .hero h1 span{color:var(--lime)}
+    .hero p{font-size:15px;color:var(--gray);max-width:600px;margin:0 auto 28px}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn-lime{padding:12px 28px;border-radius:10px;background:var(--lime);color:#000;font-size:14px;font-weight:700;transition:.2s;display:inline-block}
+    .btn-lime:hover{background:#bcf000;transform:translateY(-2px)}
+    .btn-ghost{padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);display:inline-block;transition:.2s}
+    .btn-ghost:hover{border-color:rgba(209,254,23,.3);color:#fff}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:80px}
+    .stat{text-align:center;padding:24px 12px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
+    .stat-num{font-size:28px;font-weight:900;color:var(--lime);margin-bottom:4px}
+    .stat-label{font-size:12px;color:var(--gray)}
+
+    .section-title{font-size:11px;font-weight:700;color:var(--lime);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+    .section-h2{font-size:clamp(22px,3.5vw,32px);font-weight:800;margin-bottom:32px}
+
+    .usp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:80px}
+    .usp{padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;transition:border-color .3s}
+    .usp:hover{border-color:rgba(209,254,23,.2)}
+    .usp-icon{font-size:24px;margin-bottom:10px}
+    .usp-title{font-size:15px;font-weight:700;margin-bottom:6px}
+    .usp-desc{font-size:13px;color:var(--gray);line-height:1.5}
+
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:80px}
+    .step{text-align:center;padding:24px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
+    .step-num{font-size:28px;font-weight:900;color:var(--lime);margin-bottom:8px}
+    .step-title{font-size:14px;font-weight:700;margin-bottom:6px}
+    .step-desc{font-size:12px;color:var(--gray);line-height:1.4}
+
+    /* Founder */
+    .founder{max-width:700px;margin:0 auto 80px;padding:32px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--lime);border-radius:14px;display:flex;gap:20px;align-items:flex-start}
+    .founder-avatar{width:52px;height:52px;border-radius:12px;background:rgba(209,254,23,.08);border:1px solid rgba(209,254,23,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--lime);flex-shrink:0}
+    .founder-quote{font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic}
+    .founder-name{font-size:14px;font-weight:700;color:#fff;margin-top:10px}
+    .founder-role{font-size:12px;color:var(--gray)}
+
+    .cta{text-align:center;padding:48px 32px;background:var(--surface);border:1px solid var(--border);border-radius:20px;margin-bottom:48px}
+    .cta h2{font-size:24px;font-weight:800;margin-bottom:12px}
+    .cta p{font-size:14px;color:var(--gray);margin-bottom:24px}
+
+    /* FOOTER */
+    .footer-wrap{border-top:1px solid var(--border);max-width:1400px;margin:0 auto;padding:56px 32px}
+    .footer-grid{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:48px}
+    .footer-logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px;margin-bottom:12px}
+    .logo-icon-sm{width:24px;height:24px;border-radius:5px}
+    .footer-desc{font-size:13px;color:var(--gray);line-height:1.6;max-width:260px}
+    .footer-copy{font-size:12px;color:#333;margin-top:16px}
+    .footer-col-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);margin-bottom:14px}
+    .footer-links{display:flex;flex-direction:column;gap:9px}
+    .footer-links a{font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#fff}
+
+    @media(max-width:860px){
+      .nav-center{display:none}
+      .burger{display:flex}
+      .nav-right{margin-left:auto}
+    }
+    @media(max-width:768px){
+      .wrap{padding:100px 20px 60px}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .usp-grid{grid-template-columns:1fr}
+      .steps{grid-template-columns:repeat(2,1fr)}
+      .founder{flex-direction:column;gap:14px}
+      .footer-grid{grid-template-columns:1fr;gap:24px}
+      .footer-wrap{padding:36px 16px}
+    }
+    @media(max-width:480px){
+      .steps{grid-template-columns:1fr}
+      .hero-btns{flex-direction:column;align-items:center}
+      .mob-menu a{font-size:18px;padding:9px 20px}
+    }
+  
+    /* Mobile menu smooth animation */
+    .mob-menu { transition: opacity .25s, transform .25s; opacity: 0; transform: translateY(-8px); pointer-events: none; }
+    .mob-menu.open { opacity: 1; transform: translateY(0); pointer-events: all; }
+  </style>
+</head>
+<body>
+
+<header class="header" id="header">
+  <a href="/" class="logo"><img src="/logo.png" class="logo-icon" alt="Morrow Lab">Morrow Lab</a>
+  <nav class="nav-center">
+    <div class="nav-item">
+      <button class="nav-link">Пространства <span class="nav-dot"></span></button>
+      <div class="dropdown">
+        <a href="/sanuzel/" class="dd-item"><div class="dd-icon">🚿</div><div class="dd-text"><div class="dd-name">Санузел</div><div class="dd-desc">Ванная, туалет, душевая</div></div></a>
+        <a href="/kitchen/" class="dd-item"><div class="dd-icon">🍳</div><div class="dd-text"><div class="dd-name">Кухня</div><div class="dd-desc">Кухня-гостиная, столовая</div></div></a>
+        <a href="/room/" class="dd-item"><div class="dd-icon">🛋️</div><div class="dd-text"><div class="dd-name">Комната</div><div class="dd-desc">Гостиная, спальня, кабинет</div></div></a>
+        <a href="/business/" class="dd-item"><div class="dd-icon">💼</div><div class="dd-text"><div class="dd-name">Бизнес</div><div class="dd-desc">Офис, кафе, магазин</div></div></a>
+        <a href="/dom/" class="dd-item"><div class="dd-icon">🏡</div><div class="dd-text"><div class="dd-name">Дом</div><div class="dd-desc">Загородный, коттедж</div></div></a>
+      </div>
+    </div>
+    <a href="/#examples" class="nav-link">Примеры</a>
+    <a href="/#pricing" class="nav-link">Тарифы</a>
+    <a href="/#faq" class="nav-link">FAQ</a>
+    <a href="/blog/" class="nav-link">Блог</a>
+    <a href="/masters/" class="nav-link">Мастера</a>
+    <div class="nav-item">
+      <button class="nav-link">Сервисы <span class="nav-dot"></span></button>
+      <div class="dropdown" style="min-width:340px;grid-template-columns:1fr">
+        <a href="/project/" class="dd-item"><div class="dd-icon" style="background:rgba(209,254,23,.1);border:1px solid rgba(209,254,23,.25)">✦</div><div class="dd-text"><div class="dd-name">Дизайн Студия</div><div class="dd-desc">Полный проект — от рендеров до сметы</div></div></a>
+        <a href="/b2b/" class="dd-item"><div class="dd-icon">📊</div><div class="dd-text"><div class="dd-name">B2B / API</div><div class="dd-desc">AI-рендеры для бизнеса</div></div></a>
+        <a href="/moodboard/" class="dd-item"><div class="dd-icon">🎨</div><div class="dd-text"><div class="dd-name">AI Мудборд</div><div class="dd-desc">Определи стиль интерьера</div></div></a>
+        <a class="dd-item dd-soon-item"><div class="dd-icon" style="opacity:.4">📐</div><div class="dd-text"><div class="dd-name">Конструктор <span class="badge-soon">soon</span></div><div class="dd-desc">Планировка помещения</div></div></a>
+        <a href="https://smm.morrowlab.by" class="dd-item" target="_blank" rel="noopener"><div class="dd-icon">📱</div><div class="dd-text"><div class="dd-name">SMM Admin <span style="font-size:9px;background:rgba(23,232,254,.15);color:#17e8fe;padding:1px 5px;border-radius:4px;margin-left:4px;">скоро</span></div><div class="dd-desc">Управление соцсетями</div></div></a>
+      </div>
+    </div>
+  </nav>
+  <div class="nav-right">
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="/sanuzel/">Санузел</a>
+  <a href="/kitchen/">Кухня</a>
+  <a href="/room/">Комната</a>
+  <a href="/business/">Бизнес</a>
+  <a href="/dom/">Дом</a>
+  <a href="/blog/">Блог</a>
+  <a href="/sanuzel/" style="color:var(--lime);margin-top:12px;font-size:18px;">Получить дизайн бесплатно →</a>
+  <div style="border-top:1px solid rgba(255,255,255,.07);margin:10px 0 4px;padding-top:12px">
+    <div style="font-size:11px;color:rgba(255,255,255,.25);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:0 24px 6px">Сервисы</div>
+    <a href="/project/">✦ Дизайн Студия</a>
+    <a href="/b2b/">📊 B2B / API</a>
+    <a href="/moodboard/">🎨 AI Мудборд</a>
+    <a href="https://constructor.morrowlab.by/">📐 Конструктор</a>
+    <a href="https://smm.morrowlab.by" target="_blank" rel="noopener">📱 SMM Admin <span style="font-size:9px;background:rgba(23,232,254,.15);color:#17e8fe;padding:1px 5px;border-radius:4px;">скоро</span></a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>AI-дизайн интерьера<br><span>за 1 минуту</span></h1>
+    <p>Загрузите фото помещения — получите профессиональный рендер. Без дизайнера, без ожидания, с ориентировочными ценами на материалы в BYN.</p>
+    <div class="hero-btns">
+      <a href="/sanuzel/" class="btn-lime">Попробовать бесплатно</a>
+      <a href="/#pricing" class="btn-ghost">Тарифы</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">19</div><div class="stat-label">стилей дизайна</div></div>
+    <div class="stat"><div class="stat-num">~1 мин</div><div class="stat-label">время рендера</div></div>
+    <div class="stat"><div class="stat-num">BYN</div><div class="stat-label">цены материалов*</div></div>
+    <div class="stat"><div class="stat-num">0 BYN</div><div class="stat-label">первый рендер</div></div>
+  </div>
+
+  <div class="section-title">Почему Morrow Lab</div>
+  <h2 class="section-h2">Всё для ремонта — в одном месте</h2>
+
+  <div class="usp-grid">
+    <div class="usp"><div class="usp-icon">⚡</div><div class="usp-title">Дизайн за 2 минуты</div><div class="usp-desc">Загрузи фото — AI покажет, как будет выглядеть после ремонта. Без замерщиков и ожидания</div></div>
+    <div class="usp"><div class="usp-icon">🎁</div><div class="usp-title">Первый рендер бесплатно</div><div class="usp-desc">Без регистрации, без карты. Не понравилось — перегенерируем</div></div>
+    <div class="usp"><div class="usp-icon">📦</div><div class="usp-title">Action Kit — готовый план</div><div class="usp-desc">Материалы, артикулы, ориентировочные цены и ссылки на магазины РБ. Открыл — купил</div></div>
+    <div class="usp"><div class="usp-icon">🏪</div><div class="usp-title">Магазины Беларуси</div><div class="usp-desc">OMA, Керамин, 21vek, E1 — товары, которые реально купить рядом с домом</div></div>
+    <div class="usp"><div class="usp-icon">🔧</div><div class="usp-title">Мастера на связи</div><div class="usp-desc">Сантехники, плиточники, электрики — проконсультируют и помогут с ремонтом</div></div>
+    <div class="usp"><div class="usp-icon">🛡️</div><div class="usp-title">Гарантия результата</div><div class="usp-desc">Не устроил рендер — переделаем бесплатно. Мы уверены в качестве</div></div>
+  </div>
+
+  <div class="section-title">Как это работает</div>
+  <h2 class="section-h2">4 шага к новому интерьеру</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><div class="step-title">Выберите комнату</div><div class="step-desc">Санузел, кухня, комната, дом или бизнес</div></div>
+    <div class="step"><div class="step-num">02</div><div class="step-title">Загрузите фото</div><div class="step-desc">Сфотографируйте помещение. До 10 МБ</div></div>
+    <div class="step"><div class="step-num">03</div><div class="step-title">Выберите стиль</div><div class="step-desc">19 стилей + интенсивность AI</div></div>
+    <div class="step"><div class="step-num">04</div><div class="step-title">Получите результат</div><div class="step-desc">Рендер, смена стилей, правки текстом</div></div>
+  </div>
+
+  <!-- О создателе -->
+  <div class="section-title" style="text-align:center">О создателе</div>
+  <div class="founder" style="border-left:3px solid var(--lime)">
+    <div>
+      <div class="founder-quote">Когда я впервые делал ремонт в своей квартире, столкнулся со всем, с чем сталкивается каждый новичок. Какую грунтовку купить? Сколько мешков штукатурки нужно на комнату? Где найти нормального подрядчика на шлифовку стен? Какую плитку выбрать, какая фуга лучше, какие лампочки вообще подойдут под этот потолок?<br><br>Всё затягивалось, потому что непонятно что делать по порядку. Один мастер говорит одно, второй — другое. Хотелось просто позвонить кому-то опытному и получить конкретный ответ: «бери вот эту плитку, вот эту фугу, вот этого электрика — и всё будет ок».<br><br>Такого сервиса не было. И я решил его создать. Morrow Lab — это всё, чего мне не хватало, когда я стоял в OMA и не понимал, какой герметик лучше. AI делает дизайн за минуты, подбирает материалы с ориентировочными ценами, а рядом — мастера, которые знают что делать.</div>
+      <div class="founder-name" style="margin-top:16px">Основатель Morrow Lab</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <h2>Первый рендер — бесплатно</h2>
+    <p>Без регистрации. Загрузите фото и увидите результат через минуту.</p>
+    <a href="/sanuzel/" class="btn-lime">Создать дизайн</a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <div class="footer-grid">
+    <div>
+      <a href="/" class="footer-logo"><img src="/logo.png" class="logo-icon-sm" alt="Morrow Lab">Morrow Lab</a>
+      <p class="footer-desc">Дизайн интерьера за 2 минуты. Загрузите фото — получите рендер.</p>
+      <p class="footer-copy">© 2026 ООО «Морроу Лаб» · <a href="/privacy/" style="color:rgba(255,255,255,.35);text-decoration:none;">Политика конфиденциальности</a> · <a href="/oferta/" style="color:rgba(255,255,255,.35);text-decoration:none;">Публичная оферта</a></p>
+    </div>
+    <div>
+      <div class="footer-col-title">Пространства</div>
+      <div class="footer-links">
+        <a href="/sanuzel/">Санузел</a><a href="/kitchen/">Кухня</a>
+        <a href="/room/">Комната</a><a href="/business/">Бизнес</a><a href="/dom/">Дом</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Сервис</div>
+      <div class="footer-links">
+        <a href="/#pricing">Тарифы</a><a href="/#examples">Примеры</a>
+        <a href="/#faq">FAQ</a><a href="/blog/">Блог</a><a href="https://constructor.morrowlab.by/">Конструктор</a><a href="/project/">❖ Дизайн Студия</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Компания</div>
+      <div class="footer-links">
+        <a href="/about/">О нас</a><a href="/masters/">Мастера</a>
+        <a href="mailto:hello@morrowlab.by">hello@morrowlab.by</a>
+        <a href="https://t.me/morrowlab" target="_blank">Telegram</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const burger=document.getElementById('burger'),mobMenu=document.getElementById('mobMenu'),mobClose=document.getElementById('mobClose');
+if(burger&&mobMenu){burger.onclick=()=>mobMenu.classList.add('open');mobClose.onclick=()=>mobMenu.classList.remove('open');mobMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobMenu.classList.remove('open')))}
+</script>
+</body>
+</html>

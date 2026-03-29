@@ -37,8 +37,11 @@
     .nav-item{position:relative}
     .dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);background:#0d0d0d;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:560px;display:grid;grid-template-columns:1fr 1fr;gap:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.6)}
     .nav-item:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+    .dropdown::before{content:'';position:absolute;top:-20px;left:-10px;right:-10px;height:24px}
     .dd-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;text-decoration:none;color:#fff;transition:background .2s}
     .dd-item:hover{background:rgba(255,255,255,.05)}
+    .badge-soon{font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(209,254,23,.12);color:var(--lime);font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:5px}
+    .dd-soon-item{opacity:.55;cursor:default;pointer-events:none}
     .dd-icon{width:34px;height:34px;border-radius:8px;background:var(--lime-dim);border:1px solid var(--lime-border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
     .dd-text{display:flex;flex-direction:column;gap:2px}
     .dd-name{font-size:13px;font-weight:600}
@@ -319,7 +322,7 @@
         <a href="/room/" class="dd-item"><div class="dd-icon">🛋️</div><div class="dd-text"><div class="dd-name">Комната</div><div class="dd-desc">Гостиная, спальня, кабинет</div></div></a>
         <a href="/business/" class="dd-item"><div class="dd-icon">💼</div><div class="dd-text"><div class="dd-name">Бизнес</div><div class="dd-desc">Офис, кафе, магазин</div></div></a>
         <a href="/dom/" class="dd-item"><div class="dd-icon">🏡</div><div class="dd-text"><div class="dd-name">Дом</div><div class="dd-desc">Загородный, коттедж</div></div></a>
-        <a href="/constructor/" class="dd-item"><div class="dd-icon">📐</div><div class="dd-text"><div class="dd-name">Конструктор</div><div class="dd-desc">Планировка помещения</div></div></a>
+        <a class="dd-item dd-soon-item"><div class="dd-icon" style="opacity:.4">📐</div><div class="dd-text"><div class="dd-name">Конструктор <span class="badge-soon">soon</span></div><div class="dd-desc">Планировка помещения</div></div></a>
         <a href="/project/" class="dd-item cur" style="background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.15);grid-column:1/-1"><div class="dd-icon" style="background:rgba(209,254,23,.12);border-color:rgba(209,254,23,.3)">✦</div><div class="dd-text"><div class="dd-name" style="color:#d1fe17">Дизайн Студия</div><div class="dd-desc">Полный проект — от рендеров до сметы</div></div></a>
       </div>
     </div>
