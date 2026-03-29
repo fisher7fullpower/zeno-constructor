@@ -812,8 +812,22 @@ def api_moodboard():
     image_b64 = data.get('image', '')
     if not image_b64 or not isinstance(image_b64, str) or len(image_b64) > 10_000_000:
         return jsonify({'error': 'Invalid image'}), 400
-    # Strip data URL prefix
-    img_data = image_b64.split(',', 1)[1] if ',' in image_b64 else image_b64
+    # Extract MIME type and base64 data from data URL
+    img_mime = 'image/jpeg'
+    if ',' in image_b64:
+        header, img_data = image_b64.split(',', 1)
+        if 'image/png' in header: img_mime = 'image/png'
+        elif 'image/webp' in header: img_mime = 'image/webp'
+        elif 'image/gif' in header: img_mime = 'image/gif'
+    else:
+        img_data = image_b64
+    try:
+        import base64 as _b64
+        decoded = _b64.b64decode(img_data, validate=True)
+        if len(decoded) > 10 * 1024 * 1024:
+            return jsonify({'error': 'Image too large'}), 400
+    except Exception:
+        return jsonify({'error': 'Invalid image data'}), 400
     prompt = (
         'Analyze this interior/exterior design image. Return ONLY a JSON object with these fields:\n'
         '- style_name: main style in Russian (e.g. "Минимализм", "Скандинавский", "Лофт", "Современный")\n'
@@ -830,7 +844,7 @@ def api_moodboard():
             json={
                 'model': 'meta-llama/llama-4-scout-17b-16e-instruct',
                 'messages': [{'role': 'user', 'content': [
-                    {'type': 'image_url', 'image_url': {'url': f'data:image/jpeg;base64,{img_data}'}},
+                    {'type': 'image_url', 'image_url': {'url': f'data:{img_mime};base64,{img_data}'}},
                     {'type': 'text', 'text': prompt}
                 ]}],
                 'max_tokens': 800,
@@ -860,9 +874,9 @@ def api_consultant():
     data = request.get_json(force=True) or {}
     message = data.get('message', '')
     history = data.get('history', [])
-    if not isinstance(message, str) or len(message) > 2000:
+    if not isinstance(message, str) or not message.strip() or len(message) > 2000:
         return jsonify({'error': 'Invalid message'}), 400
-    if not isinstance(history, list) or len(history) > 20:
+    if not isinstance(history, list):
         history = []
     system_prompt = (
         'Ты — AI-консультант по дизайну интерьеров и ремонту для платформы Morrow Lab (morrowlab.by). '
