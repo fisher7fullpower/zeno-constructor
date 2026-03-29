@@ -775,7 +775,7 @@
         body: JSON.stringify({
           image: fileDataUrl,
           design_type: isExterior ? 'Exterior' : 'Interior',
-          ...(isExterior ? {house_angle: 'Front'} : {room_type: roomType}),
+          ...(isExterior ? {house_angle: 'Front of House'} : {room_type: roomType}),
           design_style: hdStyle,
           ai_intervention: 'Mid',
           no_design: 1
