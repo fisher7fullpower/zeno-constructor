@@ -1571,11 +1571,13 @@ function renderZonesList() {
   }).join('');
 }
 function setStatus(msg, type='idle', spinner=false) {
+  msg = typeof msg === 'string' ? msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') : msg;
   const el = document.getElementById('statusBar');
   el.className = `status-bar ${type}`;
   el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
 }
 function setRestyleStatus(msg, type='idle', spinner=false) {
+  msg = typeof msg === 'string' ? msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') : msg;
   const el = document.getElementById('restyleStatus');
   el.className = `status-bar ${type}`;
   el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
@@ -1685,11 +1687,14 @@ function selectAiLevel(level, el) {
   el.classList.add('active');
 }
 
+function escHtml(s){return typeof s==='string'?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):s;}
+function trustedHtml(s){var o={__html:s};return o;}
 function setHdStatus(tool, msg, type='idle', spinner=false) {
   const el = document.getElementById(`hd-${tool}-status`);
   if (!el) return;
   el.className = `hd-status ${type}`;
-  el.innerHTML = spinner ? `<div class="spinner" style="border-color:var(--warn);border-top-color:transparent"></div>${msg}` : msg;
+  const safe = (msg && msg.__html) ? msg.__html : escHtml(msg);
+  el.innerHTML = spinner ? `<div class="spinner" style="border-color:var(--warn);border-top-color:transparent"></div>${safe}` : safe;
 }
 
 function showHdResult(tool, url) {
@@ -1965,7 +1970,7 @@ function isHdAuthError(msg) {
   return msg && (msg.includes('Invalid API') || msg.includes('Did you mean') || msg.includes('Unauthenticated') || msg.includes('activate'));
 }
 function hdPaidPlanMsg() {
-  return 'Требует активный план <a href="https://homedesigns.ai/pricing" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>';
+  return trustedHtml('Требует активный план <a href="https://homedesigns.ai/pricing" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>');
 }
 
 function previewTexture(input) {

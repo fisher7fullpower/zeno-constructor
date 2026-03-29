@@ -80,9 +80,10 @@ function buildUserPrompt(input: GenerateInput): string {
   const toneLabel = TONES[input.tone ?? ""] ?? "профессиональный";
   const platform = (input.platforms ?? ["instagram"])[0];
 
-  let ctx = `Тип поста: ${postTypeLabel}\nКомната: ${roomLabel}\nСтиль: ${styleLabel}\nТон: ${toneLabel}\nПлатформа: ${platform}`;
-  if (input.budget) ctx += `\nБюджет: ${input.budget} BYN`;
-  if (input.projectDetails) ctx += `\nДетали проекта: ${input.projectDetails}`;
+  const safePlatform = /^[a-zA-Z]{2,20}$/.test(platform) ? platform : "instagram";
+  let ctx = `Тип поста: ${postTypeLabel}\nКомната: ${roomLabel}\nСтиль: ${styleLabel}\nТон: ${toneLabel}\nПлатформа: ${safePlatform}`;
+  if (input.budget) ctx += `\nБюджет: ${String(input.budget).slice(0, 50)} BYN`;
+  if (input.projectDetails) ctx += `\nДетали проекта: ${String(input.projectDetails).slice(0, 2000)}`;
 
   const maxLen = platform === "telegram" ? 800 : platform === "tiktok" ? 300 : 500;
 
@@ -109,7 +110,7 @@ function buildUserPrompt(input: GenerateInput): string {
 
 export async function POST(req: NextRequest) {
   const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-  if (!rateLimit(ip, 10, 60000)) {
+  if (!rateLimit("generate:" + ip, 10, 60000)) {
     return Response.json({ error: "Too many requests" }, { status: 429 });
   }
 
@@ -152,7 +153,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!groqRes.ok) {
-      const err = await groqRes.text();
+      const err = (await groqRes.text()).slice(0, 200).replace(/[\n\r]/g, ' ');
       throw new Error(`Groq error ${groqRes.status}: ${err}`);
     }
 

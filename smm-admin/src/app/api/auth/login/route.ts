@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 export async function POST(req: NextRequest) {
   try {
     const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-    if (!rateLimit(ip, 5, 60000)) {
+    if (!rateLimit("login:" + ip, 5, 60000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 

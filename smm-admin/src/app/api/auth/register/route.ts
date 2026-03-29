@@ -9,7 +9,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://smm.morrowlab.by";
 export async function POST(req: NextRequest) {
   try {
     const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-    if (!rateLimit(ip, 5, 60000)) {
+    if (!rateLimit("register:" + ip, 5, 60000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
@@ -102,6 +102,10 @@ async function sendMagicEmail(to: string, link: string, isNew: boolean, plan?: s
   });
 }
 
+function escAttr(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function emailHtml(buttonText: string, link: string, description: string) {
   return `<!DOCTYPE html>
 <html><body style="background:#0a0a0c;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;margin:0;padding:40px 0">
@@ -110,7 +114,7 @@ function emailHtml(buttonText: string, link: string, description: string) {
     <span style="display:inline-block;background:#d1fe17;color:#040406;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px">SMM Admin</span>
   </div>
   <p style="color:rgba(255,255,255,.7);font-size:14px;line-height:1.6;margin:0 0 24px">${description}</p>
-  <a href="${link}" style="display:inline-block;background:#d1fe17;color:#040406;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;margin-bottom:20px">${buttonText}</a>
+  <a href="${escAttr(link)}" style="display:inline-block;background:#d1fe17;color:#040406;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;margin-bottom:20px">${buttonText}</a>
   <p style="color:rgba(255,255,255,.3);font-size:12px;margin:16px 0 0">Ссылка действительна 24 часа. Если вы не запрашивали доступ — просто проигнорируйте это письмо.</p>
 </div>
 </body></html>`;

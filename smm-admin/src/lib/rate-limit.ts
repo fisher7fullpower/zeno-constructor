@@ -11,14 +11,18 @@ function cleanupExpired() {
   }
 }
 
-export function rateLimit(ip: string, limit = 5, windowMs = 60000): boolean {
+/**
+ * Rate limit by key. Use `endpoint:ip` format to avoid collisions between endpoints.
+ * Example: rateLimit("invites:" + ip, 10, 60000)
+ */
+export function rateLimit(key: string, limit = 5, windowMs = 60000): boolean {
   cleanupCounter++;
   if (cleanupCounter % 100 === 0) cleanupExpired();
 
   const now = Date.now();
-  const entry = rateMap.get(ip);
+  const entry = rateMap.get(key);
   if (!entry || now > entry.resetAt) {
-    rateMap.set(ip, { count: 1, resetAt: now + windowMs });
+    rateMap.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
   entry.count++;

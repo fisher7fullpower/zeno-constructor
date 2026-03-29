@@ -26,7 +26,13 @@ export async function POST(req: NextRequest) {
   );
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const workspace = req.nextUrl.searchParams.get("workspace") ?? "";
+  const access = await checkWorkspaceAccess(workspace);
+  if (!access) {
+    return NextResponse.json({ error: "No access" }, { status: 403 });
+  }
+
   // Stub: publication service removed
   return NextResponse.json(
     { error: "Publication service not configured" },

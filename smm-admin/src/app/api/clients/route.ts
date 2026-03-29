@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "name и slug обязательны" }, { status: 400 });
   }
 
+  // Validate slug format: lowercase alphanumeric + hyphens, 2-64 chars
+  if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) {
+    return NextResponse.json({ error: "Slug должен содержать только строчные буквы, цифры и дефисы (2-64 символа)" }, { status: 400 });
+  }
+
   // Create client in Supabase
   const { data: client, error } = await supabase
     .from("clients")

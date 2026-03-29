@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 // POST — create invite for a client
 export async function POST(req: NextRequest) {
   const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-  if (!rateLimit(ip, 10, 60000)) {
+  if (!rateLimit("invites:" + ip, 10, 60000)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
@@ -18,6 +18,13 @@ export async function POST(req: NextRequest) {
 
   if (!workspace || !email) {
     return NextResponse.json({ error: "workspace и email обязательны" }, { status: 400 });
+  }
+
+  // Validate and normalize email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const normalizedEmail = String(email).toLowerCase().trim();
+  if (!emailRegex.test(normalizedEmail)) {
+    return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
   }
 
   const validRoles = ["client", "operator"];
@@ -52,7 +59,7 @@ export async function POST(req: NextRequest) {
     .from("invites")
     .insert({
       client_id: client.id,
-      email,
+      email: normalizedEmail,
       role,
     })
     .select("token")

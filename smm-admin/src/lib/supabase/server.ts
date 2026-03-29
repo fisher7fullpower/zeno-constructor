@@ -150,7 +150,10 @@ class QueryBuilder {
     let sql = `SELECT ${selectExpr} FROM ${tableAlias}${clause}`;
     if (this._orderCol) sql += ` ORDER BY ${condPrefix}${safeColumn(this._orderCol)} ${this._orderAsc ? "ASC" : "DESC"}`;
     if (this._single) sql += " LIMIT 1";
-    else if (this._limitN !== undefined) sql += ` LIMIT ${this._limitN}`;
+    else if (this._limitN !== undefined) {
+      params.push(this._limitN);
+      sql += ` LIMIT $${params.length}`;
+    }
 
     const { rows } = await pool.query(sql, params);
 
@@ -162,17 +165,21 @@ class QueryBuilder {
   }
 
   private async _runInsert(): Promise<QBResult> {
-    const data = this._data!;
-    const cols = Object.keys(data);
-    const vals = Object.values(data);
-    const placeholders = cols.map((_, i) => `$${i + 1}`).join(", ");
-    const sql = `INSERT INTO "${this._table}" (${cols.map((c) => safeColumn(c)).join(", ")}) VALUES (${placeholders}) RETURNING *`;
-    const { rows } = await pool.query(sql, vals);
-    const row = rows[0] ?? null;
-
-    // Handle unique constraint violation
-    if (!row) return { data: null, error: { message: "Insert failed" } };
-    return this._single ? { data: row, error: null } : { data: rows, error: null };
+    try {
+      const data = this._data!;
+      const cols = Object.keys(data);
+      const vals = Object.values(data);
+      const placeholders = cols.map((_, i) => `$${i + 1}`).join(", ");
+      const sql = `INSERT INTO "${this._table}" (${cols.map((c) => safeColumn(c)).join(", ")}) VALUES (${placeholders}) RETURNING *`;
+      const { rows } = await pool.query(sql, vals);
+      const row = rows[0] ?? null;
+      if (!row) return { data: null, error: { message: "Insert failed" } };
+      return this._single ? { data: row, error: null } : { data: rows, error: null };
+    } catch (err: unknown) {
+      // Preserve PostgreSQL error codes (e.g. 23505 for unique constraint)
+      const pgErr = err as { message?: string; code?: string };
+      return { data: null, error: { message: pgErr.message ?? "Insert failed", code: pgErr.code } };
+    }
   }
 
   private async _runUpdate(): Promise<QBResult> {
@@ -181,9 +188,12 @@ class QueryBuilder {
     const vals = Object.values(data);
     const sets = cols.map((c, i) => `${safeColumn(c)} = $${i + 1}`).join(", ");
     const { clause, params } = this.buildWhere("", cols.length);
-    const sql = `UPDATE "${this._table}" SET ${sets}${clause}`;
-    await pool.query(sql, [...vals, ...params]);
-    return { data: null, error: null };
+    const sql = `UPDATE "${this._table}" SET ${sets}${clause} RETURNING *`;
+    const { rows } = await pool.query(sql, [...vals, ...params]);
+    if (this._single) {
+      return rows[0] ? { data: rows[0], error: null } : { data: null, error: { message: "Row not found" } };
+    }
+    return { data: rows, error: null };
   }
 }
 

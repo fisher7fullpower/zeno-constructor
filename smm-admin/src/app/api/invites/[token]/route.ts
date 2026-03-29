@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createUser, signToken, validatePassword } from "@/lib/auth";
+import { createUser, signToken, validatePassword, findUserByCredentials } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 import pool from "@/lib/db";
@@ -34,7 +34,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // POST — accept invite, create account, sign in
 export async function POST(req: NextRequest, { params }: Params) {
   const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-  if (!rateLimit(ip, 5, 60000)) {
+  if (!rateLimit("invite-accept:" + ip, 5, 60000)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
@@ -63,17 +63,17 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Срок приглашения истёк" }, { status: 400 });
   }
 
-  // Create user (or look up existing if already exists)
+  // Create user (or verify existing user's password)
   let user;
   try {
     user = await createUser(invite.email, password, invite.role === "owner" ? "admin" : "client");
   } catch {
-    // User already exists - look them up
-    const existing = await pool.query("SELECT id, email, role FROM users WHERE email = $1", [invite.email.toLowerCase()]);
-    if (existing.rows.length === 0) {
-      return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
+    // User already exists — require password verification
+    const verified = await findUserByCredentials(invite.email, password);
+    if (!verified) {
+      return NextResponse.json({ error: "Аккаунт уже существует. Введите правильный пароль." }, { status: 401 });
     }
-    user = existing.rows[0];
+    user = verified;
   }
 
   // Link user → client

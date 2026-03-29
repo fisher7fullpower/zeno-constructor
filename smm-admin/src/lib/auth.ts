@@ -86,7 +86,11 @@ export async function isLicensedEmail(email: string): Promise<{ licensed: boolea
 }
 
 /** Create a magic login token for passwordless auth */
+const VALID_PURPOSES = ["login", "register"] as const;
 export async function createMagicToken(email: string, purpose = "login"): Promise<string> {
+  if (!VALID_PURPOSES.includes(purpose as typeof VALID_PURPOSES[number])) {
+    throw new Error("Invalid token purpose");
+  }
   const { rows } = await pool.query(
     `INSERT INTO magic_tokens (email, purpose)
      VALUES ($1, $2)

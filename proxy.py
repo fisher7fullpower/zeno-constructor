@@ -206,6 +206,8 @@ def homedesigns_advisor():
     hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
     try:
         msg = data.get('message', '')
+        if not isinstance(msg, str) or len(msg) > 2000:
+            return jsonify({'error': 'Message too long'}), 400
         # Force Russian response
         msg_ru = msg + '\n\nПожалуйста, ответь на русском языке.'
         resp = requests.post(

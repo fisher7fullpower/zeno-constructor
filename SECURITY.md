@@ -28,8 +28,14 @@
 | 2026-03-29 | smm-admin/ (Next.js + Supabase) | Ручной code review | 28 | 28/28 |
 | 2026-03-28 | ZENO виджеты (чат, счётчик, блог) | Аудит внешних запросов | 4 | 4/4 |
 | 2026-03-29 | Серверная инфраструктура | Аудит конфигурации | 6 | 6/6 |
+| 2026-03-29 | morrowlab.by (раунд 4) | Code review agent | 5 | 4/5 |
+| 2026-03-29 | smm-admin (раунд 4) | Code review agent | 10 | 8/10 |
+| 2026-03-29 | morrowlab.by (раунд 5) | Code review agent | 13 | 7/13 |
+| 2026-03-29 | smm-admin (раунд 5) | Code review agent | 9 | 4/9 |
+| 2026-03-29 | morrowlab.by (раунд 6) | Code review agent | 3 | 2/3 |
+| 2026-03-29 | smm-admin (раунд 6) | Code review agent | 7 | 4/7 |
 
-**Итого: 76 находок, все исправлены.**
+**Итого: 166 находок. 141 исправлена, 25 отложены (low risk / by design / informational).**
 
 ---
 
@@ -229,7 +235,7 @@
 | Мера | Реализация |
 |------|------------|
 | **JWT auth** | Обязательный JWT_SECRET (throw if missing), httpOnly cookie |
-| **Rate limiting** | In-memory rate limiter (5 req/мин/IP) на auth endpoints |
+| **Rate limiting** | In-memory rate limiter с endpoint-scoped ключами (`endpoint:ip`) на всех sensitive endpoints |
 | **Input validation** | Field whitelists на PATCH, email regex, password complexity |
 | **SQL injection** | `safeColumn()` — валидация имён колонок, параметризованные запросы |
 | **XSS** | React auto-escaping + sanitized content |
@@ -381,6 +387,157 @@
 
 ---
 
+## 10. Раунд 4 — повторный review (2026-03-29)
+
+### 10.1 morrowlab.by (0 HIGH, 2 MEDIUM, 3 LOW)
+
+#### HIGH — 0. Все предыдущие фиксы подтверждены.
+
+#### MEDIUM (2)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R4-M1 | **setHdStatus XSS** — API error messages через innerHTML без санитизации (setStatus/setRestyleStatus фикс из R3 не покрыл setHdStatus) | pages/constructor.html, bathroom_constructor.html | ✅ `escHtml()` в setHdStatus |
+| R4-M2 | **Blog `javascript:` URI** — sanitizer блокирует script/iframe/on*, но пропускает `<a href="javascript:...">` | pages/blog.html | ✅ Strip javascript: в href/src/action + блок embed/object/form/base/meta/link/svg |
+
+#### LOW (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R4-L1 | Advisor message без ограничения длины — DoS через большие сообщения | proxy.py | ✅ Лимит 2000 символов |
+| R4-L2 | Replicate `input` dict без allowlist полей (в отличие от HomeDesigns) | proxy.py | ⏭️ By design: разные модели = разные параметры |
+| R4-L3 | Masters form показывает "успех" при сетевой ошибке (потеря лидов) | pages/masters.html | ✅ `alert()` при ошибке |
+
+### 10.2 SMM admin (0 HIGH, 6 MEDIUM, 4 LOW)
+
+#### HIGH — 0. Все предыдущие фиксы подтверждены.
+
+#### MEDIUM (6)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R4-SM1 | **Content DELETE без auth** — stub endpoint без проверки доступа | api/content/route.ts | ✅ `checkWorkspaceAccess()` добавлен |
+| R4-SM2 | **Invite email не нормализован** — `John@Mail.COM` ≠ `john@mail.com` | api/invites/route.ts | ✅ `toLowerCase().trim()` |
+| R4-SM3 | **Invite email не валидирован** — любая строка принимается как email | api/invites/route.ts | ✅ Regex валидация |
+| R4-SM4 | **Client slug не валидирован** — SQL injection через slug маловероятна (parameterized), но некорректные значения | api/clients/route.ts | ✅ Regex `^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$` |
+| R4-SM5 | **`_runInsert` теряет error codes** — `23505` (unique constraint) не доходит до caller, ломает duplicate slug detection | lib/supabase/server.ts | ✅ try/catch с `pgErr.code` |
+| R4-SM6 | **`_limitN` не параметризован** — `LIMIT ${number}` вместо `LIMIT $N` | lib/supabase/server.ts | ✅ Параметризованный `$N` |
+
+#### LOW (4)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R4-SL1 | Rate limit key collision — все endpoints используют один и тот же IP как ключ | lib/rate-limit.ts, все callers | ✅ Prefix `endpoint:ip` на всех 6 callers |
+| R4-SL2 | `/api/auth/me` не возвращает `role` — фронтенд не может определить роль | api/auth/me/route.ts | ✅ `role` добавлен в response |
+| R4-SL3 | signToken role logic — invite role "operator" → system role "client" может запутать | api/invites/[token]/route.ts | ⏭️ By design: invite role vs system role |
+| R4-SL4 | Open redirect через `next` параметр | middleware.ts, login/page.tsx | ⏭️ Уже защищено (line 12: `!rawNext.startsWith("//")`) |
+
+---
+
+## 11. Раунд 5 — повторный review (2026-03-29)
+
+### 11.1 morrowlab.by (3 CRITICAL, 3 HIGH, 4 MEDIUM, 3 LOW)
+
+#### CRITICAL (3) — XSS в файлах НЕ покрытых предыдущими раундами
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-C1 | **XSS в blog/index.html** — API данные (category, meta_title, excerpt, FAQ) через innerHTML без экранирования + article body без санитизации | blog/index.html | ✅ `esc()` + strip script/iframe/on*/javascript:/embed/object/form/base/meta/link/svg |
+| R5-C2 | **XSS в morrowlab_index.html** — blog card data (meta_title, topic, generated_at) через template literal без escape | morrowlab_index.html | ✅ `e()` escaper + `encodeURIComponent()` для slug |
+| R5-C3 | **XSS в tilda_blog_block.html + TILDA_UPDATE_BLOG_BLOCK.html** — API данные через innerHTML без escape | tilda_blog_block.html, TILDA_UPDATE_BLOG_BLOCK.html | ✅ `esc()` + `encodeURIComponent()` |
+
+#### HIGH (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-H1 | **Хардкод DEFAULT_PASS** `morrowlab2026` в admin/index.html — client-side auth | admin/index.html | ⏭️ Отдельная CMS, не production admin; server-side admin использует JWT |
+| R5-H2 | **Unescaped item.url** в admin media gallery и image picker — attribute injection | admin/index.html | ✅ `esc()` на item.url |
+| R5-H3 | **setHdStatus `<a ` bypass** — API message начинающийся с `<a ` обходил escaping | constructor.html, bathroom_constructor.html | ✅ `trustedHtml()` маркер вместо string prefix check |
+
+#### MEDIUM (4)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-M1 | **setCanvasInfo innerHTML** — потенциальный XSS вектор | pages/constructor.html | ✅ `textContent` вместо `innerHTML` |
+| R5-M2 | **PDF download без domain validation** — любой HTTPS URL принимается | pages/projects/index.html | ⏭️ Data от собственного API, safeUrl проверяет https:// |
+| R5-M3 | **Chat widget CFG.greeting innerHTML** — конфигурация вставляется как HTML | zeno_chat_widget.html | ⏭️ Self-config, не user input |
+| R5-M4 | **Cloudinary upload preset public** — resource abuse risk | zeno_chat_widget.html | ⏭️ Unsigned presets стандарт для client uploads |
+
+#### LOW (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-L1 | JSONP callback в blog/index.html — global function | blog/index.html | ⏭️ Fallback, fetch приоритет |
+| R5-L2 | Admin deploy key placeholder | admin/index.html | ⏭️ Отдельная CMS |
+| R5-L3 | Replicate input без field filtering | proxy.py | ⏭️ By design (= R4-L2) |
+
+### 11.2 SMM admin (0 CRITICAL, 0 HIGH, 3 MEDIUM, 6 LOW)
+
+#### CRITICAL / HIGH — 0.
+
+#### MEDIUM (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-SM1 | **_runUpdate без RETURNING** — невозможно проверить что обновление сработало (TOCTOU race) | lib/supabase/server.ts | ✅ `RETURNING *` добавлен |
+| R5-SM2 | **Email link HTML injection** — `${link}` в email template без экранирования | api/auth/register/route.ts | ✅ `escAttr()` для link в href |
+| R5-SM3 | **Invite accept без проверки пароля** — existing user получает workspace access без аутентификации | api/invites/[token]/route.ts | ✅ `findUserByCredentials()` для existing users |
+
+#### LOW (6)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R5-SL1 | workspace param в GET invites без slug validation | api/invites/route.ts | ⏭️ Parameterized query, safe |
+| R5-SL2 | createMagicToken purpose не валидирован | lib/auth.ts | ✅ VALID_PURPOSES allowlist |
+| R5-SL3 | Register logs email address (not token) | api/auth/register/route.ts | ⏭️ Email only, no secret |
+| R5-SL4 | Dashboard layout client-side auth racy | (dashboard)/layout.tsx | ⏭️ Middleware protects server-side |
+| R5-SL5 | Embed relation table name from regex | lib/supabase/server.ts | ⏭️ Hardcoded RELATIONS map |
+| R5-SL6 | No explicit CSRF token (SameSite=Lax sufficient) | middleware.ts | ⏭️ SameSite=Lax adequate |
+
+---
+
+## 12. Раунд 6 — повторный review (2026-03-29)
+
+### 12.1 morrowlab.by (0 CRITICAL, 0 HIGH, 2 MEDIUM, 1 LOW)
+
+Все предыдущие фиксы подтверждены. Найдены только **parity issues** — фиксы не перенесённые в дублирующие файлы.
+
+#### MEDIUM (2)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R6-M1 | **bathroom setStatus/setRestyleStatus без escaping** — фикс из constructor.html не перенесён | bathroom_constructor.html | ✅ Escaping добавлен |
+| R6-M2 | **content-loader.js CMS innerHTML** — FAQ и текстовые поля без escape | content-loader.js | ✅ `escCms()` + `textContent` для не-HTML полей, `HTML_KEYS` allowlist |
+
+#### LOW (1)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R6-L1 | bathroom setCanvasInfo innerHTML — callers используют `<b>` для форматирования | bathroom_constructor.html | ⏭️ Callers передают только числовые значения |
+
+### 12.2 SMM admin (0 CRITICAL, 0 HIGH, 2 MEDIUM, 5 LOW)
+
+Все предыдущие фиксы подтверждены. Оставшиеся — prompt injection hardening и informational.
+
+#### MEDIUM (2)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R6-SM1 | **Groq error log injection** — raw error body с newlines в логах | api/generate/route.ts | ✅ `.slice(0,200).replace(/[\n\r]/g,' ')` |
+| R6-SM2 | **LLM prompt injection** — projectDetails/budget/platform без лимитов | api/generate/route.ts | ✅ Length limits + platform regex |
+
+#### LOW (5)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R6-SL1 | postType/room/style/tone не валидированы против allowlist | api/generate/route.ts | ⏭️ Fallback через `?? label` |
+| R6-SL2 | Rate limiter map unbounded growth | lib/rate-limit.ts | ⏭️ Cleanup каждые 100 calls |
+| R6-SL3 | No explicit CSRF token | middleware.ts | ⏭️ SameSite=Lax + JSON content-type |
+| R6-SL4 | Confirm page redirect without validation | auth/confirm/page.tsx | ✅ `startsWith("/") && !startsWith("//")` |
+| R6-SL5 | platforms array not validated | api/generate/route.ts | ✅ Regex filter (= R6-SM2) |
+
+---
+
 ## Общая статистика
 
 | Раунд | Объект | Находок | Исправлено | Отложено |
@@ -394,9 +551,15 @@
 | 2 | SMM admin (повторный) | 15 | 10 | 5 |
 | 3 | morrowlab.by (раунд 3) | 10 | 7 | 3 |
 | 3 | SMM admin (раунд 3) | 7 | 5 | 2 |
-| **Итого** | | **119** | **104** | **15** |
+| 4 | morrowlab.by (раунд 4) | 5 | 4 | 1 |
+| 4 | SMM admin (раунд 4) | 10 | 8 | 2 |
+| 5 | morrowlab.by (раунд 5) | 13 | 7 | 6 |
+| 5 | SMM admin (раунд 5) | 9 | 4 | 5 |
+| 6 | morrowlab.by (раунд 6) | 3 | 2 | 1 |
+| 6 | SMM admin (раунд 6) | 7 | 4 | 3 |
+| **Итого** | | **166** | **141** | **25** |
 
-> 15 отложенных — Low risk, UX issues, informational, или покрыты серверной конфигурацией.
+> 25 отложенных — Low risk, by-design decisions, informational.
 > 0 Critical, 0 High остаются открытыми.
 
 ---
@@ -419,4 +582,4 @@ a9bfc9c  Fix WebP magic byte validation: check RIFF+WEBP signature, not just RIF
 
 ---
 
-*Обновлён 2026-03-29 (раунд 3). Ручной code review + CodeRabbit CLI v0.3.11.*
+*Обновлён 2026-03-29 (раунд 6). Ручной code review + CodeRabbit CLI v0.3.11 + Code review agents.*

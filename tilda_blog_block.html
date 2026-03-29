@@ -1,0 +1,82 @@
+<!-- ZENO Блог — блок для главной страницы. Цвета: #d1fe17, #0a0a0a, #2a3305 -->
+<style>
+  .zb-section{background:#0a0a0a;padding:0}
+  .zb-wrap{max-width:960px;margin:0 auto;padding:60px 24px 80px;font-family:Inter,Arial,sans-serif}
+  .zb-title{font-size:28px;color:#fff;font-weight:600;margin:0 0 8px;text-align:center}
+  .zb-sub{font-size:15px;color:rgba(255,255,255,.5);margin:0 0 32px;text-align:center;line-height:1.5}
+  .zb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:28px}
+  .zb-card{background:#111;border:1px solid #2a3305;border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+  .zb-card:hover{border-color:rgba(209,254,23,.4);box-shadow:0 4px 20px rgba(209,254,23,.08)}
+  .zb-card-thumb{width:100%;height:120px;background:linear-gradient(135deg,#1a2003 0%,#0d1302 100%);display:block}
+  .zb-card-body{padding:18px 20px}
+  .zb-card-date{font-size:12px;color:rgba(209,254,23,.8);margin:0 0 6px}
+  .zb-card-title{font-size:16px;font-weight:600;margin:0 0 8px;line-height:1.4}
+  #blog-section .zb-card-title,#blog-section .zb-card-title a{color:#fff !important}
+  .zb-card-title a{text-decoration:none;transition:color .2s}
+  .zb-card-title a:hover{color:#d1fe17 !important}
+  .zb-card-excerpt{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;margin:0}
+  .zb-more{display:inline-block;margin-top:32px;padding:12px 24px;background:#d1fe17;color:#000 !important;font-weight:600;font-size:14px;border-radius:8px;text-decoration:none;font-family:Inter,sans-serif;transition:all .2s;box-shadow:0 4px 12px rgba(209,254,23,.25)}
+  #blog-section .zb-more{color:#000 !important}
+  #blog-section .zb-more:hover{color:#d1fe17 !important}
+  .zb-more:hover{background:#000;color:#d1fe17;border:1px solid #d1fe17}
+  .zb-more-wrap{text-align:center}
+  .zb-loading{text-align:center;color:rgba(255,255,255,.4);padding:40px}
+  @media(max-width:600px){.zb-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="zb-section" id="blog-section">
+<div class="zb-wrap">
+  <h2 class="zb-title">Блог</h2>
+  <p class="zb-sub">Полезные статьи о ремонте, материалах и дизайне интерьера</p>
+  <div class="zb-grid" id="zb-main-grid">
+    <div class="zb-loading">Загрузка статей...</div>
+  </div>
+  <div class="zb-more-wrap">
+    <a class="zb-more" href="https://zeno.by/page122751906.html#blog">Все статьи</a>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  var BLOG_URL='https://zeno.by/page122751906.html';
+  var API='https://n8n.zenohome.by/webhook/zeno-blog';
+  var API_JSONP=API+'?callback=zbBlogData';
+  var g=document.getElementById('zb-main-grid');
+  function err(m){if(g)g.innerHTML='<div class="zb-loading" style="grid-column:1/-1">'+m+'</div>';}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function render(data){
+    if(!g)return;
+    var articles=Array.isArray(data)?data:(data&&data.articles)||[];
+    articles=articles.filter(function(a){return(a.status||'').toLowerCase()==='done'}).slice(0,3);
+    g.innerHTML='';
+    if(!articles.length){g.innerHTML='<div class="zb-loading" style="grid-column:1/-1">Статей пока нет. Скоро появятся!</div>';return;}
+    for(var i=0;i<articles.length;i++){
+      var a=articles[i];
+      var ex=(a.meta_description||'').substring(0,120)||(a.article||'').replace(/<[^>]*>/g,'').substring(0,120);
+      if(ex.length>120)ex=ex.substring(0,117)+'...';
+      var card=document.createElement('article');
+      card.className='zb-card';
+      card.innerHTML='<div class="zb-card-thumb"></div>'
+        +'<div class="zb-card-body"><p class="zb-card-date">'+esc(a.generated_at)+'</p>'
+        +'<h3 class="zb-card-title"><a href="'+BLOG_URL+'?article='+encodeURIComponent(a.id)+'">'+esc(a.meta_title||a.topic)+'</a></h3>'
+        +'<p class="zb-card-excerpt">'+esc(ex)+'</p></div>';
+      g.appendChild(card);
+    }
+  }
+  window.zbBlogData=function(data){clearTimeout(timer);render(data);};
+  var timer;
+  function tryFetch(){
+    fetch(API).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){clearTimeout(timer);render(d)}).catch(tryJSONP);
+  }
+  function tryJSONP(){
+    timer=setTimeout(function(){err('Ошибка загрузки. Проверьте workflow ZENO Blog Proxy в n8n.');},8000);
+    var s=document.createElement('script');
+    s.src=API_JSONP;
+    s.onerror=function(){clearTimeout(timer);err('Ошибка загрузки. Проверьте workflow ZENO Blog Proxy в n8n.');};
+    document.head.appendChild(s);
+  }
+  tryFetch();
+})();
+</script>
+<!-- Zero Block. Опубликовать таблицу: File → Share → Publish to web → Sheet «Blog» -->

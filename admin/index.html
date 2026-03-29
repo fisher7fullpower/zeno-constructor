@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin CMS — Morrow Lab</title>
+<style>
+:root{--lime:#d1fe17;--bg:#040408;--card:#0e0e14;--card2:#13131c;--border:rgba(255,255,255,.07);--gray:rgba(255,255,255,.4);--sw:220px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:#fff;min-height:100vh}
+
+/* LOGIN */
+#loginWrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:380px;text-align:center}
+.lc-logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:32px}
+.lc-logo img{width:36px;height:36px;border-radius:10px}
+.lc-logo span{font-size:18px;font-weight:800}
+.lc h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.lc p{font-size:14px;color:var(--gray);margin-bottom:28px}
+.field{margin-bottom:14px;text-align:left}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.4px;margin-bottom:6px}
+.field input{width:100%;background:#08080f;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+.field input:focus{border-color:rgba(209,254,23,.4)}
+.btn-login{width:100%;padding:13px;background:var(--lime);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s;margin-top:6px}
+.btn-login:hover{background:#bcf000;transform:translateY(-1px)}
+.login-err{color:#ff5252;font-size:13px;margin-top:10px;display:none}
+
+/* LAYOUT */
+#adminWrap{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.sb-logo{display:flex;align-items:center;gap:8px;padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.sb-logo img{width:28px;height:28px;border-radius:8px}
+.sb-logo span{font-size:14px;font-weight:800}
+.sb-badge{font-size:9px;background:rgba(209,254,23,.15);color:var(--lime);padding:2px 6px;border-radius:4px;font-weight:700;margin-left:auto}
+.nav-items{flex:1;padding:16px 0;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;padding:12px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray);transition:all .2s;position:relative}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.04)}
+.nav-item.active{color:#fff;background:rgba(209,254,23,.07)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lime);border-radius:0 2px 2px 0}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+.sb-footer{padding:14px 20px;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);cursor:pointer;transition:color .2s;background:none;border:none;font-family:inherit;padding:0}
+.sb-logout:hover{color:#ff5252}
+
+.main{margin-left:var(--sw);padding:28px 32px;min-height:100vh}
+.ph{margin-bottom:24px}
+.ph h2{font-size:22px;font-weight:800;margin-bottom:4px}
+.ph p{font-size:14px;color:var(--gray)}
+
+/* PANELS */
+.panel{display:none}.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
+.card-h{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.sc-label{font-size:12px;color:var(--gray);margin-bottom:8px}
+.sc-val{font-size:26px;font-weight:900;line-height:1}
+.sc-note{font-size:11px;color:var(--gray);margin-top:4px}
+
+/* QUICK LINKS */
+.ql{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.ql a{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--gray);text-decoration:none;transition:all .2s}
+.ql a:hover{border-color:rgba(209,254,23,.25);color:#fff}
+
+/* PAGE EDITOR */
+.page-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.pt{padding:7px 16px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--gray);cursor:pointer;transition:all .2s;font-family:inherit}
+.pt.active{background:rgba(209,254,23,.1);border-color:rgba(209,254,23,.3);color:var(--lime)}
+
+/* SECTION ACCORDION */
+.section-block{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .2s}
+.section-hdr:hover{background:rgba(255,255,255,.03)}
+.section-hdr-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.section-hdr-icon{font-size:16px}
+.section-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+.section-body.open{display:block}
+.chevron{transition:transform .25s;color:var(--gray);font-size:12px}
+.section-hdr.open .chevron{transform:rotate(180deg)}
+
+/* FORM FIELDS */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ef{margin-bottom:12px}
+.ef label{display:block;font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.4px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.ef label .lkey{font-size:10px;color:rgba(255,255,255,.2);font-family:monospace;font-weight:400}
+.ef input,.ef textarea,.ef select{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.ef input:focus,.ef textarea:focus,.ef select:focus{border-color:rgba(209,254,23,.4)}
+.ef textarea{resize:vertical;min-height:72px}
+
+/* Rich text toolbar */
+.rte-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.rte-toolbar{display:flex;gap:2px;padding:6px;background:var(--card2);border-bottom:1px solid var(--border)}
+.rte-btn{width:28px;height:26px;background:transparent;border:none;border-radius:5px;color:var(--gray);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:serif}
+.rte-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+.rte-content{min-height:80px;padding:10px 14px;font-size:13px;color:#fff;outline:none;line-height:1.5;background:var(--card2)}
+.rte-content:focus{background:#0d0d17}
+.rte-content span{color:var(--lime)}
+.rte-content br{display:block;content:""}
+
+/* FAQ EDITOR */
+.faq-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.faq-row{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative}
+.faq-row-q{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:#fff;font-size:13px;font-family:inherit;padding:4px 0 8px;margin-bottom:8px;outline:none}
+.faq-row-q::placeholder{color:rgba(255,255,255,.3)}
+.faq-row-a{width:100%;background:transparent;border:none;color:rgba(255,255,255,.65);font-size:12px;font-family:inherit;resize:vertical;min-height:56px;outline:none;line-height:1.5}
+.faq-row-a::placeholder{color:rgba(255,255,255,.2)}
+.faq-del{position:absolute;top:8px;right:8px;background:none;border:none;color:rgba(255,82,82,.5);font-size:14px;cursor:pointer;padding:2px 5px;border-radius:4px;transition:color .2s}
+.faq-del:hover{color:#ff5252}
+.faq-drag{cursor:grab;color:rgba(255,255,255,.2);font-size:12px;margin-right:6px}
+
+/* PRICING EDITOR */
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.price-tier{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.price-tier h4{font-size:12px;font-weight:700;color:var(--lime);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.price-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:#fff;font-size:22px;font-weight:900;font-family:inherit;outline:none;padding:4px 0;margin-bottom:6px;text-align:center}
+.price-name-input{width:100%;background:transparent;border:none;color:var(--gray);font-size:12px;font-family:inherit;outline:none;text-align:center;padding:0}
+
+/* MEDIA */
+.upload-zone{border:2px dashed rgba(255,255,255,.1);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-zone:hover,.upload-zone.drag-over{border-color:rgba(209,254,23,.35);background:rgba(209,254,23,.03)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.mi{background:var(--card2);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.mi:hover{border-color:rgba(209,254,23,.25);transform:translateY(-2px)}
+.mi.sel{border-color:var(--lime)}
+.mi-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.mi-ph{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:24px}
+.mi-info{padding:7px 8px}
+.mi-name{font-size:10px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-chk{position:absolute;top:5px;right:5px;width:18px;height:18px;background:var(--lime);color:#000;border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.mi.sel .mi-chk{opacity:1}
+
+/* BUTTONS */
+.btn{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-lime{background:var(--lime);color:#000}
+.btn-lime:hover{background:#bcf000;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--gray);border:1px solid var(--border)}
+.btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+.btn-red{background:rgba(255,82,82,.1);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
+.btn-red:hover{background:rgba(255,82,82,.2)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.save-bar{display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid var(--border);margin-top:12px}
+.save-status{font-size:12px;color:var(--gray)}
+.save-status.ok{color:var(--lime)}
+
+/* PREVIEW PANE */
+.editor-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.preview-pane{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:sticky;top:20px}
+.preview-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--gray)}
+.preview-iframe{width:100%;height:500px;border:none;display:block}
+.preview-placeholder{padding:40px;text-align:center;color:rgba(255,255,255,.25);font-size:13px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1a1a24;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all .3s;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(209,254,23,.25)}
+.toast.err{border-color:rgba(255,82,82,.25)}
+
+/* CHART */
+.chart-wrap{height:70px;display:flex;align-items:flex-end;gap:3px}
+.bar{flex:1;background:rgba(209,254,23,.15);border-radius:2px 2px 0 0;min-height:3px;cursor:pointer;position:relative;transition:background .2s}
+.bar:hover{background:rgba(209,254,23,.4)}
+.bar-tip{position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:#1a1a24;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.bar:hover .bar-tip{opacity:1}
+
+/* SETTINGS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sr label{display:block;font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.4px;margin-bottom:5px}
+.sr input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.sr input:focus{border-color:rgba(209,254,23,.4)}
+
+/* IMAGE PICKER MODAL */
+.img-picker-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:20px}
+.img-picker-overlay.open{display:flex}
+.img-picker-modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:700px;max-height:80vh;overflow-y:auto}
+.img-picker-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.img-picker-h h3{font-size:16px;font-weight:700}
+.img-picker-close{background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;padding:0 4px;transition:color .2s}
+.img-picker-close:hover{color:#fff}
+
+@media(max-width:900px){.editor-layout{grid-template-columns:1fr}.preview-pane{display:none}}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:none}.main{margin-left:0;padding:16px}.pricing-grid{grid-template-columns:1fr 1fr}.field-row{grid-template-columns:1fr}.sg{grid-template-columns:1fr}}
+.mob-btn{display:none;position:fixed;bottom:20px;right:20px;z-index:200;width:46px;height:46px;background:var(--lime);color:#000;border:none;border-radius:50%;font-size:18px;align-items:center;justify-content:center;cursor:pointer}
+@media(max-width:768px){.mob-btn{display:flex}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap">
+  <div class="lc">
+    <div class="lc-logo"><img src="/logo.png" alt=""><span>Morrow Lab</span></div>
+    <h2>Панель управления</h2>
+    <p>Вход только для администратора</p>
+    <div class="field"><label>ПАРОЛЬ</label>
+      <div style="position:relative">
+        <input type="password" id="lpass" placeholder="Пароль" onkeydown="if(event.key==='Enter')login()" style="padding-right:44px;width:100%">
+        <button type="button" onclick="var i=document.getElementById('lpass');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🙈'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px;color:#888">👁</button>
+      </div>
+    </div>
+    <button class="btn-login" onclick="login()">Войти →</button>
+    <div class="login-err" id="lerr">Неверный пароль</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminWrap">
+  <div class="sidebar" id="sb">
+    <div class="sb-logo"><img src="/logo.png" alt=""><span>Morrow Lab</span><span class="sb-badge">CMS</span></div>
+    <div class="nav-items">
+      <div class="nav-section">Панель</div>
+      <div class="nav-item active" onclick="showPanel('overview')"><span class="nav-icon">📊</span>Обзор</div>
+      <div class="nav-item" onclick="showPanel('editor')"><span class="nav-icon">✏️</span>Редактор страниц</div>
+      <div class="nav-item" onclick="showPanel('media')"><span class="nav-icon">🖼</span>Медиафайлы</div>
+      <div class="nav-section">Сайт</div>
+      <div class="nav-item" onclick="window.open('/','_blank')"><span class="nav-icon">🌐</span>Главная</div>
+      <div class="nav-item" onclick="window.open('/sanuzel/','_blank')"><span class="nav-icon">🚿</span>Санузел</div>
+      <div class="nav-item" onclick="window.open('/kitchen/','_blank')"><span class="nav-icon">🍳</span>Кухня</div>
+      <div class="nav-item" onclick="window.open('/room/','_blank')"><span class="nav-icon">🛋</span>Комната</div>
+      <div class="nav-item" onclick="window.open('/dom/','_blank')"><span class="nav-icon">🏠</span>Дом</div>
+      <div class="nav-item" onclick="window.open('/business/','_blank')"><span class="nav-icon">💼</span>Бизнес</div>
+      <div class="nav-section">Система</div>
+      <div class="nav-item" onclick="showPanel('settings')"><span class="nav-icon">⚙️</span>Настройки</div>
+    </div>
+    <div class="sb-footer">
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Деплой</div>
+        <div style="font-size:10px;color:var(--gray);margin-bottom:6px;line-height:1.4">✔ При сохранении → DEV автоматически</div>
+        <button onclick="deployEnv('prod')" style="width:100%;padding:7px 10px;background:rgba(255,255,255,.04);color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">🚀 Пуш в PROD</button>
+        <div id="deployStatus" style="font-size:11px;color:var(--gray);margin-top:6px;text-align:center;min-height:16px"></div>
+      </div>
+      <button class="sb-logout" onclick="logout()">🚪 Выйти</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="ph"><h2>📊 Обзор</h2><p>Статистика и быстрые действия</p></div>
+      <div class="stats-row">
+        <div class="sc"><div class="sc-label">📈 Сегодня</div><div class="sc-val" id="st-today">—</div><div class="sc-note" id="st-today-sub">загрузка...</div></div>
+        <div class="sc"><div class="sc-label">📅 7 дней</div><div class="sc-val" id="st-week">—</div><div class="sc-note">уникальных визитов</div></div>
+        <div class="sc"><div class="sc-label">🖼 Изображений</div><div class="sc-val" id="st-imgs">0</div><div class="sc-note">в медиатеке</div></div>
+        <div class="sc"><div class="sc-label">📄 Страниц</div><div class="sc-val">6</div><div class="sc-note">активных</div></div>
+      </div>
+      <div class="card"><div class="card-h">📊 Трафик за 14 дней</div><div class="chart-wrap" id="chart"></div></div>
+      <div class="card"><div class="card-h">⚡ Быстрые действия</div>
+        <div class="ql">
+          <a href="#" onclick="showPanel('editor');return false">✏️ Редактировать контент</a>
+          <a href="#" onclick="showPanel('media');return false">📤 Загрузить изображение</a>
+          <a href="https://n8n.zenohome.by" target="_blank">⚙️ n8n</a>
+          <a href="https://morrowlab.by" target="_blank">🌐 Сайт</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE EDITOR -->
+    <div class="panel" id="panel-editor">
+      <div class="ph"><h2>✏️ Редактор страниц</h2><p>Редактируйте тексты, FAQ и цены</p></div>
+      <div class="page-tabs" id="pageTabs">
+        <button class="pt active" onclick="selectPage('sanuzel',this)">🚿 Санузел</button>
+        <button class="pt" onclick="selectPage('kitchen',this)">🍳 Кухня</button>
+        <button class="pt" onclick="selectPage('room',this)">🛋 Комната</button>
+        <button class="pt" onclick="selectPage('dom',this)">🏠 Дом</button>
+        <button class="pt" onclick="selectPage('business',this)">💼 Бизнес</button>
+      </div>
+
+      <div class="editor-layout">
+        <div id="editorSections"></div>
+        <div class="preview-pane">
+          <div class="preview-hdr">
+            <span id="previewLabel">Превью</span>
+            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="reloadPreview()">↺ Обновить</button>
+          </div>
+          <iframe id="previewFrame" class="preview-iframe" src="" title="preview"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="panel" id="panel-media">
+      <div class="ph"><h2>🖼 Медиафайлы</h2><p>Загружайте и управляйте изображениями</p></div>
+      <div class="card">
+        <div class="card-h">📤 Загрузить</div>
+        <div class="upload-zone" id="uz">
+          <input type="file" id="fi" multiple accept="image/*" onchange="handleFiles(this.files)">
+          <div style="font-size:32px;margin-bottom:10px">🖼</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">Перетащите или кликните</div>
+          <div style="font-size:12px;color:var(--gray)">JPG, PNG, WebP · до 10 МБ</div>
+          <div id="uprogress" style="display:none;margin-top:14px;font-size:12px;color:var(--gray)"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h" style="justify-content:space-between">
+          <span>🗂 Медиатека <span id="mc" style="font-size:12px;color:var(--gray);font-weight:400"></span></span>
+          <input type="text" id="msearch" placeholder="🔍 Поиск..." oninput="filterMedia()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:#fff;font-size:12px;font-family:inherit;outline:none;width:200px">
+        </div>
+        <div class="media-grid" id="mg"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-lime" id="copyBtn" disabled onclick="copyUrl()">📋 Копировать URL</button>
+          <button class="btn btn-ghost" id="useBtn" disabled onclick="useInEditor()">⬤ Вставить в редактор</button>
+          <button class="btn btn-red" id="delBtn" disabled onclick="deleteMedia()">🗑 Удалить</button>
+          <span id="selInfo" style="font-size:12px;color:var(--gray);align-self:center;margin-left:auto"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="ph"><h2>⚙️ Настройки</h2><p>Пароль и конфигурация</p></div>
+      <div class="card"><div class="card-h">🔐 Пароль</div>
+        <div class="sg">
+          <div class="sr"><label>Текущий пароль</label><input type="password" id="cp"></div>
+          <div></div>
+          <div class="sr"><label>Новый пароль</label><input type="password" id="np"></div>
+          <div class="sr"><label>Повторите</label><input type="password" id="np2"></div>
+        </div>
+        <div style="margin-top:14px"><button class="btn btn-lime" onclick="chgPass()">Изменить пароль</button></div>
+      </div>
+      <div class="card"><div class="card-h">ℹ️ Информация</div>
+        <div style="font-size:13px;color:var(--gray);line-height:2">
+          <div>CMS версия: <span style="color:#fff">2.0</span></div>
+          <div>Сервер: <span style="color:#fff">morrowlab.by</span></div>
+          <div>n8n: <span style="color:#fff">n8n.zenohome.by</span></div>
+          <div>Последнее сохранение: <span style="color:#fff" id="lastSave">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /adminWrap -->
+
+<!-- Image Picker Modal -->
+<div class="img-picker-overlay" id="imgPickerOverlay">
+  <div class="img-picker-modal">
+    <div class="img-picker-h">
+      <h3>🖼 Выбрать изображение</h3>
+      <button class="img-picker-close" onclick="closeImgPicker()">×</button>
+    </div>
+    <div class="media-grid" id="pickerGrid"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-lime" id="pickerInsertBtn" disabled onclick="insertFromPicker()">Вставить</button>
+      <button class="btn btn-ghost" onclick="closeImgPicker()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="mob-btn" onclick="document.getElementById('sb').classList.toggle('open')">☰</button>
+
+<script>
+// ── CONFIG ──
+var PASS_KEY='ml_adm_p', MEDIA_KEY='ml_media', SESS_KEY='ml_sess', CONTENT_KEY='ml_content';
+var DEFAULT_PASS='morrowlab2026';
+var UPLOAD_URL='https://morrowlab.by/webhook/admin-upload';
+var CONTENT_SAVE='https://morrowlab.by/webhook/admin-content-save';
+var CONTENT_LOAD='https://morrowlab.by/webhook/admin-content-load';
+
+// ── AUTH ──
+function getPass(){ return localStorage.getItem(PASS_KEY)||DEFAULT_PASS; }
+function login(){
+  var p=document.getElementById('lpass').value;
+  if(p===getPass()){
+    sessionStorage.setItem(SESS_KEY,'1');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminWrap').style.display='block';
+    init();
+  } else {
+    document.getElementById('lerr').style.display='block';
+    setTimeout(function(){document.getElementById('lerr').style.display='none';},2000);
+  }
+}
+function logout(){ sessionStorage.removeItem(SESS_KEY); location.reload(); }
+
+async function deployEnv(target) {
+  const statusEl = document.getElementById('deployStatus');
+  statusEl.textContent = target === 'dev' ? '⏳ Деплой в DEV...' : '⏳ Деплой в PROD...';
+  try {
+    const res = await fetch('/webhook/admin-deploy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': '/* Set via server config */' },
+      body: JSON.stringify({ target })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statusEl.textContent = target === 'dev' ? '✅ DEV обновлён!' : '✅ PROD обновлён!';
+    } else {
+      statusEl.textContent = '❌ ' + (data.error || 'Ошибка');
+    }
+  } catch(e) {
+    statusEl.textContent = '❌ Ошибка сети';
+  }
+  setTimeout(() => { statusEl.textContent = ''; }, 4000);
+}
+function chgPass(){
+  var c=document.getElementById('cp').value, n=document.getElementById('np').value, n2=document.getElementById('np2').value;
+  if(c!==getPass()){toast('Неверный текущий пароль','err');return;}
+  if(n.length<6){toast('Минимум 6 символов','err');return;}
+  if(n!==n2){toast('Пароли не совпадают','err');return;}
+  localStorage.setItem(PASS_KEY,n);
+  toast('✅ Пароль изменён');
+  ['cp','np','np2'].forEach(function(id){document.getElementById(id).value='';});
+}
+window.addEventListener('DOMContentLoaded',function(){
+  if(sessionStorage.getItem(SESS_KEY)){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminWrap').style.display='block';
+    init();
+  }
+});
+
+// ── INIT ──
+function init(){
+  loadStats(); loadMediaList();
+  selectPage('sanuzel', document.querySelector('.pt'));
+  loadContentFromServer();
+}
+
+// ── PANEL NAV ──
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var p=document.getElementById('panel-'+name);
+  if(p) p.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+name+"'")) n.classList.add('active');
+  });
+  document.getElementById('sb').classList.remove('open');
+}
+
+// ── STATS ──
+function loadStats(){
+  fetch('https://n8n.zenohome.by/webhook/visitor-stats').then(function(r){return r.json();}).then(function(d){
+    if(d.today!==undefined) document.getElementById('st-today').textContent=d.today;
+    if(d.week!==undefined) document.getElementById('st-week').textContent=d.week;
+    if(d.chart) renderChart(d.chart); else renderChart(demoChart());
+  }).catch(function(){ renderChart(demoChart()); });
+  document.getElementById('st-imgs').textContent=getMedia().length;
+}
+function demoChart(){
+  var r=[];
+  for(var i=13;i>=0;i--){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    r.push({date:d.toLocaleDateString('ru',{day:'2-digit',month:'2-digit'}), count:Math.floor(Math.random()*80+10)});
+  }
+  return r;
+}
+function renderChart(data){
+  if(!data||!data.length) return;
+  var mx=Math.max.apply(null,data.map(function(d){return d.count||0;}));
+  document.getElementById('chart').innerHTML=data.map(function(d){
+    var h=mx>0?Math.max(3,Math.round((d.count/mx)*66)):3;
+    return '<div class="bar" style="height:'+h+'px"><div class="bar-tip">'+d.count+' · '+d.date+'</div></div>';
+  }).join('');
+}
+
+// ── CONTENT STORAGE ──
+var cmsContent = {};
+
+function loadContentFromServer(){
+  fetch(CONTENT_LOAD).then(function(r){return r.json();}).then(function(d){
+    cmsContent = d || {};
+    // Merge with any local unsaved changes
+    var local = {};
+    try{ local = JSON.parse(localStorage.getItem(CONTENT_KEY)||'{}'); }catch(e){}
+    Object.keys(local).forEach(function(k){ if(!cmsContent[k]) cmsContent[k]=local[k]; });
+  }).catch(function(){
+    try{ cmsContent = JSON.parse(localStorage.getItem(CONTENT_KEY)||'{}'); }catch(e){ cmsContent={}; }
+  });
+}
+
+function getPageContent(page){
+  return cmsContent[page] || {};
+}
+function setPageContent(page, data){
+  if(!cmsContent[page]) cmsContent[page]={};
+  Object.assign(cmsContent[page], data);
+  localStorage.setItem(CONTENT_KEY, JSON.stringify(cmsContent));
+}
+
+// ── PAGE EDITOR ──
+var currentPage = 'sanuzel';
+var currentImgField = null;
+
+var PAGE_DEFAULTS = {
+  sanuzel:  {hero_badge:'Санузел · AI-дизайн',hero_title:'Быстрый и <span>красивый</span><br>дизайн санузла',hero_sub:'Загрузите фото и получите рендер за 2 минуты.',feat1:'Результат на email за 1–2 минуты',feat2:'Пошаговый план ремонта',feat3:'Первый рендер бесплатно',feat4:'Любое состояние помещения',form_title:'Создать AI-дизайн',form_sub:'Заполните форму — результат придёт на email'},
+  kitchen:  {hero_badge:'Кухня · AI-дизайн',hero_title:'AI-дизайн <span>кухни</span><br>за 2 минуты',hero_sub:'Загрузите фото кухни и получите профессиональный рендер.',feat1:'Рендер за 1–2 минуты',feat2:'Пошаговый план ремонта',feat3:'Первый рендер бесплатно',feat4:'Гостиная, столовая, кухня',form_title:'Создать AI-дизайн',form_sub:'Заполните форму — результат придёт на email'},
+  room:     {hero_badge:'Комната · AI-дизайн',hero_title:'AI-дизайн <span>комнаты</span><br>и гостиной',hero_sub:'Загрузите фото и получите AI-рендер любой комнаты.',feat1:'Рендер за 1–2 минуты',feat2:'Пошаговый план ремонта',feat3:'Первый рендер бесплатно',feat4:'Спальня, гостиная, кабинет',form_title:'Создать AI-дизайн',form_sub:'Заполните форму — результат придёт на email'},
+  dom:      {hero_badge:'Дом · AI-дизайн',hero_title:'AI-дизайн <span>загородного</span><br>дома',hero_sub:'Загрузите фото и получите AI-рендер любого помещения дома.',feat1:'Рендер за 1–2 минуты',feat2:'Пошаговый план ремонта',feat3:'Первый рендер бесплатно',feat4:'Любые помещения дома',form_title:'Создать AI-дизайн',form_sub:'Заполните форму — результат придёт на email'},
+  business: {hero_badge:'Бизнес · AI-дизайн',hero_title:'AI-дизайн <span>коммерческих</span><br>пространств',hero_sub:'Офис, кафе, магазин, салон — рендер за 2 минуты.',feat1:'Рендер за 1–2 минуты',feat2:'Пошаговый план ремонта',feat3:'Первый рендер бесплатно',feat4:'Офис, кафе, магазин, салон',form_title:'Создать AI-дизайн',form_sub:'Заполните форму — результат придёт на email'}
+};
+
+var PAGE_FAQ_DEFAULTS = {
+  sanuzel: [
+    {q:'Как это работает?',a:'Вы загружаете фото санузла и заполняете форму. AI за 1–2 минуты создаёт рендер в выбранном стиле.'},
+    {q:'Какое фото подойдёт?',a:'Любое фото санузла — ванной, туалета, душевой. JPEG или PNG, до 10 МБ.'},
+    {q:'Сколько стоит?',a:'Первый рендер бесплатно. Далее от 29 BYN за пакет из 5 рендеров.'},
+    {q:'Как получить результат?',a:'Результат придёт на указанный email в течение 1–2 минут после отправки формы.'}
+  ],
+  kitchen: [{q:'Как это работает?',a:'Загрузите фото кухни и получите AI-рендер.'},{q:'Первый рендер бесплатно?',a:'Да, первый рендер всегда бесплатно.'}],
+  room: [{q:'Как это работает?',a:'Загрузите фото комнаты и получите AI-рендер.'},{q:'Первый рендер бесплатно?',a:'Да.'}],
+  dom: [{q:'Как это работает?',a:'Загрузите фото помещения дома и получите AI-рендер.'},{q:'Первый рендер бесплатно?',a:'Да.'}],
+  business: [{q:'Как это работает?',a:'Загрузите фото коммерческого помещения и получите AI-рендер.'},{q:'Первый рендер бесплатно?',a:'Да.'}]
+};
+
+function selectPage(page, btn){
+  currentPage = page;
+  document.querySelectorAll('.pt').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  renderEditorSections();
+  document.getElementById('previewLabel').textContent = 'Превью: /'+page+'/';
+  document.getElementById('previewFrame').src = 'https://morrowlab.by/'+page+'/';
+}
+
+function renderEditorSections(){
+  var p = currentPage;
+  var saved = getPageContent(p);
+  var def = PAGE_DEFAULTS[p] || {};
+  var faq = saved.faq || PAGE_FAQ_DEFAULTS[p] || [];
+  var pricing = saved.pricing || {free:{name:'Free',price:'0'},basic:{name:'Basic',price:'29'},pro:{name:'Pro',price:'79'},business:{name:'Biz',price:'199'}};
+
+  document.getElementById('editorSections').innerHTML =
+    makeSectionBlock('hero','🦸 Hero-секция', makeHeroEditor(saved, def)) +
+    makeSectionBlock('images','🖼 Изображения (примеры)', makeImagesEditor(saved)) +
+    makeSectionBlock('feats','⭐ Особенности', makeFeatEditor(saved, def)) +
+    makeSectionBlock('form','📋 Форма', makeFormEditor(saved, def)) +
+    makeSectionBlock('faq','❓ FAQ', makeFaqEditor(faq)) +
+    makeSectionBlock('pricing','💰 Цены', makePricingEditor(pricing)) +
+    '<div class="save-bar"><button class="btn btn-lime" onclick="savePage()">💾 Сохранить все изменения</button><button class="btn btn-ghost" onclick="selectPage(currentPage,null)">↺ Сбросить</button><span class="save-status" id="edSaveStatus"></span></div>';
+
+  // Open hero by default
+  toggleSection('hero');
+}
+
+function makeSectionBlock(id, title, body){
+  return '<div class="section-block" id="sb-'+id+'">'+
+    '<div class="section-hdr" onclick="toggleSection(\''+id+'\')" id="sh-'+id+'">'+
+    '<div class="section-hdr-left"><span class="section-hdr-icon">'+title.split(' ')[0]+'</span>'+title.split(' ').slice(1).join(' ')+'</div>'+
+    '<span class="chevron">▼</span></div>'+
+    '<div class="section-body" id="sbody-'+id+'">'+body+'</div></div>';
+}
+
+function toggleSection(id){
+  var body=document.getElementById('sbody-'+id), hdr=document.getElementById('sh-'+id);
+  if(body.classList.contains('open')){ body.classList.remove('open'); hdr.classList.remove('open'); }
+  else { body.classList.add('open'); hdr.classList.add('open'); }
+}
+
+function makeImagesEditor(saved){
+  var slots = [
+    {key:'ex_img1', label:'Пример 1', tagKey:'ex_tag1', titleKey:'ex_title1'},
+    {key:'ex_img2', label:'Пример 2', tagKey:'ex_tag2', titleKey:'ex_title2'},
+    {key:'ex_img3', label:'Пример 3', tagKey:'ex_tag3', titleKey:'ex_title3'},
+  ];
+  var html = '<div style="padding-top:14px;display:flex;flex-direction:column;gap:20px">';
+  slots.forEach(function(s){
+    var url = saved[s.key]||'';
+    var tag = saved[s.tagKey]||'';
+    var title = saved[s.titleKey]||'';
+    html += '<div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px">'+
+      '<div style="font-size:12px;font-weight:700;color:var(--lime);margin-bottom:12px">'+s.label+'</div>'+
+      '<div style="display:flex;gap:14px;align-items:flex-start">'+
+        '<div style="flex-shrink:0;width:100px;height:72px;border-radius:8px;overflow:hidden;background:#1a1a1a;border:1px solid var(--border);display:flex;align-items:center;justify-content:center" id="img-prev-'+s.key+'">'+
+          (url ? '<img src="'+esc(url)+'" style="width:100%;height:100%;object-fit:cover">' : '<span style="color:var(--gray);font-size:22px">🖼</span>')+
+        '</div>'+
+        '<div style="flex:1">'+
+          '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">'+
+            '<input type="text" id="ef-'+s.key+'" value="'+esc(url)+'" placeholder="/images/photo.jpg" style="flex:1;font-size:11px" oninput="updateImgPreview(\''+s.key+'\')">'+
+            '<button class="btn btn-ghost" style="white-space:nowrap;font-size:11px;padding:5px 10px" onclick="openImgPicker(function(u){document.getElementById(\'ef-'+s.key+'\').value=u;updateImgPreview(\''+s.key+'\')})">📂 Выбрать</button>'+
+          '</div>'+
+          '<input type="text" id="ef-'+s.tagKey+'" value="'+esc(tag)+'" placeholder="Стиль (Минимализм, Лофт...)" style="margin-bottom:6px">'+
+          '<input type="text" id="ef-'+s.titleKey+'" value="'+esc(title)+'" placeholder="Подпись к примеру">'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  });
+  return html + '</div>';
+}
+
+function updateImgPreview(key){
+  var url = document.getElementById('ef-'+key).value;
+  var prev = document.getElementById('img-prev-'+key);
+  if(!prev) return;
+  prev.innerHTML = url ? '<img src="'+esc(url)+'" style="width:100%;height:100%;object-fit:cover">' : '<span style="color:var(--gray);font-size:22px">🖼</span>';
+}
+
+function makeHeroEditor(saved, def){
+  return '<div style="padding-top:14px">'+
+    ef('hero_badge','Бейдж (метка над заголовком)',saved.hero_badge||def.hero_badge||'')+
+    '<div class="ef"><label>Заголовок <span class="lkey">hero_title</span> <span style="color:var(--gray);font-weight:400;font-size:10px">— можно HTML: &lt;span&gt;слово&lt;/span&gt; выделит лаймом, &lt;br&gt; — перенос</span></label>'+
+    '<div class="rte-wrap"><div class="rte-toolbar">'+
+    '<button class="rte-btn" onclick="rteCmd(\'bold\')" title="Жирный"><b>B</b></button>'+
+    '<button class="rte-btn" onclick="rteCmd(\'italic\')" title="Курсив"><i>I</i></button>'+
+    '<button class="rte-btn" onclick="rteWrapSpan()" title="Выделить лаймом" style="color:var(--lime)">★</button>'+
+    '<button class="rte-btn" onclick="rteInsertBr()" title="Перенос строки">↵</button>'+
+    '</div>'+
+    '<div class="rte-content" id="rte-hero_title" contenteditable="true">'+
+      (saved.hero_title||def.hero_title||'')+'</div></div></div>'+
+    ef('hero_sub','Подзаголовок / описание',saved.hero_sub||def.hero_sub||'','textarea')+'</div>';
+}
+
+function makeFeatEditor(saved, def){
+  var html = '<div style="padding-top:14px">';
+  for(var i=1;i<=4;i++){
+    var key='feat'+i;
+    html += ef(key,'Пункт '+i,saved[key]||def[key]||'');
+  }
+  return html+'</div>';
+}
+
+function makeFormEditor(saved, def){
+  return '<div style="padding-top:14px">'+
+    ef('form_title','Заголовок формы',saved.form_title||def.form_title||'')+
+    ef('form_sub','Подзаголовок формы',saved.form_sub||def.form_sub||'')+'</div>';
+}
+
+function makeFaqEditor(faq){
+  var html='<div style="padding-top:14px"><div class="faq-list" id="faqList">';
+  faq.forEach(function(item,i){
+    html += '<div class="faq-row" id="fr-'+i+'">'+
+      '<button class="faq-del" onclick="delFaq('+i+')" title="Удалить">×</button>'+
+      '<input class="faq-row-q" placeholder="Вопрос..." value="'+esc(item.q)+'">'+
+      '<textarea class="faq-row-a" placeholder="Ответ...">'+esc(item.a)+'</textarea>'+
+      '</div>';
+  });
+  html += '</div><button class="btn btn-ghost" onclick="addFaq()" style="font-size:12px;padding:7px 14px">+ Добавить вопрос</button></div>';
+  return html;
+}
+
+function makePricingEditor(pricing){
+  var tiers=[{key:'free',label:'Free'},{key:'basic',label:'Basic'},{key:'pro',label:'Pro'},{key:'business',label:'Biz'}];
+  var html='<div style="padding-top:14px"><div class="pricing-grid">';
+  tiers.forEach(function(t){
+    var p=pricing[t.key]||{};
+    html+='<div class="price-tier"><h4>'+t.label+'</h4>'+
+      '<input class="price-input" id="pp-'+t.key+'" value="'+(p.price||0)+'" placeholder="0">'+
+      '<div style="font-size:10px;color:var(--gray);text-align:center;margin-bottom:6px">BYN</div>'+
+      '<input class="price-name-input" id="pn-'+t.key+'" value="'+(p.name||t.label)+'" placeholder="Название">'+
+      '</div>';
+  });
+  return html+'</div></div>';
+}
+
+function ef(key, label, value, type){
+  var tag = type === 'textarea' ? '<textarea id="ef-'+key+'" style="min-height:64px">'+esc(value||'')+'</textarea>' :
+    '<input type="text" id="ef-'+key+'" value="'+esc(value||'')+'">';
+  return '<div class="ef"><label>'+label+' <span class="lkey">'+key+'</span></label>'+tag+'</div>';
+}
+
+function addFaq(){
+  var list = document.getElementById('faqList');
+  var idx = list.children.length;
+  var div = document.createElement('div');
+  div.className = 'faq-row';
+  div.id = 'fr-'+idx;
+  div.innerHTML = '<button class="faq-del" onclick="delFaq('+idx+')" title="Удалить">×</button>'+
+    '<input class="faq-row-q" placeholder="Вопрос...">'+
+    '<textarea class="faq-row-a" placeholder="Ответ..."></textarea>';
+  list.appendChild(div);
+}
+
+function delFaq(i){
+  var el = document.getElementById('fr-'+i);
+  if(el) el.remove();
+}
+
+// Rich text
+var activeRte = 'hero_title';
+function rteCmd(cmd){ document.execCommand(cmd,false,null); }
+function rteWrapSpan(){
+  var sel=window.getSelection();
+  if(!sel.rangeCount) return;
+  var range=sel.getRangeAt(0);
+  var span=document.createElement('span');
+  range.surroundContents(span);
+}
+function rteInsertBr(){
+  var el=document.getElementById('rte-hero_title');
+  if(!el) return;
+  el.focus();
+  document.execCommand('insertHTML',false,'<br>');
+}
+
+// Collect all editor values
+function collectEditorData(){
+  var p = currentPage;
+  var data = {};
+  // Text fields
+  ['hero_badge','hero_sub','feat1','feat2','feat3','feat4','form_title','form_sub',
+   'ex_img1','ex_img2','ex_img3','ex_tag1','ex_tag2','ex_tag3','ex_title1','ex_title2','ex_title3'].forEach(function(key){
+    var el=document.getElementById('ef-'+key);
+    if(el) data[key]=el.value;
+  });
+  // RTE
+  var rteEl=document.getElementById('rte-hero_title');
+  if(rteEl) data['hero_title']=rteEl.innerHTML;
+  // FAQ
+  var faqItems = [];
+  document.querySelectorAll('.faq-row').forEach(function(row){
+    var q=(row.querySelector('.faq-row-q')||{}).value||'';
+    var a=(row.querySelector('.faq-row-a')||{}).value||'';
+    if(q) faqItems.push({q:q,a:a});
+  });
+  data.faq = faqItems;
+  // Pricing
+  var pricing={};
+  ['free','basic','pro','business'].forEach(function(t){
+    var priceEl=document.getElementById('pp-'+t), nameEl=document.getElementById('pn-'+t);
+    pricing[t]={ price: priceEl?priceEl.value:'0', name: nameEl?nameEl.value:t };
+  });
+  data.pricing = pricing;
+  return data;
+}
+
+function savePage(){
+  var data = collectEditorData();
+  setPageContent(currentPage, data);
+
+  var statusEl = document.getElementById('edSaveStatus');
+  statusEl.textContent = 'Сохраняем...'; statusEl.className='save-status';
+
+  fetch(CONTENT_SAVE, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ page: currentPage, data: data })
+  }).then(function(r){return r.json();})
+  .then(function(){
+    statusEl.textContent='✓ Сохранено · деплой в DEV...'; statusEl.className='save-status ok';
+    document.getElementById('lastSave').textContent=new Date().toLocaleString('ru');
+    toast('✅ Сохранено: /'+currentPage+'/ → деплой в DEV...');
+    setTimeout(reloadPreview, 800);
+    // Auto-deploy to DEV after every save
+    return fetch('/webhook/admin-deploy', {
+      method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':'/* Set via server config */'},
+      body: JSON.stringify({ target: 'dev' })
+    });
+  })
+  .then(function(r){ return r && r.json ? r.json() : null; })
+  .then(function(d){
+    statusEl.textContent = d && d.ok ? '✓ Сохранено + DEV обновлён' : '✓ Сохранено на сервере';
+    statusEl.className='save-status ok';
+    setTimeout(function(){statusEl.textContent='';statusEl.className='save-status';},5000);
+  })
+  .catch(function(){
+    statusEl.textContent='⚠ Локально (нет связи с сервером)'; statusEl.className='save-status';
+    toast('⚠ Сохранено только локально','err');
+  });
+}
+
+function reloadPreview(){
+  var f=document.getElementById('previewFrame');
+  f.src='https://morrowlab.by/'+currentPage+'/?_t='+Date.now();
+}
+
+// ── MEDIA ──
+var selMedia = null;
+
+function getMedia(){ try{return JSON.parse(localStorage.getItem(MEDIA_KEY))||[];}catch(e){return[];} }
+function saveMedia(lib){ localStorage.setItem(MEDIA_KEY,JSON.stringify(lib)); document.getElementById('st-imgs').textContent=lib.length; }
+
+function loadMediaList(){
+  var lib=getMedia();
+  document.getElementById('mc').textContent='('+lib.length+' файлов)';
+  renderMedia(lib);
+}
+
+function renderMedia(items){
+  var g=document.getElementById('mg');
+  if(!items.length){ g.innerHTML='<div style="color:var(--gray);font-size:13px;padding:32px;text-align:center;grid-column:1/-1">Медиатека пуста</div>'; return; }
+  g.innerHTML=items.map(function(item,i){
+    var isImg=/\.(jpg|jpeg|png|webp|gif)$/i.test(item.name);
+    return '<div class="mi" id="mi-'+i+'" onclick="selectMedia('+i+')">'+(isImg?'<img class="mi-img" src="'+esc(item.url)+'" loading="lazy">':'<div class="mi-ph">📄</div>')+'<div class="mi-chk">✓</div><div class="mi-info"><div class="mi-name">'+esc(item.name)+'</div></div></div>';
+  }).join('');
+}
+
+function filterMedia(){
+  var q=document.getElementById('msearch').value.toLowerCase();
+  var lib=getMedia().filter(function(i){return !q||i.name.toLowerCase().includes(q);});
+  renderMedia(lib);
+}
+
+function selectMedia(i){
+  document.querySelectorAll('.mi').forEach(function(el){el.classList.remove('sel');});
+  if(selMedia===i){ selMedia=null; ['copyBtn','useBtn','delBtn'].forEach(function(id){document.getElementById(id).disabled=true;}); document.getElementById('selInfo').textContent=''; return; }
+  selMedia=i;
+  var el=document.getElementById('mi-'+i); if(el) el.classList.add('sel');
+  ['copyBtn','useBtn','delBtn'].forEach(function(id){document.getElementById(id).disabled=false;});
+  var lib=getMedia(); document.getElementById('selInfo').textContent=lib[i]?lib[i].name:'';
+}
+
+function copyUrl(){
+  if(selMedia===null) return;
+  var lib=getMedia(); var item=lib[selMedia]; if(!item) return;
+  navigator.clipboard.writeText(item.url).then(function(){toast('📋 URL скопирован');});
+}
+
+function useInEditor(){
+  if(selMedia===null) return;
+  var lib=getMedia(); var item=lib[selMedia]; if(!item) return;
+  toast('URL скопирован: '+item.url+'\nВставьте в поле изображения в редакторе');
+  navigator.clipboard.writeText(item.url);
+}
+
+function deleteMedia(){
+  if(selMedia===null) return;
+  var lib=getMedia();
+  if(!confirm('Удалить "'+lib[selMedia].name+'"?')) return;
+  lib.splice(selMedia,1); saveMedia(lib); selMedia=null;
+  ['copyBtn','useBtn','delBtn'].forEach(function(id){document.getElementById(id).disabled=true;});
+  document.getElementById('selInfo').textContent='';
+  loadMediaList(); toast('🗑 Файл удалён из медиатеки');
+}
+
+// Upload
+var uz=document.getElementById('uz');
+uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',function(){uz.classList.remove('drag-over');});
+uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
+
+function handleFiles(files){
+  if(!files||!files.length) return;
+  uploadNext(Array.from(files),0);
+}
+
+function uploadNext(files,idx){
+  if(idx>=files.length){
+    document.getElementById('uprogress').style.display='none';
+    loadMediaList(); toast('✅ Загружено: '+files.length+' файл(ов)'); return;
+  }
+  var file=files[idx];
+  var prog=document.getElementById('uprogress'); prog.style.display='block';
+  prog.textContent='Загружаем ('+  (idx+1)+'/'+files.length+'): '+file.name;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    fetch(UPLOAD_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filename:file.name,size:file.size,type:file.type,data:e.target.result})
+    }).then(function(r){return r.json();}).then(function(resp){
+      var url=resp.url||'/images/'+file.name;
+      var lib=getMedia(); lib=lib.filter(function(i){return i.name!==file.name;});
+      lib.unshift({name:file.name,url:'https://morrowlab.by'+url,size:file.size,type:file.type,date:new Date().toISOString()});
+      saveMedia(lib); uploadNext(files,idx+1);
+    }).catch(function(){
+      var lib=getMedia(); lib.unshift({name:file.name,url:e.target.result,size:file.size,date:new Date().toISOString(),local:true});
+      saveMedia(lib); uploadNext(files,idx+1);
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── IMAGE PICKER ──
+var pickerCallback = null;
+var pickerSel = null;
+
+function openImgPicker(callback){
+  pickerCallback = callback; pickerSel = null;
+  document.getElementById('pickerInsertBtn').disabled=true;
+  var lib=getMedia();
+  var g=document.getElementById('pickerGrid');
+  if(!lib.length){ g.innerHTML='<div style="color:var(--gray);padding:32px;text-align:center">Медиатека пуста. Загрузите изображения.</div>'; }
+  else {
+    g.innerHTML=lib.map(function(item,i){
+      var isImg=/\.(jpg|jpeg|png|webp|gif)$/i.test(item.name);
+      return '<div class="mi" id="pi-'+i+'" onclick="selectPicker('+i+')">'+(isImg?'<img class="mi-img" src="'+esc(item.url)+'" loading="lazy">':'<div class="mi-ph">📄</div>')+'<div class="mi-chk">✓</div><div class="mi-info"><div class="mi-name">'+esc(item.name)+'</div></div></div>';
+    }).join('');
+  }
+  document.getElementById('imgPickerOverlay').classList.add('open');
+}
+
+function selectPicker(i){
+  document.querySelectorAll('#pickerGrid .mi').forEach(function(el){el.classList.remove('sel');});
+  pickerSel=i;
+  var el=document.getElementById('pi-'+i); if(el) el.classList.add('sel');
+  document.getElementById('pickerInsertBtn').disabled=false;
+}
+
+function insertFromPicker(){
+  if(pickerSel===null||!pickerCallback) return;
+  var lib=getMedia(); var item=lib[pickerSel]; if(!item) return;
+  pickerCallback(item.url);
+  closeImgPicker();
+}
+
+function closeImgPicker(){
+  document.getElementById('imgPickerOverlay').classList.remove('open');
+  pickerCallback=null; pickerSel=null;
+}
+
+// ── UTILS ──
+function toast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(type||'ok');
+  clearTimeout(t._tmr); t._tmr=setTimeout(function(){t.classList.remove('show');},3500);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

@@ -6,5 +6,5 @@ export async function GET(req: NextRequest) {
   if (!token) return NextResponse.json({ user: null });
 
   const user = await verifyToken(token);
-  return NextResponse.json({ user: user ? { id: user.id, email: user.email } : null });
+  return NextResponse.json({ user: user ? { id: user.id, email: user.email, role: user.role } : null });
 }

@@ -37,7 +37,8 @@ function ConfirmContent() {
           setError(data.error || "unknown");
           return;
         }
-        router.push(data.redirect || "/clients");
+        const rd = data.redirect || "/clients";
+        router.push(rd.startsWith("/") && !rd.startsWith("//") ? rd : "/clients");
       })
       .catch(() => {
         setError("unknown");

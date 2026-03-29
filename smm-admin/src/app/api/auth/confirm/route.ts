@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 // POST — actually consume the token and set cookie
 export async function POST(req: NextRequest) {
   const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
-  if (!rateLimit(ip, 10, 60000)) {
+  if (!rateLimit("confirm:" + ip, 10, 60000)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
