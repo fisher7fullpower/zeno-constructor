@@ -1,6 +1,6 @@
 #!/bin/bash
 # pre-tool-use.sh — PreToolUse hook
-# Запускается перед каждым Write/Edit/Bash операцией
+# Запускается перед каждым Write/Edit операцией
 # Читает JSON из stdin, проверяет на секреты
 
 INPUT=$(cat)

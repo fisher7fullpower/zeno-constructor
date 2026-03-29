@@ -25,6 +25,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     :root{--lime:#d1fe17;--lime-dim:rgba(209,254,23,.07);--lime-border:rgba(209,254,23,.2);--bg:#000;--card:#0a0a0a;--card2:#111;--border:#1c1c1c;--border2:#242424;--gray:#666;--muted:rgba(255,255,255,.45)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -185,23 +186,16 @@
     } catch(e) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; }
   })();
 
-  /* Санитизация HTML статей: RegExp для удаления тегов script собирается через concat — иначе парсер HTML обрывает блок script на середине. */
   function sanitizeArticleHtml(raw) {
-    let cleaned = String(raw || '')
+    let content = String(raw || '')
       .replace(/https?:\/\/zeno\.by/gi, 'https://morrowlab.by')
       .replace(/\bZENO\b/g, 'Morrow Lab')
       .replace(/\bzeno\.by\b/gi, 'morrowlab.by');
-    const scriptEnd = '</scr' + 'ipt>';
-    cleaned = cleaned
-      .replace(new RegExp('<script[\\s\\S]*?' + scriptEnd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '')
-      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-      .replace(/<(embed|object|form|base|meta|link|svg)[\s\S]*?(?:<\/\1>|\/?>)/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
-      .replace(/href\s*=\s*["']?\s*javascript:/gi, 'href="#')
-      .replace(/src\s*=\s*["']?\s*javascript:/gi, 'src="')
-      .replace(/action\s*=\s*["']?\s*javascript:/gi, 'action="');
-    return cleaned;
+    return DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ['p','br','b','i','em','strong','a','ul','ol','li','h1','h2','h3','h4','blockquote','code','pre','img'],
+      ALLOWED_ATTR: ['href','src','alt','title','class'],
+      ALLOW_DATA_ATTR: false
+    });
   }
 
   function openArticle(i) {

@@ -10,11 +10,14 @@ NC='\033[0m'
 ERRORS=0
 WARNINGS=0
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
 # Файлы для проверки
 if [ -n "$1" ]; then
   FILES="$1"
 else
-  FILES=$(find /Users/adm/Documents/rep/REP_test -name "*.html" \
+  FILES=$(find "$PROJECT_ROOT" -name "*.html" \
     -not -path "*/node_modules/*" \
     -not -path "*/.git/*" \
     -not -path "*/smm-admin/*" \
@@ -26,7 +29,8 @@ fi
 echo "=== Morrow Lab Design System Audit ==="
 echo ""
 
-for FILE in $FILES; do
+while IFS= read -r FILE; do
+  [ -z "$FILE" ] && continue
   FILE_ERRORS=0
   FILE_WARNINGS=0
 
@@ -39,10 +43,10 @@ for FILE in $FILES; do
   fi
 
   # 2. Проверка hardcoded цветов (не из дизайн-системы)
-  HARDCODED_COLORS=$(grep -n "#[0-9a-fA-F]\{6\}" "$FILE" 2>/dev/null | \
-    grep -v "#d1fe17\|#000000\|#000\b\|#0a0a0a\|#1c1c1c\|#666666\|#666\b\|#fff\b\|#ffffff\|#FFFFFF" | \
+  HARDCODED_COLORS=$(grep -En "#[0-9a-fA-F]{6}" "$FILE" 2>/dev/null | \
+    grep -Ev "#d1fe17|#000000|#000[^0-9a-fA-F]|#0a0a0a|#1c1c1c|#666666|#666[^0-9a-fA-F]|#fff[^0-9a-fA-F]|#ffffff|#FFFFFF" | \
     grep -v "<!--\|//\|og-image\|favicon\|logo" | \
-    grep "color:\|background:\|border-color:\|box-shadow:\|fill:" | head -5)
+    grep -E "color:|background:|border-color:|box-shadow:|fill:" | head -5)
   if [ -n "$HARDCODED_COLORS" ]; then
     echo -e "${YELLOW}[WARN]${NC} $FILE — Non-system color:"
     echo "$HARDCODED_COLORS" | head -3
@@ -50,7 +54,7 @@ for FILE in $FILES; do
   fi
 
   # 3. Проверка секретов (критично)
-  SECRETS=$(grep -n -E "(api_key|apikey|secret|password|token)\s*=\s*['\"][a-zA-Z0-9_\-]{10,}" "$FILE" 2>/dev/null | \
+  SECRETS=$(grep -nE "(api_key|apikey|secret|password|token)[[:space:]]*=[[:space:]]*['\"][a-zA-Z0-9_\-]{10,}" "$FILE" 2>/dev/null | \
     grep -v "user_token\|partner_token\|X-Admin-Key\|{{" | head -3)
   if [ -n "$SECRETS" ]; then
     echo -e "${RED}[CRITICAL]${NC} $FILE — Possible hardcoded secret:"
@@ -59,7 +63,7 @@ for FILE in $FILES; do
   fi
 
   # 4. Проверка XSS (innerHTML без esc)
-  UNSAFE_HTML=$(grep -n "innerHTML\s*=" "$FILE" 2>/dev/null | \
+  UNSAFE_HTML=$(grep -nE "innerHTML[[:space:]]*=" "$FILE" 2>/dev/null | \
     grep -v "esc(\|escHtml(\|sanitize(\|DOMPurify\|'';\|\"\";" | head -3)
   if [ -n "$UNSAFE_HTML" ]; then
     echo -e "${YELLOW}[WARN]${NC} $FILE — Possible unsafe innerHTML:"
@@ -78,7 +82,7 @@ for FILE in $FILES; do
   if [ "$FILE_ERRORS" -eq 0 ] && [ "$FILE_WARNINGS" -eq 0 ]; then
     echo -e "${GREEN}[OK]${NC} $FILE"
   fi
-done
+done <<< "$FILES"
 
 echo ""
 echo "=== Summary ==="
