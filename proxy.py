@@ -1,6 +1,8 @@
-from flask import Flask, request, jsonify
-import requests, base64, uuid, os, re, time
+from flask import Flask, request, jsonify, Response as FlaskResponse
+import requests, base64, uuid, os, re, time, json, hashlib, secrets
 from urllib.parse import urlparse
+from datetime import datetime, timedelta
+import jwt
 
 app = Flask(__name__)
 
@@ -27,6 +29,10 @@ def rate_limit(key, limit=30, window=60):
 
 REPLICATE_TOKEN   = os.environ.get('REPLICATE_TOKEN', '')
 HOMEDESIGNS_TOKEN = os.environ.get('HOMEDESIGNS_TOKEN', '')
+RESEND_KEY        = os.environ.get('RESEND_KEY', '')
+FROM_EMAIL        = os.environ.get('FROM_EMAIL', 'noreply@morrowlab.by')
+JWT_SECRET        = os.environ.get('JWT_SECRET', '')
+ADMIN_KEY         = os.environ.get('ADMIN_KEY', '')
 
 if not REPLICATE_TOKEN or not HOMEDESIGNS_TOKEN:
     import sys
@@ -38,6 +44,11 @@ REPLICATE_HDRS = {'Authorization': 'Token ' + REPLICATE_TOKEN, 'Content-Type': '
 UPLOAD_DIR = '/var/www/constructor.zenohome.by/uploads'
 UPLOAD_URL = 'https://constructor.zenohome.by/uploads'
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+DATA_DIR      = '/var/www/morrowlab.by/html/data'
+REQUESTS_DIR  = DATA_DIR + '/requests'
+PARTNERS_FILE = DATA_DIR + '/partners.json'
+os.makedirs(REQUESTS_DIR, exist_ok=True)
 
 # ── Security: CORS allowlist ──
 ALLOWED_ORIGINS = {
@@ -139,10 +150,94 @@ def save_base64_image(data_url):
         f.write(img_bytes)
     return UPLOAD_URL + '/' + filename
 
-# ── Replicate ────────────────────────────────────────────────────────
-# Auto-converts base64 image inputs to hosted URLs before sending to Replicate
-# (Grounding DINO returns empty results with base64, needs URL)
+# ── Email (Resend API) ───────────────────────────────────────────────
+def send_email(to_email, subject, html_body):
+    """Send email via Resend API. Returns True on success."""
+    if not RESEND_KEY:
+        return False
+    try:
+        resp = requests.post(
+            'https://api.resend.com/emails',
+            headers={'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json'},
+            json={'from': 'Morrow Lab <' + FROM_EMAIL + '>', 'to': [to_email],
+                  'subject': subject, 'html': html_body},
+            timeout=15
+        )
+        return resp.status_code in (200, 201)
+    except Exception:
+        return False
 
+# ── Request/Lead data helpers ────────────────────────────────────────
+_req_rate_limits = {}  # ip -> [timestamps]
+
+def check_request_rate_limit(ip, max_per_day=5, cooldown_sec=120):
+    now = time.time()
+    if ip not in _req_rate_limits:
+        _req_rate_limits[ip] = []
+    _req_rate_limits[ip] = [t for t in _req_rate_limits[ip] if now - t < 86400]
+    if len(_req_rate_limits[ip]) >= max_per_day:
+        return False, 'Лимит заявок на сегодня исчерпан'
+    if _req_rate_limits[ip] and now - _req_rate_limits[ip][-1] < cooldown_sec:
+        return False, 'Подождите 2 минуты перед следующей заявкой'
+    return True, ''
+
+def load_partners():
+    try:
+        with open(PARTNERS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f).get('partners', [])
+    except Exception:
+        return []
+
+def save_request(req_data):
+    rid = req_data['id']
+    with open(os.path.join(REQUESTS_DIR, rid + '.json'), 'w', encoding='utf-8') as f:
+        json.dump(req_data, f, ensure_ascii=False, indent=2)
+
+def load_request(rid):
+    if not re.match(r'^[A-Za-z0-9_\-]{1,32}$', rid):
+        return None
+    path = os.path.join(REQUESTS_DIR, rid + '.json')
+    if not os.path.exists(path):
+        return None
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+# ── OTP Auth helpers ─────────────────────────────────────────────────
+OTP_STORE = {}  # {email: {code, expires, attempts, created, role}}
+
+def generate_otp():
+    import random
+    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+
+def create_jwt_token(email, role, partner_id=None):
+    if not JWT_SECRET:
+        raise RuntimeError('JWT_SECRET not configured')
+    payload = {'email': email, 'role': role, 'exp': datetime.utcnow() + timedelta(days=30)}
+    if partner_id:
+        payload['partner_id'] = partner_id
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def verify_jwt_token(token_str):
+    if not JWT_SECRET:
+        return None
+    try:
+        return jwt.decode(token_str, JWT_SECRET, algorithms=['HS256'])
+    except Exception:
+        return None
+
+def get_auth_from_cookie():
+    token_str = request.cookies.get('ml_session', '')
+    if not token_str:
+        return None
+    return verify_jwt_token(token_str)
+
+def check_admin_auth():
+    """Returns True if request has valid admin key."""
+    if not ADMIN_KEY:
+        return False
+    return request.headers.get('X-Admin-Key', '') == ADMIN_KEY
+
+# ── Replicate ────────────────────────────────────────────────────────
 @app.route('/api/replicate', methods=['POST', 'OPTIONS'])
 def replicate_create():
     if request.method == 'OPTIONS': return '', 204
@@ -187,7 +282,6 @@ def replicate_create():
 
 @app.route('/api/replicate/<pred_id>', methods=['GET'])
 def replicate_status(pred_id):
-    # Validate prediction ID format (alphanumeric, reasonable length)
     if not re.match(r'^[a-zA-Z0-9]{10,40}$', pred_id):
         return jsonify({'error': 'Invalid prediction ID'}), 400
     try:
@@ -200,22 +294,17 @@ def replicate_status(pred_id):
         return jsonify({'error': 'Service unavailable'}), 502
 
 # ── homedesigns.ai generic v2 proxy ──────────────────────────────────
-# Sends ALL fields (including base64 images) as form-data STRING values.
-# The API accepts "base64 Image string" directly — no file upload needed.
-
 @app.route('/api/homedesigns/v2/<path:endpoint>', methods=['POST', 'OPTIONS'])
 def homedesigns_v2(endpoint):
     if request.method == 'OPTIONS': return '', 204
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
     if not rate_limit('hd:' + ip, 20, 60):
         return jsonify({'error': 'Too many requests'}), 429
-    # Security: restrict to known endpoints
     if endpoint not in HOMEDESIGNS_ALLOWED_ENDPOINTS:
         return jsonify({'error': 'Unknown endpoint'}), 400
     data = request.get_json(force=True) or {}
     form_fields = {}
     for key, value in data.items():
-        # Security: only forward known fields to upstream API
         if key not in HOMEDESIGNS_ALLOWED_FIELDS:
             continue
         if isinstance(value, bool):
@@ -223,7 +312,7 @@ def homedesigns_v2(endpoint):
         elif isinstance(value, (int, float)):
             form_fields[key] = str(value)
         else:
-            form_fields[key] = value   # base64 strings sent as-is
+            form_fields[key] = value
     hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
     try:
         resp = requests.post(
@@ -242,7 +331,6 @@ def homedesigns_v2(endpoint):
         return jsonify({'success': False, 'message': 'Service unavailable'}), 502
 
 # ── design_advisor ────────────────────────────────────────────────────
-
 @app.route('/api/homedesigns/advisor', methods=['POST', 'OPTIONS'])
 def homedesigns_advisor():
     if request.method == 'OPTIONS': return '', 204
@@ -255,7 +343,6 @@ def homedesigns_advisor():
         msg = data.get('message', '')
         if not isinstance(msg, str) or len(msg) > 2000:
             return jsonify({'error': 'Message too long'}), 400
-        # Force Russian response
         msg_ru = msg + '\n\nПожалуйста, ответь на русском языке.'
         resp = requests.post(
             'https://homedesigns.ai/api/v2/design_advisor',
@@ -279,7 +366,6 @@ def proxy_image():
     url = request.args.get('url', '')
     if not url.startswith('https://'):
         return jsonify({'error': 'invalid url'}), 400
-    # Security: SSRF protection — only allow known domains
     parsed = urlparse(url)
     if parsed.hostname not in PROXY_IMAGE_ALLOWED_DOMAINS:
         return jsonify({'error': 'Domain not allowed'}), 403
@@ -287,9 +373,7 @@ def proxy_image():
         resp = requests.get(url, timeout=30, allow_redirects=False)
         if resp.status_code != 200:
             return jsonify({'error': 'Image not available'}), 502
-        from flask import Response as FlaskResponse
         content_type = resp.headers.get('content-type', 'image/png')
-        # Only proxy image content types
         if not content_type.startswith('image/'):
             return jsonify({'error': 'Not an image'}), 400
         r = FlaskResponse(resp.content, content_type=content_type)
@@ -300,6 +384,417 @@ def proxy_image():
         return r
     except Exception:
         return jsonify({'error': 'Failed to fetch image'}), 502
+
+# ── Partners & Requests ──────────────────────────────────────────────
+@app.route('/api/partners', methods=['GET', 'OPTIONS'])
+def get_partners():
+    if request.method == 'OPTIONS': return '', 204
+    room_type = request.args.get('type', '')
+    partners = [p for p in load_partners() if p.get('active')]
+    if room_type:
+        partners = [p for p in partners if room_type in p.get('specialization', [])]
+    safe = []
+    for p in partners:
+        safe.append({
+            'id': p['id'], 'name': p['name'], 'icon': p.get('icon', ''),
+            'specialization': p.get('specialization', []),
+            'description': p.get('description', ''),
+            'price_from': p.get('price_from', ''),
+            'rating': p.get('rating', 0), 'reviews': p.get('reviews', 0)
+        })
+    return jsonify(safe)
+
+@app.route('/api/request', methods=['POST', 'OPTIONS'])
+def create_request():
+    if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Real-IP', request.remote_addr or '')
+    ok, msg = check_request_rate_limit(ip)
+    if not ok:
+        return jsonify({'error': msg}), 429
+    data = request.get_json(force=True) or {}
+    email = (data.get('email') or '').strip()
+    name  = (data.get('name') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    if not email or '@' not in email:
+        return jsonify({'error': 'Email обязателен'}), 400
+    if not name:
+        return jsonify({'error': 'Укажите имя'}), 400
+    if data.get('website'):
+        return jsonify({'error': 'spam'}), 400
+    rid         = secrets.token_urlsafe(8)
+    user_token  = secrets.token_urlsafe(16)
+    render_url  = data.get('render_url', '')
+    if render_url and render_url.startswith('data:'):
+        saved = save_base64_image(render_url)
+        if saved:
+            render_url = saved
+    partner_ids = data.get('partners', [])
+    if not partner_ids:
+        partner_ids = [p['id'] for p in load_partners() if p.get('active')]
+    partner_tokens = {pid: secrets.token_urlsafe(12) for pid in partner_ids}
+    req_obj = {
+        'id': rid, 'user_token': user_token,
+        'created': datetime.utcnow().isoformat() + 'Z',
+        'status': 'sent',
+        'user': {'name': name, 'phone': phone, 'email': email},
+        'room_type': data.get('room_type', ''),
+        'area': data.get('area', ''),
+        'style': data.get('style', ''),
+        'wishes': data.get('wishes', ''),
+        'render_url': render_url,
+        'action_kit': data.get('action_kit', []),
+        'source_page': data.get('source_page', ''),
+        'partners_sent': partner_ids,
+        'partner_tokens': partner_tokens,
+        'responses': {}, 'chosen': None, 'ip': ip
+    }
+    save_request(req_obj)
+    _req_rate_limits.setdefault(ip, []).append(time.time())
+    try:
+        requests.post('https://n8n.morrowlab.by/webhook/new-request', json={
+            'event': 'new_request', 'request_id': rid,
+            'user_name': name, 'user_email': email, 'user_phone': phone,
+            'room_type': req_obj['room_type'], 'area': req_obj['area'],
+            'style': req_obj['style'], 'wishes': req_obj['wishes'],
+            'render_url': render_url, 'partners': partner_ids,
+            'partner_tokens': partner_tokens,
+            'status_url': 'https://morrowlab.by/r/?id=' + rid + '&token=' + user_token
+        }, timeout=5)
+    except Exception:
+        pass
+    return jsonify({
+        'success': True, 'request_id': rid,
+        'status_url': '/r/?id=' + rid + '&token=' + user_token,
+        'partners_count': len(partner_ids)
+    })
+
+@app.route('/api/request/<rid>', methods=['GET', 'OPTIONS'])
+def get_request_status(rid):
+    if request.method == 'OPTIONS': return '', 204
+    token = request.args.get('token', '')
+    req = load_request(rid)
+    if not req:
+        return jsonify({'error': 'Заявка не найдена'}), 404
+    if req.get('user_token') != token:
+        return jsonify({'error': 'Неверный токен'}), 403
+    all_partners = {p['id']: p for p in load_partners()}
+    partners_info = []
+    for pid in req.get('partners_sent', []):
+        p = all_partners.get(pid, {})
+        resp = req.get('responses', {}).get(pid)
+        partners_info.append({
+            'id': pid, 'name': p.get('name', pid), 'icon': p.get('icon', ''),
+            'status': 'responded' if resp else 'waiting', 'response': resp
+        })
+    return jsonify({
+        'id': req['id'], 'created': req['created'], 'status': req['status'],
+        'room_type': req.get('room_type', ''), 'area': req.get('area', ''),
+        'style': req.get('style', ''), 'wishes': req.get('wishes', ''),
+        'render_url': req.get('render_url', ''), 'action_kit': req.get('action_kit', []),
+        'partners': partners_info
+    })
+
+@app.route('/api/request/<rid>/reply', methods=['POST', 'OPTIONS'])
+def partner_reply(rid):
+    if request.method == 'OPTIONS': return '', 204
+    data = request.get_json(force=True) or {}
+    partner_token = data.get('token', '')
+    req = load_request(rid)
+    if not req:
+        return jsonify({'error': 'Заявка не найдена'}), 404
+    partner_id = None
+    for pid, tok in req.get('partner_tokens', {}).items():
+        if tok == partner_token:
+            partner_id = pid
+            break
+    if not partner_id:
+        return jsonify({'error': 'Неверный токен партнёра'}), 403
+    response_data = {
+        'price': data.get('price', ''), 'days': data.get('days', ''),
+        'comment': data.get('comment', ''),
+        'responded_at': datetime.utcnow().isoformat() + 'Z'
+    }
+    if 'responses' not in req:
+        req['responses'] = {}
+    req['responses'][partner_id] = response_data
+    req['status'] = 'all_responded' if all(
+        req['responses'].get(p) for p in req['partners_sent']
+    ) else 'has_responses'
+    save_request(req)
+    try:
+        all_partners = {p['id']: p for p in load_partners()}
+        requests.post('https://n8n.morrowlab.by/webhook/partner-replied', json={
+            'event': 'partner_replied', 'request_id': rid,
+            'partner_id': partner_id,
+            'partner_name': all_partners.get(partner_id, {}).get('name', partner_id),
+            'price': response_data['price'], 'days': response_data['days'],
+            'user_email': req['user']['email'],
+            'status_url': 'https://morrowlab.by/r/?id=' + rid + '&token=' + req['user_token']
+        }, timeout=5)
+    except Exception:
+        pass
+    return jsonify({'success': True, 'message': 'Оценка отправлена'})
+
+@app.route('/api/request/<rid>/choose', methods=['POST', 'OPTIONS'])
+def choose_partner(rid):
+    if request.method == 'OPTIONS': return '', 204
+    data = request.get_json(force=True) or {}
+    token = data.get('user_token', '')
+    partner_id = data.get('partner_id', '')
+    req = load_request(rid)
+    if not req:
+        return jsonify({'error': 'Заявка не найдена'}), 404
+    if req.get('user_token') != token:
+        return jsonify({'error': 'Неверный токен'}), 403
+    req['chosen'] = partner_id
+    req['status'] = 'chosen'
+    save_request(req)
+    try:
+        requests.post('https://n8n.morrowlab.by/webhook/partner-chosen', json={
+            'event': 'partner_chosen', 'request_id': rid, 'partner_id': partner_id,
+            'user_name': req['user']['name'], 'user_phone': req['user']['phone'],
+            'user_email': req['user']['email']
+        }, timeout=5)
+    except Exception:
+        pass
+    return jsonify({'success': True})
+
+@app.route('/api/request/<rid>/view', methods=['GET', 'OPTIONS'])
+def view_request(rid):
+    """Partner views full request details (by partner_token)."""
+    if request.method == 'OPTIONS': return '', 204
+    token = request.args.get('token', '')
+    req = load_request(rid)
+    if not req:
+        return jsonify({'error': 'Заявка не найдена'}), 404
+    partner_id = None
+    for pid, tok in req.get('partner_tokens', {}).items():
+        if tok == token:
+            partner_id = pid
+            break
+    if not partner_id:
+        return jsonify({'error': 'Неверный токен'}), 403
+    return jsonify({
+        'id': req['id'], 'created': req['created'], 'status': req['status'],
+        'room_type': req.get('room_type', ''), 'area': req.get('area', ''),
+        'style': req.get('style', ''), 'wishes': req.get('wishes', ''),
+        'render_url': req.get('render_url', ''),
+        'action_kit': req.get('action_kit', []),
+        'user_attachments': req.get('user_attachments', []),
+        'my_response': req.get('responses', {}).get(partner_id),
+        'is_chosen': req.get('chosen') == partner_id
+    })
+
+# ── OTP Auth ─────────────────────────────────────────────────────────
+@app.route('/api/auth/send-code', methods=['POST', 'OPTIONS'])
+def auth_send_code():
+    if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('otp:' + ip, 10, 60):
+        return jsonify({'error': 'Too many requests'}), 429
+    data = request.get_json(force=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    role  = data.get('role', 'user')
+    if not email or '@' not in email or len(email) > 254:
+        return jsonify({'error': 'Invalid email'}), 400
+    if role not in ('user', 'partner'):
+        role = 'user'
+    existing = OTP_STORE.get(email)
+    if existing and existing['expires'] > datetime.utcnow():
+        age = (datetime.utcnow() - existing.get('created', datetime.utcnow())).total_seconds()
+        if age < 60:
+            return jsonify({'error': 'Code already sent. Wait 60 seconds.'}), 429
+    if role == 'partner':
+        found = any(p.get('email', '').lower() == email for p in load_partners())
+        if not found:
+            return jsonify({'error': 'Partner email not found'}), 404
+    otp = generate_otp()
+    OTP_STORE[email] = {
+        'code': otp, 'role': role,
+        'expires': datetime.utcnow() + timedelta(minutes=10),
+        'created': datetime.utcnow(), 'attempts': 0
+    }
+    html = (
+        '<div style="font-family:sans-serif;max-width:400px;margin:0 auto;padding:20px">'
+        '<h2 style="color:#000">Morrow Lab</h2>'
+        '<p>Ваш код для входа:</p>'
+        '<div style="font-size:32px;font-weight:900;letter-spacing:8px;padding:20px;'
+        'background:#f5f5f5;border-radius:12px;text-align:center;margin:16px 0">'
+        + otp +
+        '</div>'
+        '<p style="color:#888;font-size:13px">Код действителен 10 минут.</p>'
+        '</div>'
+    )
+    send_email(email, f'Код для входа: {otp} — Morrow Lab', html)
+    return jsonify({'success': True, 'message': 'Code sent'})
+
+@app.route('/api/auth/verify-code', methods=['POST', 'OPTIONS'])
+def auth_verify_code():
+    if request.method == 'OPTIONS': return '', 204
+    data = request.get_json(force=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    code  = (data.get('code') or '').strip()
+    if not email or not code:
+        return jsonify({'error': 'Email and code required'}), 400
+    otp_data = OTP_STORE.get(email)
+    if not otp_data:
+        return jsonify({'error': 'No code sent for this email'}), 400
+    if otp_data['expires'] < datetime.utcnow():
+        del OTP_STORE[email]
+        return jsonify({'error': 'Code expired'}), 400
+    if otp_data['attempts'] >= 5:
+        del OTP_STORE[email]
+        return jsonify({'error': 'Too many attempts'}), 429
+    otp_data['attempts'] += 1
+    if otp_data['code'] != code:
+        remaining = 5 - otp_data['attempts']
+        return jsonify({'error': f'Wrong code. {remaining} attempts left.'}), 400
+    role = otp_data.get('role', 'user')
+    partner_id = None
+    if role == 'partner':
+        for p in load_partners():
+            if p.get('email', '').lower() == email:
+                partner_id = p['id']
+                break
+    try:
+        token = create_jwt_token(email, role, partner_id)
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 500
+    del OTP_STORE[email]
+    resp = jsonify({'success': True, 'role': role, 'email': email})
+    resp.set_cookie('ml_session', token, max_age=30*24*3600,
+                    httponly=True, samesite='Lax', secure=True, path='/')
+    return resp
+
+@app.route('/api/auth/logout', methods=['POST', 'OPTIONS'])
+def auth_logout():
+    if request.method == 'OPTIONS': return '', 204
+    resp = jsonify({'success': True})
+    resp.delete_cookie('ml_session', path='/')
+    return resp
+
+@app.route('/api/auth/me', methods=['GET', 'OPTIONS'])
+def auth_me():
+    if request.method == 'OPTIONS': return '', 204
+    auth = get_auth_from_cookie()
+    if not auth:
+        return jsonify({'authenticated': False}), 401
+    return jsonify({
+        'authenticated': True, 'email': auth['email'],
+        'role': auth.get('role', 'user'), 'partner_id': auth.get('partner_id')
+    })
+
+@app.route('/api/my/requests', methods=['GET', 'OPTIONS'])
+def my_requests():
+    if request.method == 'OPTIONS': return '', 204
+    auth = get_auth_from_cookie()
+    if not auth:
+        return jsonify({'error': 'Not authenticated'}), 401
+    email = auth['email']
+    result = []
+    all_partners = {p['id']: p for p in load_partners()}
+    for fname in sorted(os.listdir(REQUESTS_DIR), reverse=True):
+        if not fname.endswith('.json'):
+            continue
+        try:
+            with open(os.path.join(REQUESTS_DIR, fname), 'r', encoding='utf-8') as f:
+                req = json.load(f)
+        except Exception:
+            continue
+        if req.get('user', {}).get('email', '').lower() != email:
+            continue
+        partners_info = []
+        for pid in req.get('partners_sent', []):
+            p = all_partners.get(pid, {})
+            resp = req.get('responses', {}).get(pid)
+            partners_info.append({
+                'id': pid, 'name': p.get('name', pid), 'icon': p.get('icon', ''),
+                'status': 'responded' if resp else 'waiting', 'response': resp
+            })
+        result.append({
+            'id': req['id'], 'created': req.get('created', ''),
+            'status': req.get('status', ''), 'room_type': req.get('room_type', ''),
+            'area': req.get('area', ''), 'style': req.get('style', ''),
+            'wishes': req.get('wishes', ''), 'render_url': req.get('render_url', ''),
+            'user_token': req.get('user_token', ''), 'partners': partners_info,
+            'chosen': req.get('chosen', ''),
+            'user_attachments': req.get('user_attachments', []),
+            'responses_count': len(req.get('responses', {})),
+            'partners_count': len(req.get('partners_sent', []))
+        })
+    return jsonify({'requests': result, 'email': email})
+
+@app.route('/api/partner/requests', methods=['GET', 'OPTIONS'])
+def partner_requests():
+    if request.method == 'OPTIONS': return '', 204
+    auth = get_auth_from_cookie()
+    if not auth or auth.get('role') != 'partner':
+        return jsonify({'error': 'Not authenticated as partner'}), 401
+    partner_id = auth.get('partner_id')
+    email = auth['email']
+    if not partner_id:
+        for p in load_partners():
+            if p.get('email', '').lower() == email:
+                partner_id = p['id']
+                break
+    if not partner_id:
+        return jsonify({'error': 'Partner not found'}), 404
+    result = []
+    for fname in sorted(os.listdir(REQUESTS_DIR), reverse=True):
+        if not fname.endswith('.json'):
+            continue
+        try:
+            with open(os.path.join(REQUESTS_DIR, fname), 'r', encoding='utf-8') as f:
+                req = json.load(f)
+        except Exception:
+            continue
+        if partner_id not in req.get('partners_sent', []):
+            continue
+        my_response = req.get('responses', {}).get(partner_id)
+        is_chosen = req.get('chosen') == partner_id
+        result.append({
+            'id': req['id'], 'created': req.get('created', ''),
+            'status': req.get('status', ''), 'room_type': req.get('room_type', ''),
+            'area': req.get('area', ''), 'style': req.get('style', ''),
+            'wishes': req.get('wishes', ''), 'render_url': req.get('render_url', ''),
+            'user_attachments': req.get('user_attachments', []),
+            'my_response': my_response,
+            'my_token': req.get('partner_tokens', {}).get(partner_id, ''),
+            'is_chosen': is_chosen,
+            'user_name':  req['user']['name']  if is_chosen else '',
+            'user_phone': req['user']['phone'] if is_chosen else '',
+            'user_email': req['user']['email'] if is_chosen else ''
+        })
+    return jsonify({'requests': result, 'partner_id': partner_id})
+
+# ── Admin ─────────────────────────────────────────────────────────────
+@app.route('/api/admin/requests', methods=['GET', 'OPTIONS'])
+def admin_requests():
+    if request.method == 'OPTIONS': return '', 204
+    if not check_admin_auth():
+        return jsonify({'error': 'unauthorized'}), 401
+    reqs = []
+    for fname in sorted(os.listdir(REQUESTS_DIR), reverse=True):
+        if fname.endswith('.json'):
+            try:
+                with open(os.path.join(REQUESTS_DIR, fname), 'r', encoding='utf-8') as f:
+                    reqs.append(json.load(f))
+            except Exception:
+                pass
+    return jsonify(reqs)
+
+@app.route('/api/admin/partners', methods=['GET', 'POST', 'OPTIONS'])
+def admin_partners():
+    if request.method == 'OPTIONS': return '', 204
+    if not check_admin_auth():
+        return jsonify({'error': 'unauthorized'}), 401
+    if request.method == 'GET':
+        return jsonify(load_partners())
+    data = request.get_json(force=True) or {}
+    partners = data.get('partners', [])
+    with open(PARTNERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump({'partners': partners}, f, ensure_ascii=False, indent=2)
+    return jsonify({'success': True, 'count': len(partners)})
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=3030)
