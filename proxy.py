@@ -322,7 +322,11 @@ def homedesigns_v2(endpoint):
             timeout=120
         )
         try:
-            return jsonify(resp.json()), resp.status_code
+            rj = resp.json()
+            if resp.status_code != 200:
+                import sys
+                print(f'[homedesigns] {endpoint} → {resp.status_code}: fields={list(form_fields.keys())} body={str(rj)[:300]}', file=sys.stderr, flush=True)
+            return jsonify(rj), resp.status_code
         except Exception:
             return jsonify({'success': False, 'message': 'Invalid response from upstream'}), resp.status_code
     except requests.Timeout:
