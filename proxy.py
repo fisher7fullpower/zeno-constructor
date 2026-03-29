@@ -206,8 +206,7 @@ def load_request(rid):
 OTP_STORE = {}  # {email: {code, expires, attempts, created, role}}
 
 def generate_otp():
-    import random
-    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    return ''.join([str(secrets.randbelow(10)) for _ in range(6)])
 
 def create_jwt_token(email, role, partner_id=None):
     if not JWT_SECRET:
