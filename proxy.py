@@ -33,6 +33,7 @@ RESEND_KEY        = os.environ.get('RESEND_KEY', '')
 FROM_EMAIL        = os.environ.get('FROM_EMAIL', 'noreply@morrowlab.by')
 JWT_SECRET        = os.environ.get('JWT_SECRET', '')
 ADMIN_KEY         = os.environ.get('ADMIN_KEY', '')
+GROQ_API_KEY      = os.environ.get('GROQ_API_KEY', '')
 
 if not REPLICATE_TOKEN or not HOMEDESIGNS_TOKEN:
     import sys
@@ -797,6 +798,95 @@ def admin_partners():
     with open(PARTNERS_FILE, 'w', encoding='utf-8') as f:
         json.dump({'partners': partners}, f, ensure_ascii=False, indent=2)
     return jsonify({'success': True, 'count': len(partners)})
+
+# ── Moodboard: AI style analysis via Groq vision ─────────────────────
+@app.route('/api/moodboard', methods=['POST', 'OPTIONS'])
+def api_moodboard():
+    if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('moodboard:' + ip, 5, 60):
+        return jsonify({'error': 'Too many requests'}), 429
+    if not GROQ_API_KEY:
+        return jsonify({'error': 'AI service not configured'}), 503
+    data = request.get_json(force=True) or {}
+    image_b64 = data.get('image', '')
+    if not image_b64 or not isinstance(image_b64, str) or len(image_b64) > 10_000_000:
+        return jsonify({'error': 'Invalid image'}), 400
+    # Strip data URL prefix
+    img_data = image_b64.split(',', 1)[1] if ',' in image_b64 else image_b64
+    prompt = (
+        'Analyze this interior/exterior design image. Return ONLY a JSON object with these fields:\n'
+        '- style_name: main style in Russian (e.g. "Минимализм", "Скандинавский", "Лофт", "Современный")\n'
+        '- description: 2-3 sentences in Russian about the style\n'
+        '- matching_styles: array of 3-4 related style names in Russian\n'
+        '- palette: array of 4-6 dominant hex color codes from the image (e.g. ["#f5f0e8","#3a2e1c"])\n'
+        '- palette_names: array of color names in Russian for each hex code\n'
+        'Return ONLY valid JSON, no markdown, no extra text.'
+    )
+    try:
+        resp = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={'Authorization': 'Bearer ' + GROQ_API_KEY, 'Content-Type': 'application/json'},
+            json={
+                'model': 'meta-llama/llama-4-scout-17b-16e-instruct',
+                'messages': [{'role': 'user', 'content': [
+                    {'type': 'image_url', 'image_url': {'url': f'data:image/jpeg;base64,{img_data}'}},
+                    {'type': 'text', 'text': prompt}
+                ]}],
+                'max_tokens': 800,
+                'temperature': 0.3
+            },
+            timeout=30
+        )
+        if resp.status_code != 200:
+            return jsonify({'error': 'AI service error'}), 502
+        content = resp.json()['choices'][0]['message']['content'].strip()
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        if json_match:
+            return jsonify(json.loads(json_match.group()))
+        return jsonify({'raw': content})
+    except Exception:
+        return jsonify({'error': 'Service error'}), 502
+
+# ── AI Consultant (renovation advisor via Groq) ───────────────────────
+@app.route('/api/consultant', methods=['POST', 'OPTIONS'])
+def api_consultant():
+    if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('consultant:' + ip, 20, 60):
+        return jsonify({'error': 'Too many requests'}), 429
+    if not GROQ_API_KEY:
+        return jsonify({'error': 'AI service not configured'}), 503
+    data = request.get_json(force=True) or {}
+    message = data.get('message', '')
+    history = data.get('history', [])
+    if not isinstance(message, str) or len(message) > 2000:
+        return jsonify({'error': 'Invalid message'}), 400
+    if not isinstance(history, list) or len(history) > 20:
+        history = []
+    system_prompt = (
+        'Ты — AI-консультант по дизайну интерьеров и ремонту для платформы Morrow Lab (morrowlab.by). '
+        'Отвечай на русском языке, кратко и по существу. '
+        'Помогаешь подобрать материалы, стили, планировки, оцениваешь стоимость ремонта в BYN.'
+    )
+    messages = [{'role': 'system', 'content': system_prompt}]
+    for h in history[-6:]:
+        if isinstance(h, dict) and h.get('role') in ('user', 'assistant') and isinstance(h.get('content'), str):
+            messages.append({'role': h['role'], 'content': h['content'][:1000]})
+    messages.append({'role': 'user', 'content': message})
+    try:
+        resp = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={'Authorization': 'Bearer ' + GROQ_API_KEY, 'Content-Type': 'application/json'},
+            json={'model': 'llama-3.3-70b-versatile', 'messages': messages, 'max_tokens': 600, 'temperature': 0.7},
+            timeout=30
+        )
+        if resp.status_code != 200:
+            return jsonify({'error': 'AI service error'}), 502
+        reply = resp.json()['choices'][0]['message']['content']
+        return jsonify({'reply': reply})
+    except Exception:
+        return jsonify({'error': 'Service error'}), 502
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=3030)
