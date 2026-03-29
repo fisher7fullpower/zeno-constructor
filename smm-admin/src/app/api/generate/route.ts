@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkWorkspaceAccess } from "@/lib/workspace-access";
 
 const GROQ_KEY = process.env.GROQ_API_KEY ?? "";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -113,6 +114,11 @@ export async function POST(req: NextRequest) {
 
   if (!input.workspace || !input.postType) {
     return NextResponse.json({ error: "workspace и postType обязательны" }, { status: 400 });
+  }
+
+  const access = await checkWorkspaceAccess(input.workspace);
+  if (!access) {
+    return NextResponse.json({ error: "Нет доступа к workspace" }, { status: 403 });
   }
 
   if (!GROQ_KEY) {

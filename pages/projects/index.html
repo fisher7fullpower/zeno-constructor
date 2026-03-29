@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <title>Просмотр AI Дизайн-Проекта | Morrow Lab</title>
+  <meta name="description" content="Просмотр готового AI дизайн-проекта от Morrow Lab">
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--lime:#d1fe17;--lime-dim:rgba(209,254,23,.07);--lime-border:rgba(209,254,23,.2);--bg:#000;--card:#0a0a0a;--card2:#111;--border:#1c1c1c;--border2:#242424;--gray:#666;--muted:rgba(255,255,255,.45)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1a2003;border-radius:4px}
+
+    .header{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;display:flex;align-items:center;padding:0 24px;background:rgba(4,4,4,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);gap:16px}
+    .logo{font-size:14px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px}
+    .logo-icon{width:24px;height:24px;border-radius:6px;object-fit:cover}
+    .header-title{font-size:13px;color:var(--muted)}
+    .header-right{margin-left:auto;display:flex;gap:8px}
+    .btn-download{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;background:var(--lime);color:#000;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s;font-family:inherit}
+    .btn-download:hover{background:#bcf000}
+
+    /* Loading */
+    .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px}
+    .loader{width:40px;height:40px;border:2px solid var(--border2);border-top-color:var(--lime);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-size:14px;color:var(--muted)}
+
+    /* Error */
+    .error-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;text-align:center;padding:40px}
+    .error-icon{font-size:48px}
+    .error-title{font-size:22px;font-weight:700}
+    .error-sub{font-size:14px;color:var(--muted);max-width:400px;line-height:1.6}
+
+    /* Project content */
+    .project-content{display:none;padding:72px 0 60px;max-width:960px;margin:0 auto}
+
+    /* Status bar */
+    .status-bar{margin:0 24px 32px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .status-pill{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .status-new{background:rgba(100,100,100,.2);color:#888;border:1px solid #333}
+    .status-processing{background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.3)}
+    .status-ready{background:var(--lime-dim);color:var(--lime);border:1px solid var(--lime-border)}
+    .status-sent{background:rgba(0,200,100,.1);color:#00c864;border:1px solid rgba(0,200,100,.3)}
+    .status-info{display:flex;flex-direction:column;gap:2px}
+    .status-name{font-size:15px;font-weight:700}
+    .status-meta{font-size:12px;color:var(--muted)}
+    .status-action{margin-left:auto}
+
+    /* Section headers */
+    .proj-section{margin:0 24px 40px}
+    .proj-section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--lime);margin-bottom:16px;opacity:.8}
+
+    /* Renders grid */
+    .renders-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .render-card{border-radius:16px;overflow:hidden;background:var(--card);border:1px solid var(--border)}
+    .render-label{padding:12px 16px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border)}
+    .render-before-after{display:grid;grid-template-columns:1fr 1fr}
+    .render-img-wrap{position:relative}
+    .render-img-wrap img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+    .render-img-tag{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px}
+    .render-img-tag.after{background:rgba(209,254,23,.85);color:#000}
+
+    /* Moodboard */
+    .moodboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .mood-item{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .mood-item img{width:100%;aspect-ratio:4/3;object-fit:cover}
+    .mood-caption{padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted)}
+
+    /* Spec table */
+    .spec-table{width:100%;border-collapse:collapse}
+    .spec-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--border)}
+    .spec-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top}
+    .spec-table tr:last-child td{border-bottom:none}
+    .spec-table tr:hover td{background:rgba(255,255,255,.02)}
+    .spec-cat{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--lime);text-transform:uppercase}
+    .spec-price{font-weight:700;color:var(--lime);white-space:nowrap}
+    .spec-link{color:var(--muted);font-size:12px;text-decoration:none;transition:color .2s}
+    .spec-link:hover{color:var(--lime)}
+    .spec-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+
+    /* Estimate */
+    .estimate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+    .est-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+    .est-cat{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+    .est-val{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
+    .est-note{font-size:12px;color:var(--gray)}
+    .est-total{background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .est-total-label{font-size:13px;font-weight:600;color:var(--muted)}
+    .est-total-val{font-size:28px;font-weight:900;letter-spacing:-1px;color:var(--lime)}
+
+    /* Processing placeholder */
+    .processing-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px;text-align:center}
+    .proc-icon{font-size:40px;margin-bottom:16px;animation:bounce 2s ease-in-out infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .proc-title{font-size:18px;font-weight:700;margin-bottom:8px}
+    .proc-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:360px;margin:0 auto 24px}
+    .proc-steps{display:flex;flex-direction:column;gap:8px;text-align:left;max-width:320px;margin:0 auto}
+    .proc-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+    .proc-step.done{color:#fff}
+    .proc-step.active{color:var(--lime)}
+    .proc-step-icon{width:20px;height:20px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+
+    @media(max-width:640px){
+      .renders-grid{grid-template-columns:1fr}
+      .estimate-grid{grid-template-columns:1fr}
+      .moodboard-grid{grid-template-columns:repeat(2,1fr)}
+      .project-content{padding-top:64px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <a href="/" class="logo">
+    <img src="/logo.png" alt="Morrow Lab" class="logo-icon">
+    Morrow Lab
+  </a>
+  <span class="header-title" id="hdrTitle">AI Дизайн-Проект</span>
+  <div class="header-right" id="hdrRight"></div>
+</header>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loader"></div>
+  <div class="loading-text">Загружаем проект...</div>
+</div>
+
+<!-- ERROR -->
+<div class="error-screen" id="errorScreen">
+  <div class="error-icon">🔐</div>
+  <div class="error-title" id="errorTitle">Проект не найден</div>
+  <p class="error-sub" id="errorSub">Ссылка устарела или неверна. Обратитесь к нам — мы вышлем актуальную ссылку на проект.</p>
+  <a href="https://t.me/morrowlab" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:9px;background:var(--lime);color:#000;font-size:13px;font-weight:700;text-decoration:none;margin-top:8px">Написать в Telegram</a>
+</div>
+
+<!-- PROJECT CONTENT -->
+<div class="project-content" id="projectContent">
+
+  <!-- Status bar -->
+  <div class="status-bar" id="statusBar">
+    <div id="statusPill"></div>
+    <div class="status-info">
+      <div class="status-name" id="clientName"></div>
+      <div class="status-meta" id="projectMeta"></div>
+    </div>
+    <div class="status-action" id="statusAction"></div>
+  </div>
+
+  <!-- Processing placeholder (shown while project is being generated) -->
+  <div class="proj-section" id="processingSection" style="display:none">
+    <div class="processing-card">
+      <div class="proc-icon">⚙️</div>
+      <div class="proc-title">Проект в обработке</div>
+      <p class="proc-sub">AI генерирует рендеры и составляет спецификацию. Это занимает 24–48 часов. Вы получите уведомление на email, когда проект будет готов.</p>
+      <div class="proc-steps" id="procSteps"></div>
+    </div>
+  </div>
+
+  <!-- Renders section -->
+  <div class="proj-section" id="rendersSection" style="display:none">
+    <div class="proj-section-title">AI-рендеры помещений</div>
+    <div class="renders-grid" id="rendersGrid"></div>
+  </div>
+
+  <!-- Moodboard section -->
+  <div class="proj-section" id="moodboardSection" style="display:none">
+    <div class="proj-section-title">Стилистический коллаж</div>
+    <div class="moodboard-grid" id="moodboardGrid"></div>
+  </div>
+
+  <!-- Specification section -->
+  <div class="proj-section" id="specSection" style="display:none">
+    <div class="proj-section-title">Спецификация материалов</div>
+    <div class="spec-wrap">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Категория</th>
+            <th>Наименование</th>
+            <th>Бренд</th>
+            <th>Цена, BYN</th>
+            <th>Магазин</th>
+          </tr>
+        </thead>
+        <tbody id="specBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Estimate section -->
+  <div class="proj-section" id="estimateSection" style="display:none">
+    <div class="proj-section-title">Смета ремонта</div>
+    <div class="estimate-grid" id="estimateGrid"></div>
+    <div class="est-total" id="estimateTotal"></div>
+  </div>
+
+  <!-- PDF section -->
+  <div class="proj-section" id="pdfSection" style="display:none">
+    <div class="proj-section-title">PDF-отчёт</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;align-items:center;gap:20px">
+      <div style="width:48px;height:60px;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📄</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px" id="pdfName"></div>
+        <div style="font-size:12px;color:var(--muted)">Полный отчёт с рендерами, коллажем, спецификацией и сметой</div>
+      </div>
+      <a id="pdfDownloadBtn" href="#" download style="margin-left:auto;padding:10px 20px;border-radius:9px;background:var(--lime);color:#000;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Скачать PDF
+      </a>
+    </div>
+  </div>
+
+</div><!-- /project-content -->
+
+<script>
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function safeUrl(u){if(!u)return '';return /^https:\/\//.test(u)?esc(u):'';}
+
+// Get project token from URL
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const projectToken = pathParts[pathParts.length - 1];
+
+async function loadProject() {
+  if (!projectToken || projectToken === 'projects') {
+    showError('Ссылка некорректна', 'Перейдите по ссылке из письма или обратитесь к нам.');
+    return;
+  }
+  if (!/^[a-zA-Z0-9_-]{10,64}$/.test(projectToken)) return;
+
+  try {
+    const res = await fetch(`https://n8n.zenohome.by/webhook/morrow-project-view?token=${projectToken}`);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    renderProject(data);
+  } catch (e) {
+    // If API is unavailable, try to show basic info from token
+    if (e.message === '404') {
+      showError('Проект не найден', 'Ссылка устарела или неверна. Напишите нам в Telegram.');
+    } else {
+      showError('Ошибка загрузки', 'Не удалось загрузить данные проекта. Попробуйте позже или напишите нам.');
+    }
+  }
+}
+
+function showError(title, sub) {
+  document.getElementById('loadingScreen').style.display = 'none';
+  const err = document.getElementById('errorScreen');
+  err.style.display = 'flex';
+  document.getElementById('errorTitle').textContent = title;
+  document.getElementById('errorSub').textContent = sub;
+}
+
+function renderProject(data) {
+  document.getElementById('loadingScreen').style.display = 'none';
+
+  const content = document.getElementById('projectContent');
+  content.style.display = 'block';
+
+  // Status
+  const statusMap = {
+    'new': ['status-new', 'Новая'],
+    'processing': ['status-processing', 'В обработке'],
+    'ready_for_review': ['status-processing', 'На проверке'],
+    'approved': ['status-ready', 'Готов'],
+    'sent': ['status-sent', 'Отправлен'],
+    'completed': ['status-sent', 'Завершён']
+  };
+  const [statusClass, statusLabel] = statusMap[data.status] || ['status-new', esc(data.status)];
+  document.getElementById('statusPill').innerHTML = `<div class="status-pill ${esc(statusClass)}">${esc(statusLabel)}</div>`;
+  document.getElementById('clientName').textContent = `Проект для ${data.name || 'клиента'}`;
+  document.getElementById('projectMeta').textContent = `${pkgLabel(data.package)} · ${data.style || ''} стиль · ${data.area || '?'}м² · ${formatDate(data.created_at)}`;
+  document.getElementById('hdrTitle').textContent = `AI Дизайн-Проект #${data.project_id?.slice(-6) || '------'}`;
+
+  // PDF button in header
+  if (data.pdf_url && /^https:\/\//.test(data.pdf_url)) {
+    document.getElementById('hdrRight').innerHTML = `<a href="${esc(data.pdf_url)}" download class="btn-download"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Скачать PDF</a>`;
+  }
+
+  // If processing — show progress
+  if (['new','processing','ready_for_review'].includes(data.status)) {
+    document.getElementById('processingSection').style.display = 'block';
+    const steps = [
+      { label: 'Заявка получена', done: true },
+      { label: 'Генерация рендеров', done: data.status !== 'new', active: data.status === 'processing' },
+      { label: 'Составление спецификации', done: data.status === 'ready_for_review', active: data.status === 'processing' },
+      { label: 'Проверка дизайнером', done: false, active: data.status === 'ready_for_review' },
+      { label: 'Отправка на email', done: false }
+    ];
+    document.getElementById('procSteps').innerHTML = steps.map(s => `
+      <div class="proc-step ${s.done ? 'done' : ''} ${s.active ? 'active' : ''}">
+        <div class="proc-step-icon">${s.done ? '✓' : s.active ? '⟳' : '○'}</div>
+        ${s.label}
+      </div>
+    `).join('');
+    return; // Don't show other sections while processing
+  }
+
+  // Renders
+  if (data.renders && data.renders.length > 0) {
+    document.getElementById('rendersSection').style.display = 'block';
+    document.getElementById('rendersGrid').innerHTML = data.renders.map(r => `
+      <div class="render-card">
+        <div class="render-label">${esc(r.room) || 'Помещение'}</div>
+        <div class="render-before-after">
+          ${r.before_url ? `<div class="render-img-wrap"><img src="${safeUrl(r.before_url)}" alt="До" loading="lazy"><div class="render-img-tag">До</div></div>` : ''}
+          ${r.after_url ? `<div class="render-img-wrap"><img src="${safeUrl(r.after_url)}" alt="После" loading="lazy"><div class="render-img-tag after">После</div></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Moodboard
+  if (data.moodboard && data.moodboard.length > 0) {
+    document.getElementById('moodboardSection').style.display = 'block';
+    document.getElementById('moodboardGrid').innerHTML = data.moodboard.map(m => `
+      <div class="mood-item">
+        ${m.url ? `<img src="${safeUrl(m.url)}" alt="${esc(m.label) || ''}" loading="lazy">` : `<div style="aspect-ratio:4/3;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:24px">${esc(m.emoji) || '🎨'}</div>`}
+        <div class="mood-caption">${esc(m.label) || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // Specification
+  if (data.specification && data.specification.length > 0) {
+    document.getElementById('specSection').style.display = 'block';
+    document.getElementById('specBody').innerHTML = data.specification.map(item => `
+      <tr>
+        <td><span class="spec-cat">${esc(item.category) || ''}</span></td>
+        <td>${esc(item.name) || ''}</td>
+        <td>${esc(item.brand) || '—'}</td>
+        <td><span class="spec-price">${item.price_byn ? esc(String(item.price_byn)) + ' BYN' : '—'}</span></td>
+        <td>${item.store_url && /^https:\/\//.test(item.store_url) ? `<a href="${esc(item.store_url)}" target="_blank" rel="noopener" class="spec-link">Открыть ↗</a>` : '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Estimate
+  if (data.estimate) {
+    document.getElementById('estimateSection').style.display = 'block';
+    const cats = [
+      { key: 'materials', label: 'Материалы' },
+      { key: 'labor', label: 'Работы' },
+      { key: 'furniture', label: 'Мебель' }
+    ];
+    document.getElementById('estimateGrid').innerHTML = cats.map(c => {
+      const v = data.estimate[c.key];
+      return v ? `<div class="est-card"><div class="est-cat">${c.label}</div><div class="est-val">${esc(v.range) || esc(v.amount) || '—'} BYN</div><div class="est-note">${esc(v.note) || ''}</div></div>` : '';
+    }).filter(Boolean).join('');
+    if (data.estimate.total) {
+      document.getElementById('estimateTotal').innerHTML = `
+        <div><div class="est-total-label">Итого (ориентировочно)</div></div>
+        <div class="est-total-val">${esc(data.estimate.total)} BYN</div>
+      `;
+    }
+  }
+
+  // PDF
+  if (data.pdf_url && /^https:\/\//.test(data.pdf_url)) {
+    document.getElementById('pdfSection').style.display = 'block';
+    const filename = data.pdf_url.split('/').pop();
+    document.getElementById('pdfName').textContent = filename;
+    document.getElementById('pdfDownloadBtn').href = data.pdf_url;
+  }
+}
+
+function pkgLabel(pkg) {
+  return { basic: 'Базовый', standard: 'Стандарт', full: 'Полный' }[pkg] || pkg || '';
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch { return iso; }
+}
+
+// Init
+loadProject();
+</script>
+</body>
+</html>

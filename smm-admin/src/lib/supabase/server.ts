@@ -131,16 +131,16 @@ class QueryBuilder {
           return `(SELECT row_to_json(x) FROM (SELECT * FROM "${name}" WHERE id = t."${fk}") x) AS "${name}"`;
         }
         const jsonPairs = columns.split(",").map((c) => {
-          const col = c.trim();
-          return `'${col}', x.${col}`;
+          const col = safeColumn(c.trim()).replace(/"/g, '');
+          return `'${col}', x."${col}"`;
         });
         return `(SELECT json_build_object(${jsonPairs.join(", ")}) FROM "${name}" x WHERE x.id = t."${fk}") AS "${name}"`;
       });
 
-      const mainExpr = mainCols === "*" ? "t.*" : mainCols.split(",").map((c) => `t.${c.trim()}`).join(", ");
+      const mainExpr = mainCols === "*" ? "t.*" : mainCols.split(",").map((c) => `t.${safeColumn(c.trim())}`).join(", ");
       selectExpr = `${mainExpr}, ${embedExprs.join(", ")}`;
     } else {
-      selectExpr = mainCols === "*" ? "*" : mainCols.split(",").map((c) => c.trim()).join(", ");
+      selectExpr = mainCols === "*" ? "*" : mainCols.split(",").map((c) => safeColumn(c.trim())).join(", ");
     }
 
     const tableAlias = embeds.length > 0 ? `"${this._table}" t${joinExpr}` : `"${this._table}"`;

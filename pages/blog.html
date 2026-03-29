@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Блог Morrow Lab — дизайн интерьеров, ремонт, материалы</title>
+  <meta name="description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах. AI-советы по стилю, материалам, планировке и бюджету от экспертов Morrow Lab.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://morrowlab.by/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Блог Morrow Lab — дизайн интерьеров, ремонт, материалы">
+  <meta property="og:description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах. AI-советы по стилю, материалам, планировке и бюджету.">
+  <meta property="og:url" content="https://morrowlab.by/blog/">
+  <meta property="og:image" content="https://morrowlab.by/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Morrow Lab">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Блог Morrow Lab — дизайн интерьеров, ремонт, материалы">
+  <meta name="twitter:description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах.">
+  <meta name="twitter:image" content="https://morrowlab.by/og-image.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--lime:#d1fe17;--lime-dim:rgba(209,254,23,.07);--lime-border:rgba(209,254,23,.2);--bg:#000;--card:#0a0a0a;--card2:#111;--border:#1c1c1c;--border2:#242424;--gray:#666;--muted:rgba(255,255,255,.45)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1a2003;border-radius:4px}
+    .header{position:fixed;top:0;left:0;right:0;z-index:1000;height:60px;display:flex;align-items:center;padding:0 40px;background:rgba(4,4,4,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:border-color .3s}
+    .header.scrolled{border-color:var(--border2)}
+    .logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:2px}
+    .nav-link{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;cursor:pointer;background:none;border:none;font-family:inherit}
+    .nav-link:hover,.nav-link.cur{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .burger{display:none;flex-direction:column;gap:4px;padding:8px;background:none;border:none;cursor:pointer}
+    .burger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}
+    @media(max-width:960px){.nav-center{display:none}.burger{display:flex}}
+    .btn-ghost{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;background:transparent;border:1px solid var(--border2);color:rgba(255,255,255,.55);cursor:pointer;text-decoration:none;transition:all .2s}
+    .btn-ghost:hover{border-color:var(--lime-border);color:var(--lime)}
+    .btn-lime{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;background:var(--lime);color:#000;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+    .btn-lime:hover{background:#bcf000;transform:translateY(-1px)}
+    .page-hero{max-width:1400px;margin:0 auto;padding:100px 32px 56px;border-bottom:1px solid var(--border)}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border:1px solid var(--lime-border);border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:20px}
+    .hero-tag-dot{width:5px;height:5px;background:var(--lime);border-radius:50%}
+    .page-h1{font-size:clamp(32px,5vw,64px);font-weight:800;letter-spacing:-2px;line-height:1.06;margin-bottom:16px}
+    .page-h1 span{color:var(--lime)}
+    .page-sub{font-size:17px;color:var(--muted);line-height:1.65;max-width:520px}
+    .blog-wrap{max-width:1400px;margin:0 auto;padding:56px 32px}
+    .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .blog-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;text-decoration:none;color:#fff;display:flex;flex-direction:column;gap:12px;transition:all .25s;cursor:pointer}
+    .blog-card:hover{border-color:var(--lime-border);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+    .blog-tag{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime)}
+    .blog-title{font-size:16px;font-weight:700;line-height:1.45;color:#fff}
+    .blog-excerpt{font-size:13px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .blog-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray);margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+    .blog-read{color:var(--lime);font-weight:600}
+    .skel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .skel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:10px}
+    .skel-line{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shim 1.5s infinite}
+    @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* ARTICLE MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:60px 20px;overflow-y:auto}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;max-width:780px;width:100%;padding:48px;position:relative;margin:auto}
+    .modal-close{position:absolute;top:20px;right:20px;background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;transition:color .2s}
+    .modal-close:hover{color:#fff}
+    .modal-tag{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:14px}
+    .modal-title{font-size:clamp(22px,3vw,36px);font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:20px}
+    .modal-meta{font-size:13px;color:var(--gray);margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+    .modal-body{font-size:15px;color:rgba(255,255,255,.75);line-height:1.8;white-space:pre-wrap}
+    .modal-body h2,.modal-body h3{color:#fff;margin:24px 0 10px;letter-spacing:-.5px}
+    .modal-cta{margin-top:32px;padding:24px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:14px;text-align:center}
+    .modal-cta p{margin-bottom:14px;color:rgba(255,255,255,.7);font-size:14px}
+    .footer-wrap{border-top:1px solid var(--border);max-width:1400px;margin:0 auto;padding:48px 32px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px}
+    .footer-logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+    .footer-desc{font-size:13px;color:var(--gray);line-height:1.6;max-width:260px}
+    .footer-copy{font-size:12px;color:#333;margin-top:14px}
+    .fc-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+    .footer-links{display:flex;flex-direction:column;gap:8px}
+    .footer-links a{font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#fff}
+    @media(max-width:900px){.blog-grid,.skel-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.blog-grid,.skel-grid{grid-template-columns:1fr}.page-hero{padding:88px 20px 40px}.blog-wrap{padding:40px 20px}.modal{padding:28px 20px}.footer-grid{grid-template-columns:1fr;gap:28px}.footer-wrap{padding:36px 20px}.header{padding:0 20px}}
+        .logo-icon{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0}
+    .logo-icon-sm{width:22px;height:22px;border-radius:6px;object-fit:cover;flex-shrink:0}
+</style>
+</head>
+<body>
+<header class="header" id="hdr">
+  <a href="/" class="logo"><img src="/logo.png" class="logo-icon" alt="Morrow Lab">Morrow Lab</a>
+  <nav class="nav-center">
+    <a href="/#examples" class="nav-link">Примеры</a>
+    <a href="/#pricing" class="nav-link">Тарифы</a>
+    <a href="/#faq" class="nav-link">FAQ</a>
+    <a href="/blog/" class="nav-link cur">Блог</a>
+    <a href="/masters/" class="nav-link">Мастера</a>
+  </nav>
+  <div class="nav-right">
+    <a href="/" class="nav-link" style="opacity:.7">← Главная</a>
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="hero-tag"><span class="hero-tag-dot"></span>Блог · Morrow Lab</div>
+  <h1 class="page-h1">Полезные статьи<br>о <span>дизайне</span> и ремонте</h1>
+  <p class="page-sub">Советы по выбору материалов, стилей интерьера, планировке и ремонту помещений.</p>
+</div>
+
+<div class="blog-wrap">
+  <div id="blogArea">
+    <div class="skel-grid">
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-tag" id="modalTag">Дизайн интерьеров</div>
+    <h2 class="modal-title" id="modalTitle"></h2>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-cta">
+      <p>Хотите такой дизайн в своём помещении?</p>
+      <a href="/sanuzel/" class="btn-lime">Создать AI-дизайн бесплатно →</a>
+    </div>
+  </div>
+</div>
+
+<div class="footer-wrap">
+  <div class="footer-grid">
+    <div>
+      <a href="/" class="footer-logo"><img src="/logo.png" class="logo-icon-sm" alt="Morrow Lab">Morrow Lab</a>
+      <p class="footer-desc">AI-дизайн интерьеров за 2 минуты. Загрузите фото — получите рендер.</p>
+      <p class="footer-copy">© 2026 ООО «Морроу Лаб» · <a href="/privacy/" style="color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#d4f72c'" onmouseout="this.style.color='rgba(255,255,255,.35)'">Политика конфиденциальности</a></p>
+    </div>
+    <div><div class="fc-title">Пространства</div><div class="footer-links"><a href="/sanuzel/">Санузел</a><a href="/kitchen/">Кухня</a><a href="/room/">Комната</a><a href="/business/">Бизнес</a><a href="/dom/">Дом</a></div></div>
+    <div><div class="fc-title">Контакты</div><div class="footer-links"><a href="mailto:hello@morrowlab.by">hello@morrowlab.by</a><a href="https://t.me/morrowlab" target="_blank">Telegram</a></div></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', scrollY > 10));
+
+  let articles = [];
+
+  (async () => {
+    try {
+      const r = await fetch('https://n8n.zenohome.by/webhook/morrow-blog');
+      const text = await r.text();
+      // Handle JSONP format: null([...]) or plain JSON
+      let data;
+      const jpMatch = text.match(/^\s*\w*\s*\((.+)\)\s*;?\s*$/s);
+      data = JSON.parse(jpMatch ? jpMatch[1] : text);
+      articles = (Array.isArray(data) ? data : data.articles || []).filter(a => a.article);
+      if (!articles.length) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; return; }
+      const cats = ['Дизайн интерьеров','Материалы','Ремонт','Советы','Тренды 2026'];
+      document.getElementById('blogArea').innerHTML = '<div class="blog-grid">' + articles.map((a, i) => {
+        const excerpt = (a.meta_description || a.article.replace(/<[^>]+>/g,'')).slice(0, 180);
+        const cat = cats[i % cats.length];
+        return `<div class="blog-card" onclick="openArticle(${i})">
+          <div class="blog-tag">${cat}</div>
+          <div class="blog-title">${a.meta_title || a.topic || 'Статья'}</div>
+          <div class="blog-excerpt">${excerpt}...</div>
+          <div class="blog-meta"><span>${a.generated_at || '2026'} · Morrow Lab</span><span class="blog-read">Читать →</span></div>
+        </div>`;
+      }).join('') + '</div>';
+    } catch(e) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; }
+  })();
+
+  function openArticle(i) {
+    const a = articles[i];
+    document.getElementById('modalTitle').textContent = a.meta_title || a.topic || 'Статья';
+    document.getElementById('modalMeta').textContent = (a.generated_at || '2026') + ' · Morrow Lab';
+    let cleaned = (a.article || '')
+      .replace(/https?:\/\/zeno\.by/gi,'https://morrowlab.by')
+      .replace(/\bZENO\b/g,'Morrow Lab')
+      .replace(/\bzeno\.by\b/gi,'morrowlab.by');
+    cleaned = cleaned.replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/on\w+\s*=\s*[^\s>]*/gi, '');
+    document.getElementById('modalBody').innerHTML = cleaned;
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalBtn(); }
+  function closeModalBtn() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+</script>
+</body>
+</html>

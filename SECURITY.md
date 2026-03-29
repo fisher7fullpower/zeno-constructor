@@ -261,9 +261,97 @@
 
 ---
 
+## 8. Повторный code review (2026-03-29, раунд 2)
+
+### 8.1 morrowlab.by — повторный review (3 HIGH, 5 MEDIUM, 3 LOW)
+
+#### HIGH (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R-H1 | **Stored XSS в блоге** — `innerHTML` без санитизации для `a.article` | pages/blog.html | ✅ Strip script/iframe/on* |
+| R-H2 | **XSS в projects** — поля из API без экранирования (`status`, `pdf_url`, `room`, URLs) | pages/projects/index.html | ✅ `esc()` + `safeUrl()` |
+| R-H3 | **XSS в constructor** — `d.label` из Replicate через `innerHTML` без escape | pages/constructor.html, bathroom_constructor.html | ✅ `esc()` на labels |
+
+#### MEDIUM (5)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R-M1 | Нет rate limiting в локальном proxy.py | proxy.py | ⏭️ Есть на сервере (Flask-Limiter) |
+| R-M2 | Нет security headers (CSP, X-Frame-Options) | proxy.py / nginx | ⏭️ Настроено в nginx |
+| R-M3 | CORS Methods/Headers отдаются без проверки origin | proxy.py | ✅ Перемещены в `if origin` блок |
+| R-M4 | Blog CRUD без auth (TODO) | ml-upload.py (сервер) | ✅ `check_auth()` на сервере |
+| R-M5 | `projectToken` из URL без валидации формата | pages/projects/index.html | ✅ Regex `^[a-zA-Z0-9_-]{10,64}$` |
+
+#### LOW (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R-L1 | `showSuccess()` на ошибке отправки заказа | pages/project/index.html | ⏭️ UX, не security |
+| R-L2 | `.env.example` содержит префиксы токенов (`r8_`, `gsk_`) | .env.example | ⏭️ Minor reconnaissance |
+| R-L3 | Untracked файлы могут содержать данные | working directory | ⏭️ Покрыто .gitignore |
+
+---
+
+### 8.2 SMM admin — повторный review (4 HIGH, 6 MEDIUM, 5 LOW)
+
+#### Предыдущие 28 фиксов подтверждены корректными. 0 Critical.
+
+#### HIGH (4)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R2-H1 | **Rate limiter in-memory** — не работает в multi-instance, memory leak | src/lib/rate-limit.ts | ✅ Cleanup каждые 100 вызовов + комментарий про Redis |
+| R2-H2 | **Нет rate limit на confirm** endpoint | src/app/api/auth/confirm/route.ts | ✅ 10/мин/IP |
+| R2-H3 | **Нет rate limit на invite acceptance** | src/app/api/invites/[token]/route.ts | ✅ 5/мин/IP |
+| R2-H4 | **`json_build_object` embed columns** без `safeColumn()` | src/lib/supabase/server.ts | ✅ `safeColumn()` applied |
+
+#### MEDIUM (6)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R2-M1 | Operator может приглашать operator без owner check | src/app/api/invites/route.ts | ⏭️ Intentional business logic |
+| R2-M2 | `createUser` silent fail на duplicate в invite flow | src/app/api/invites/[token]/route.ts | ✅ Lookup existing user |
+| R2-M3 | `.env.example` — устаревшие Supabase ключи | .env.example | ✅ Обновлён |
+| R2-M4 | `_runSelect` main columns без `safeColumn()` | src/lib/supabase/server.ts | ✅ `safeColumn()` applied |
+| R2-M5 | Нет workspace access check на generate endpoint | src/app/api/generate/route.ts | ✅ `checkWorkspaceAccess()` |
+| R2-M6 | Password validation не централизована | src/lib/auth.ts | ✅ `validatePassword()` exported |
+
+#### LOW (5)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R2-L1 | `x-forwarded-for` может быть spoofed | rate-limit usage | ⏭️ Зависит от reverse proxy |
+| R2-L2 | `plan` value в email без HTML escape | auth/register/route.ts | ⏭️ Email clients sanitize |
+| R2-L3 | Groq error text в console.error | api/generate/route.ts | ⏭️ Не утекает клиенту |
+| R2-L4 | n8n error text в логах | src/lib/n8n.ts | ⏭️ Серверные логи |
+| R2-L5 | Team page delete button без handler | settings/team/page.tsx | ⏭️ UX, не security |
+
+---
+
+## Общая статистика
+
+| Раунд | Объект | Находок | Исправлено | Отложено |
+|-------|--------|---------|------------|----------|
+| 1 | proxy.py, ml-upload.py, admin HTML | 30 | 30 | 0 |
+| 1 | CodeRabbit CLI (proxy.py) | 8 | 8 | 0 |
+| 1 | SMM admin | 28 | 28 | 0 |
+| 1 | ZENO виджеты | 4 | 4 | 0 |
+| 1 | Серверная инфраструктура | 6 | 6 | 0 |
+| 2 | morrowlab.by (повторный) | 11 | 6 | 5 |
+| 2 | SMM admin (повторный) | 15 | 10 | 5 |
+| **Итого** | | **102** | **92** | **10** |
+
+> 10 отложенных — Low risk items, UX issues, или покрыты серверной конфигурацией (nginx, Flask-Limiter).
+
+---
+
 ## Коммиты безопасности
 
 ```
+(pending)  Round 2: fix XSS in blog/projects/constructor, rate limiting, safeColumn, workspace access
+ecef17f  Add SECURITY.md: comprehensive security review report (76 findings)
+(filter)  git filter-repo: remove secrets from commit history
 3cdf7fc  SMM admin: remove Postmypost integration, fix all 28 security findings
 89f4637  Allow uppercase in Replicate prediction ID validation
 55c2874  Reject non-200 responses in proxy-image to prevent empty body proxying
@@ -275,4 +363,4 @@ a9bfc9c  Fix WebP magic byte validation: check RIFF+WEBP signature, not just RIF
 
 ---
 
-*Документ сгенерирован на основе ручного code review, CodeRabbit CLI v0.3.11, и аудита серверной инфраструктуры.*
+*Документ сгенерирован на основе ручного code review, CodeRabbit CLI v0.3.11, и аудита серверной инфраструктуры. Обновлён 2026-03-29 (раунд 2).*

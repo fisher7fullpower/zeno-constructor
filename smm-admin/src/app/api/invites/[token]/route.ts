@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createUser, signToken } from "@/lib/auth";
+import { createUser, signToken, validatePassword } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 import pool from "@/lib/db";
 
 type Params = { params: Promise<{ token: string }> };
@@ -31,14 +33,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 // POST — accept invite, create account, sign in
 export async function POST(req: NextRequest, { params }: Params) {
+  const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
+  if (!rateLimit(ip, 5, 60000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { token } = await params;
   const { password } = await req.json();
 
-  if (!password || password.length < 8) {
-    return NextResponse.json({ error: "Пароль минимум 8 символов" }, { status: 400 });
-  }
-  if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-    return NextResponse.json({ error: "Пароль должен содержать заглавную букву и цифру" }, { status: 400 });
+  const pwError = validatePassword(password);
+  if (pwError) {
+    return NextResponse.json({ error: pwError }, { status: 400 });
   }
 
   // Fetch and validate invite
@@ -58,8 +63,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Срок приглашения истёк" }, { status: 400 });
   }
 
-  // Create user (or update password if already exists)
-  const user = await createUser(invite.email, password, invite.role === "owner" ? "admin" : "client");
+  // Create user (or look up existing if already exists)
+  let user;
+  try {
+    user = await createUser(invite.email, password, invite.role === "owner" ? "admin" : "client");
+  } catch {
+    // User already exists - look them up
+    const existing = await pool.query("SELECT id FROM users WHERE email = $1", [invite.email.toLowerCase()]);
+    if (existing.rows.length === 0) {
+      return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
+    }
+    user = existing.rows[0];
+  }
 
   // Link user → client
   await pool.query(

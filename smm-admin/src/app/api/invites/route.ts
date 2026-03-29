@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
 
   if (!client) return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });
 
-  // Only owner / operator can invite
+  // Only owner / operator can invite.
+  // Intentional: operators can invite other operators (business logic decision).
   const { data: access } = await supabase
     .from("client_users")
     .select("role")

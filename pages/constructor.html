@@ -3,7 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Morrow Lab — Конструктор планировки</title>
+  <title>Конструктор планировки онлайн | Morrow Lab</title>
+  <meta name="description" content="Бесплатный конструктор планировки помещений онлайн. Расставьте мебель, измените стиль комнаты с помощью AI. Ванная, кухня, гостиная — за 2 минуты.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://morrowlab.by/constructor/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Конструктор планировки онлайн | Morrow Lab">
+  <meta property="og:description" content="Бесплатный конструктор планировки помещений онлайн. Расставьте мебель и измените стиль с помощью AI.">
+  <meta property="og:url" content="https://morrowlab.by/constructor/">
+  <meta property="og:image" content="https://morrowlab.by/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Morrow Lab">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Конструктор планировки онлайн | Morrow Lab">
+  <meta name="twitter:image" content="https://morrowlab.by/og-image.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <script src="https://unpkg.com/konva@9/konva.min.js"></script>
   <style>
     :root {
@@ -302,6 +320,7 @@
       align-items: center;
       gap: 16px;
       text-align: center;
+      pointer-events: none;
     }
     .placeholder-icon {
       width: 80px; height: 80px;
@@ -405,52 +424,6 @@
     .zone-intensity label { font-size: 10px; color: var(--muted); white-space: nowrap; }
     .zone-intensity input { flex: 1; accent-color: var(--lime); }
     .zone-intensity span { font-size: 10px; color: var(--text); min-width: 24px; text-align: right; }
-
-    /* ── Furniture Catalog ─────────────────────────── */
-    .furn-cat { margin-bottom: 5px; }
-    .furn-cat-header {
-      padding: 9px 10px;
-      display: flex; align-items: center; gap: 9px;
-      cursor: pointer; user-select: none;
-      background: var(--gray); border: 1px solid var(--gray2);
-      border-radius: 10px; transition: border-color 0.15s;
-    }
-    .furn-cat-header:hover { border-color: var(--gray3); }
-    .furn-cat.open .furn-cat-header { border-color: rgba(204,255,0,0.3); border-radius: 10px 10px 0 0; }
-    .furn-cat-icon {
-      width: 26px; height: 26px; flex-shrink: 0;
-      border-radius: 6px; background: rgba(204,255,0,0.09);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-    }
-    .furn-cat.open .furn-cat-icon { background: rgba(204,255,0,0.15); }
-    .furn-cat-label { font-size: 12px; font-weight: 500; flex: 1; color: var(--white); }
-    .furn-cat-count { font-size: 10px; color: var(--muted); }
-    .furn-cat-chevron { flex-shrink: 0; color: var(--muted); transition: transform 0.2s; }
-    .furn-cat.open .furn-cat-chevron { transform: rotate(180deg); }
-    .furn-cat-body {
-      display: none;
-      background: var(--gray); border: 1px solid rgba(204,255,0,0.3); border-top: none;
-      border-radius: 0 0 10px 10px; padding: 8px;
-    }
-    .furn-cat.open .furn-cat-body { display: block; }
-    .furn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-    .furn-item {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 8px 4px; border-radius: 8px;
-      border: 1px solid var(--gray2); background: var(--black);
-      cursor: grab; user-select: none; transition: border-color 0.15s, background 0.15s;
-    }
-    .furn-item:hover { border-color: var(--lime); background: rgba(204,255,0,0.05); }
-    .furn-item:active { cursor: grabbing; }
-    .furn-item-icon { width: 36px; height: 36px; color: var(--lime); }
-    .furn-item-icon svg { width: 100%; height: 100%; }
-    .furn-item-name { font-size: 10px; color: var(--white); text-align: center; line-height: 1.2; }
-    .furn-item-size { font-size: 9px; color: var(--muted); }
-
-    /* Grid overlay */
-    .grid-toggle { font-size: 11px; }
-    .grid-toggle.active { color: var(--lime) !important; border-color: rgba(204,255,0,0.3) !important; }
 
     /* Canvas crosshair when sampling */
     .canvas-sampling #canvas-container { cursor: crosshair !important; }
@@ -649,10 +622,10 @@
     <!-- Upload -->
     <div class="section">
       <div class="section-title">Рендер</div>
-      <label class="btn btn-ghost" for="fileInput" style="cursor:pointer;display:block;text-align:center;user-select:none">
+      <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
         ↑ Загрузить изображение
-      </label>
-      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleFileUpload(this)">
+      </button>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
     </div>
 
     <!-- Detect objects -->
@@ -706,10 +679,13 @@
             </div>
             <div class="hd-note" style="margin-top:0;margin-bottom:6px">Вмешательство AI</div>
             <div class="hd-ai-level">
-              <button class="hd-level-btn" onclick="selectAiLevel('Very Low',this)">Мин.</button>
-              <button class="hd-level-btn active" onclick="selectAiLevel('Low',this)">Низкое</button>
-              <button class="hd-level-btn" onclick="selectAiLevel('Mid',this)">Среднее</button>
-              <button class="hd-level-btn" onclick="selectAiLevel('Extreme',this)">Макс.</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Very Low',this)" title="Мягкая корректировка, сохраняет детали">Мин.</button>
+              <button class="hd-level-btn active" onclick="selectAiLevel('Low',this)" title="Лёгкая стилизация">Низкое</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Mid',this)" title="Баланс стиля и структуры">Среднее</button>
+              <button class="hd-level-btn" onclick="selectAiLevel('Extreme',this)" title="Полная трансформация — меняет стены, материалы, всё">Макс. ⚡</button>
+            </div>
+            <div id="restyle-level-hint" style="font-size:10px;color:#666;margin:4px 0 6px;line-height:1.4">
+              Мин.–Среднее: сохраняют планировку. <strong style="color:#d1fe17">Макс.</strong>: полная смена стиля
             </div>
             <button class="btn btn-dark" onclick="hdCreativeRedesign()">Применить стиль</button>
             <img id="hd-restyle-result" class="hd-result-img" alt="">
@@ -1017,12 +993,6 @@
 
     </div>
 
-    <!-- ══ FURNITURE CATALOG ══ -->
-    <div class="section">
-      <div class="section-title">Каталог мебели</div>
-      <div id="furnitureCatalog"></div>
-    </div>
-
     <!-- Material Recolor — professional click-to-select -->
     <div class="section">
       <div class="section-title">Перекраска материала</div>
@@ -1062,29 +1032,19 @@
     <div class="canvas-toolbar">
       <span class="canvas-info" id="canvasInfo">Нет изображения</span>
       <div class="spacer"></div>
-      <button class="tb-btn grid-toggle" id="btnGrid" onclick="toggleGrid()" title="Показать/скрыть сетку">▦ Сетка</button>
     </div>
 
     <div class="canvas-area" id="canvasArea">
       <div class="sampling-banner" id="samplingBanner">✎ Кликните на материал для выбора цвета — Esc для отмены</div>
       <div class="draw-banner" id="drawBanner">✎ Нарисуйте рамку вокруг объекта — Esc для отмены</div>
-      <div id="canvas-container" style="display:none"
-           ondragover="event.preventDefault()"
-           ondrop="handleFurnitureDrop(event)"></div>
+      <div id="canvas-container" style="display:none"></div>
 
       <!-- Placeholder -->
-      <div class="placeholder" id="placeholder"
-           ondragover="event.preventDefault();this.style.borderColor='var(--lime)'"
-           ondragleave="this.style.borderColor=''"
-           ondrop="event.preventDefault();this.style.borderColor='';const f=event.dataTransfer.files[0];if(f)loadImageFile(f)">
+      <div class="placeholder" id="placeholder">
         <div class="placeholder-icon">🛁</div>
         <h3>Загрузите рендер</h3>
         <p>AI обнаружит объекты — ванну, душ, унитаз, раковину — и сделает их перетаскиваемыми. Также можно изменить стиль комнаты через AI.</p>
-        <label style="display:inline-block;margin:12px 0 4px;padding:8px 22px;background:rgba(204,255,0,0.1);border:1px solid var(--lime);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--lime)" for="fileInput">
-          ↑ Выбрать файл
-        </label>
-        <p style="font-size:11px;color:var(--muted);margin:0">или перетащите изображение сюда</p>
-        <div class="placeholder-steps" style="margin-top:16px">
+        <div class="placeholder-steps">
           <div class="step"><b>1</b> Загрузить</div>
           <div class="step"><b>2</b> Найти объекты</div>
           <div class="step"><b>3</b> Перетащить</div>
@@ -1792,26 +1752,96 @@ function applyHdResult(tool) {
 }
 
 // 1. Creative Redesign
+// Style prompts for full Replicate redesign (Extreme mode)
+const RESTYLE_PROMPTS = {
+  'Modern':       'modern interior design, contemporary style, clean smooth walls, sleek finishes, neutral palette',
+  'Minimalist':   'minimalist interior design, clean white smooth plaster walls, minimal furniture, no decoration, bright airy',
+  'Scandinavian': 'scandinavian interior design, white smooth walls, light oak wood, natural light, cozy',
+  'Industrial':   'industrial loft interior, smooth concrete walls, metal fixtures, open space, dark tones',
+  'Japandi':      'japandi interior design, japanese minimalism, warm wood tones, zen, natural textures',
+  'Luxury':       'luxury interior design, marble surfaces, gold accents, high-end finishes, elegant chandelier'
+};
+const RESTYLE_NEG = 'brick wall, rough stone, old texture, dirty walls, peeling paint, damaged, watermark, text, logo';
+
 async function hdCreativeRedesign() {
   if (!originalImage) { setHdStatus('restyle','Загрузите рендер','error'); return; }
   setHdStatus('restyle','Генерация стиля...','loading',true);
   try {
-    const data = await callHdApi('creative_redesign', {
-      image: getOriginalBase64(),
-      design_type: 'Interior',
-      room_type: 'Bathroom',
-      design_style: selectedStyle,
-      ai_intervention: selectedAiLevel,
-      no_design: 1
-    });
-    if (data._url) {
-      showHdResult('restyle', data._url);
-      setHdStatus('restyle','✓ Готово','success');
+    if (selectedAiLevel === 'Extreme') {
+      // Full style transformation via Replicate — completely replaces walls, materials
+      await hdFullRestyleReplicate();
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('restyle', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      // Structure-preserving via homedesigns.ai (keeps room geometry)
+      const data = await callHdApi('creative_redesign', {
+        image: getOriginalBase64(),
+        design_type: 'Interior',
+        room_type: 'Bathroom',
+        design_style: selectedStyle,
+        ai_intervention: selectedAiLevel,
+        no_design: 1
+      });
+      if (data._url) {
+        showHdResult('restyle', data._url);
+        setHdStatus('restyle','✓ Готово','success');
+      } else {
+        const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
+        setHdStatus('restyle', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      }
     }
   } catch(e) { setHdStatus('restyle',`Ошибка: ${e.message}`,'error'); }
+}
+
+async function hdFullRestyleReplicate() {
+  const base64 = getOriginalBase64(1024);
+  const prompt = (RESTYLE_PROMPTS[selectedStyle] || 'modern minimalist interior design, clean walls') +
+    ', photorealistic, 8k, professional interior photography, high quality';
+
+  setHdStatus('restyle','Запускаем полную трансформацию...','loading',true);
+
+  const createResp = await fetch(`${API_BASE}/api/replicate`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      version: '76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38',
+      input: {
+        image: base64,
+        prompt: prompt,
+        negative_prompt: RESTYLE_NEG,
+        num_inference_steps: 50,
+        guidance_scale: 15,
+        prompt_strength: 0.9
+      }
+    })
+  });
+
+  const predData = await createResp.json();
+  if (!predData.id) {
+    // Fallback to homedesigns.ai if Replicate fails
+    setHdStatus('restyle','Запасной вариант...','loading',true);
+    const data = await callHdApi('creative_redesign', {
+      image: getOriginalBase64(), design_type:'Interior', room_type:'Bathroom',
+      design_style: selectedStyle, ai_intervention:'Extreme', no_design:1
+    });
+    if (data._url) { showHdResult('restyle', data._url); setHdStatus('restyle','✓ Готово','success'); }
+    else throw new Error(data.message || 'Ошибка API');
+    return;
+  }
+
+  setHdStatus('restyle','Генерация... (~30 сек)','loading',true);
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const st = await (await fetch(`${API_BASE}/api/replicate/${predData.id}`)).json();
+    if (st.status === 'succeeded') {
+      const url = Array.isArray(st.output) ? st.output[0] : st.output;
+      if (url) { showHdResult('restyle', url); setHdStatus('restyle','✓ Готово','success'); return; }
+    }
+    if (st.status === 'failed' || st.status === 'canceled') {
+      throw new Error('Модель не справилась. Попробуйте ещё раз.');
+    }
+    const elapsed = Math.round((i+1)*3);
+    setHdStatus('restyle',`Генерация... ${elapsed} сек`,'loading',true);
+  }
+  throw new Error('Таймаут. Попробуйте снова.');
 }
 
 // 2. Change Color & Textures
@@ -2124,52 +2154,37 @@ function addCustomItem(input) {
 // ══════════════════════════════════════════════════════
 // File upload
 // ══════════════════════════════════════════════════════
-function loadImageFile(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    setStatus('Выберите файл изображения (JPG, PNG, WebP)', 'error'); return;
-  }
-  setStatus('Загрузка...', 'loading', true);
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onerror = () => setStatus('Ошибка чтения файла', 'error');
   reader.onload = (e) => {
     const img = new Image();
-    img.onerror = () => setStatus('Не удалось открыть изображение', 'error');
     img.onload = () => {
-      try {
-        originalImage = img;
-        const maxW = Math.max(STAGE_MAX_W(), 300);
-        const maxH = Math.max(STAGE_MAX_H(), 300);
-        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-        const w = Math.max(Math.round(img.width * scale), 100);
-        const h = Math.max(Math.round(img.height * scale), 100);
-        initStage(w, h);
-        bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
-        bgLayer.draw();
-        detectedObjects = []; initialPositions = []; activeObjectId = null; savedPositions = {};
-        customItems = [];
-        objectsLayer.destroyChildren(); objectsLayer.draw();
-        document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
-        setStatus('✓ Изображение загружено', 'success');
-        setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
-        const cacheC = document.createElement('canvas');
-        cacheC.width = img.width; cacheC.height = img.height;
-        cacheC.getContext('2d').drawImage(img, 0, 0);
-        originalImgData = cacheC.getContext('2d').getImageData(0, 0, img.width, img.height);
-        zones = [];
-        renderZonesList();
-      } catch(err) {
-        setStatus('Ошибка загрузки: ' + err.message, 'error');
-        console.error('handleFileUpload error', err);
-      }
+      originalImage = img;
+      const scale = Math.min(STAGE_MAX_W() / img.width, STAGE_MAX_H() / img.height, 1);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      initStage(w, h);
+      bgLayer.add(new Konva.Image({ image: img, width: w, height: h }));
+      bgLayer.draw();
+      detectedObjects = []; initialPositions = []; activeObjectId = null; savedPositions = {};
+      objectsLayer.destroyChildren(); objectsLayer.draw();
+      document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
+      setStatus('Изображение загружено', 'success');
+      setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
+      // Cache original pixels for zone-based recoloring
+      const cacheC = document.createElement('canvas');
+      cacheC.width = img.width; cacheC.height = img.height;
+      cacheC.getContext('2d').drawImage(img, 0, 0);
+      originalImgData = cacheC.getContext('2d').getImageData(0, 0, img.width, img.height);
+      // Clear all zones and reset zone UI
+      zones = [];
+      renderZonesList();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-}
-
-function handleFileUpload(input) {
-  const file = input.files[0];
-  if (file) loadImageFile(file);
   input.value = '';
 }
 
@@ -2518,324 +2533,7 @@ function exportImage() {
   a.download = `morrowlab_${Date.now()}.png`;
   a.click();
 }
-
-// ══════════════════════════════════════════════════════
-// Furniture Catalog — data, render, drag & drop
-// ══════════════════════════════════════════════════════
-
-const FURNITURE_CATALOG = {
-  kitchen: { label: 'Кухня', icon: '🍳', items: [
-    { id:'fridge',    name:'Холодильник',     w:60,  h:60,  svg:'M4 2h28v32H4V2zm2 2v28h24V4H6zm4 4h16v8H10v-8zm0 12h16v8H10v-8z' },
-    { id:'stove',     name:'Плита',           w:60,  h:60,  svg:'M4 2h28v32H4V2zm2 2v28h24V4H6zm4 6a4 4 0 108 0 4 4 0 00-8 0zm12 0a4 4 0 108 0 4 4 0 00-8 0zm-12 14a4 4 0 108 0 4 4 0 00-8 0zm12 0a4 4 0 108 0 4 4 0 00-8 0z' },
-    { id:'sink_k',    name:'Мойка',           w:50,  h:60,  svg:'M4 4h28v28H4V4zm4 4v20h20V8H8zm4 4a8 8 0 1016 0v12H12V12z' },
-    { id:'cabinet_k', name:'Шкаф нижний',     w:60,  h:35,  svg:'M2 2h32v28H2V2zm2 2v24h28V4H4zm12 2h4v20h-4V6z' },
-    { id:'table_k',   name:'Стол обеденный',  w:120, h:80,  svg:'M3 3h30v26H3V3zm2 2v22h26V5H5z' },
-  ]},
-  bathroom: { label: 'Ванная', icon: '🛁', items: [
-    { id:'bathtub',   name:'Ванна',           w:170, h:70,  svg:'M2 6c0-2 2-4 4-4h24c2 0 4 2 4 4v20c0 4-3 7-7 7H9c-4 0-7-3-7-7V6zm4 0v20c0 2 1 3 3 3h18c2 0 3-1 3-3V6c0-1-1-2-2-2H8c-1 0-2 1-2 2z' },
-    { id:'shower',    name:'Душевая кабина',  w:90,  h:90,  svg:'M2 2h32v32H2V2zm2 2v28h28V4H4zm2 2h24v24H6V6zm10 4a6 6 0 100 12 6 6 0 000-12z' },
-    { id:'toilet',    name:'Унитаз',          w:37,  h:60,  svg:'M8 2h20v6H8V2zm-2 8c0-1 1-2 2-2h20c1 0 2 1 2 2v10c0 8-5 14-12 14S6 28 6 20V10zm12 4a6 6 0 100 12 6 6 0 000-12z' },
-    { id:'sink_b',    name:'Раковина',        w:50,  h:40,  svg:'M4 8h28v4c0 10-6 18-14 18S4 22 4 12V8zm14 4a8 8 0 10-1 16 8 8 0 001-16z' },
-    { id:'washer',    name:'Стир. машина',    w:60,  h:60,  svg:'M4 2h28v32H4V2zm2 2v28h24V4H6zm10 8a8 8 0 100 16 8 8 0 000-16zm0 3a5 5 0 110 10 5 5 0 010-10z' },
-  ]},
-  bedroom: { label: 'Спальня', icon: '🛏', items: [
-    { id:'bed_double',name:'Кровать 2-сп.',   w:160, h:200, svg:'M2 4h32v24H2V4zm2 2v20h28V6H4zm2 2h10v6H6V8zm16 0h10v6H22V8z' },
-    { id:'bed_single',name:'Кровать 1-сп.',   w:90,  h:200, svg:'M4 4h28v24H4V4zm2 2v20h24V6H6zm2 2h8v6H8V8z' },
-    { id:'wardrobe',  name:'Шкаф-купе',       w:120, h:60,  svg:'M2 2h32v28H2V2zm2 2v24h28V4H4zm14 0v24M11 10v12m14-12v12' },
-    { id:'nightstand',name:'Тумбочка',        w:45,  h:40,  svg:'M4 4h28v24H4V4zm2 2v20h24V6H6zm4 4h16v4H10v-4zm0 8h16v4H10v-4z' },
-  ]},
-  living: { label: 'Гостиная', icon: '🛋', items: [
-    { id:'sofa',      name:'Диван',           w:200, h:90,  svg:'M2 8h32v18H2V8zm2 2v14h28V10H4zm2 0v10h4V10H6zm20 0v10h4V10h-4zM10 20h16v4H10v-4z' },
-    { id:'table_l',   name:'Журн. столик',    w:100, h:60,  svg:'M4 6h28v20H4V6zm2 2v16h24V8H6z' },
-    { id:'tv_stand',  name:'ТВ-тумба',        w:150, h:40,  svg:'M2 4h32v24H2V4zm2 2v20h28V6H4zm4 4h8v12H8v-12zm12 0h8v12h-8v-12z' },
-    { id:'bookshelf', name:'Стеллаж',         w:80,  h:35,  svg:'M2 2h32v28H2V2zm2 2v24h28V4H4zm0 8h28M4 20h28m-14-16v24' },
-  ]},
-  office: { label: 'Офис', icon: '💼', items: [
-    { id:'desk',      name:'Стол рабочий',    w:140, h:70,  svg:'M2 4h32v24H2V4zm2 2v20h28V6H4zm2 14h10v6H6v-6z' },
-    { id:'chair',     name:'Кресло',          w:50,  h:50,  svg:'M10 4a8 8 0 1016 0v4H10V4zM8 10h20v12c0 4-4 8-10 8s-10-4-10-8V10z' },
-    { id:'filing',    name:'Шкаф для док.',   w:80,  h:40,  svg:'M4 2h28v28H4V2zm2 2v24h24V4H6zm2 4h20v4H8V8zm0 8h20v4H8v-4zm0 8h20v4H8v-4z' },
-  ]},
-};
-
-let placedFurniture = [];
-let selectedFurnitureId = null;
-let gridLayer = null;
-let gridVisible = false;
-const GRID_SNAP = 10; // 10px snap
-
-// Render catalog in sidebar
-function renderFurnitureCatalog() {
-  const container = document.getElementById('furnitureCatalog');
-  if (!container) return;
-  container.innerHTML = Object.entries(FURNITURE_CATALOG).map(([catId, cat]) => `
-    <div class="furn-cat" id="fcat-${catId}">
-      <div class="furn-cat-header" onclick="toggleFurnCat('${catId}')">
-        <div class="furn-cat-icon">${cat.icon}</div>
-        <span class="furn-cat-label">${cat.label}</span>
-        <span class="furn-cat-count">${cat.items.length}</span>
-        <svg class="furn-cat-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
-      </div>
-      <div class="furn-cat-body">
-        <div class="furn-grid">
-          ${cat.items.map(item => `
-            <div class="furn-item" draggable="true"
-                 data-type="${item.id}" data-w="${item.w}" data-h="${item.h}"
-                 ondragstart="onFurnDragStart(event,'${item.id}')">
-              <div class="furn-item-icon">
-                <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
-                  <path d="${item.svg}"/>
-                </svg>
-              </div>
-              <div class="furn-item-name">${item.name}</div>
-              <div class="furn-item-size">${item.w}×${item.h} см</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function toggleFurnCat(catId) {
-  const el = document.getElementById(`fcat-${catId}`);
-  if (!el) return;
-  const wasOpen = el.classList.contains('open');
-  document.querySelectorAll('.furn-cat').forEach(c => c.classList.remove('open'));
-  if (!wasOpen) el.classList.add('open');
-}
-
-// Drag from catalog
-function onFurnDragStart(e, itemId) {
-  e.dataTransfer.setData('furniture-id', itemId);
-  e.dataTransfer.effectAllowed = 'copy';
-}
-
-// Drop on canvas
-function handleFurnitureDrop(e) {
-  e.preventDefault();
-  const itemId = e.dataTransfer.getData('furniture-id');
-  if (!itemId || !stage) return;
-
-  const item = findCatalogItem(itemId);
-  if (!item) return;
-
-  const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
-  const x = snapToGrid(e.clientX - containerRect.left - item.w / 2);
-  const y = snapToGrid(e.clientY - containerRect.top - item.h / 2);
-
-  placeFurnitureOnCanvas(item, x, y);
-}
-
-function findCatalogItem(id) {
-  for (const cat of Object.values(FURNITURE_CATALOG)) {
-    const item = cat.items.find(i => i.id === id);
-    if (item) return item;
-  }
-  return null;
-}
-
-function snapToGrid(val) {
-  return Math.round(val / GRID_SNAP) * GRID_SNAP;
-}
-
-function placeFurnitureOnCanvas(item, x, y) {
-  const furnId = 'furn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-
-  const group = new Konva.Group({
-    x: x, y: y, draggable: true, id: furnId,
-    name: 'furnitureGroup'
-  });
-
-  // Background rect
-  const rect = new Konva.Rect({
-    width: item.w, height: item.h,
-    fill: 'rgba(204,255,0,0.12)',
-    stroke: 'rgba(204,255,0,0.5)',
-    strokeWidth: 1,
-    cornerRadius: 2,
-    name: 'furnRect'
-  });
-  group.add(rect);
-
-  // SVG icon via Konva.Path — scale to fit
-  const iconPad = 4;
-  const iconScale = Math.min((item.w - iconPad * 2) / 36, (item.h - iconPad * 2) / 36, 1);
-  const iconOffX = (item.w - 36 * iconScale) / 2;
-  const iconOffY = (item.h - 36 * iconScale) / 2;
-  group.add(new Konva.Path({
-    data: item.svg,
-    fill: 'rgba(204,255,0,0.6)',
-    x: iconOffX, y: iconOffY,
-    scaleX: iconScale, scaleY: iconScale,
-    listening: false
-  }));
-
-  // Label below
-  group.add(new Konva.Text({
-    text: item.name,
-    fontSize: 9, fill: '#ffffff',
-    x: 0, y: item.h + 2,
-    width: item.w, align: 'center',
-    listening: false, name: 'furnLabel'
-  }));
-
-  // Size label
-  group.add(new Konva.Text({
-    text: `${item.w}×${item.h}`,
-    fontSize: 8, fill: 'rgba(255,255,255,0.4)',
-    x: 0, y: item.h + 12,
-    width: item.w, align: 'center',
-    listening: false
-  }));
-
-  // Snap on drag
-  group.on('dragmove', () => {
-    group.x(snapToGrid(group.x()));
-    group.y(snapToGrid(group.y()));
-  });
-
-  // Click to select
-  group.on('click tap', (e) => {
-    e.cancelBubble = true;
-    selectFurniture(furnId);
-  });
-
-  group.on('mouseover', () => { document.body.style.cursor = 'grab'; });
-  group.on('mouseout',  () => { document.body.style.cursor = 'default'; });
-  group.on('dragstart', () => { document.body.style.cursor = 'grabbing'; group.moveToTop(); });
-  group.on('dragend',   () => { document.body.style.cursor = 'default'; });
-
-  objectsLayer.add(group);
-  objectsLayer.batchDraw();
-
-  placedFurniture.push({ id: furnId, itemId: item.id, group });
-  selectFurniture(furnId);
-}
-
-// Selection
-function selectFurniture(furnId) {
-  const prevId = selectedFurnitureId;
-  selectedFurnitureId = (prevId === furnId) ? null : furnId;
-
-  // Update visual — highlight selected
-  objectsLayer.find('.furnitureGroup').forEach(g => {
-    const r = g.findOne('.furnRect');
-    if (!r) return;
-    if (g.id() === selectedFurnitureId) {
-      r.stroke('#CCFF00');
-      r.strokeWidth(2);
-      r.fill('rgba(204,255,0,0.2)');
-    } else {
-      r.stroke('rgba(204,255,0,0.5)');
-      r.strokeWidth(1);
-      r.fill('rgba(204,255,0,0.12)');
-    }
-  });
-  objectsLayer.batchDraw();
-}
-
-// Keyboard: R=rotate, Delete=remove, Escape=deselect
-document.addEventListener('keydown', (e) => {
-  if (!selectedFurnitureId) return;
-
-  if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') {
-    const g = stage && stage.findOne(`#${selectedFurnitureId}`);
-    if (g) {
-      const rect = g.findOne('.furnRect');
-      if (rect) {
-        const w = rect.width();
-        const h = rect.height();
-        // Set offset to center, rotate around center
-        if (g.offsetX() === 0) {
-          g.offsetX(w / 2);
-          g.offsetY(h / 2);
-          g.x(g.x() + w / 2);
-          g.y(g.y() + h / 2);
-        }
-        g.rotation((g.rotation() + 90) % 360);
-      }
-      objectsLayer.batchDraw();
-    }
-    e.preventDefault();
-  }
-
-  if (e.key === 'Delete' || e.key === 'Backspace') {
-    // Don't delete if user is typing in an input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-    const g = stage && stage.findOne(`#${selectedFurnitureId}`);
-    if (g) {
-      g.destroy();
-      placedFurniture = placedFurniture.filter(f => f.id !== selectedFurnitureId);
-      selectedFurnitureId = null;
-      objectsLayer.batchDraw();
-    }
-    e.preventDefault();
-  }
-
-  if (e.key === 'Escape') {
-    selectFurniture(selectedFurnitureId); // toggles off
-  }
-});
-
-// ══════════════════════════════════════════════════════
-// Grid Layer
-// ══════════════════════════════════════════════════════
-
-function createGridLayer() {
-  if (gridLayer) gridLayer.destroy();
-  if (!stage) return;
-
-  gridLayer = new Konva.Layer({ listening: false });
-  const w = stage.width();
-  const h = stage.height();
-
-  // Major lines every 50px (= 50cm), minor every 10px
-  for (let x = 0; x <= w; x += GRID_SNAP) {
-    const isMajor = x % 50 === 0;
-    gridLayer.add(new Konva.Line({
-      points: [x, 0, x, h],
-      stroke: isMajor ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
-      strokeWidth: isMajor ? 0.5 : 0.3,
-    }));
-  }
-  for (let y = 0; y <= h; y += GRID_SNAP) {
-    const isMajor = y % 50 === 0;
-    gridLayer.add(new Konva.Line({
-      points: [0, y, w, y],
-      stroke: isMajor ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)',
-      strokeWidth: isMajor ? 0.5 : 0.3,
-    }));
-  }
-
-  // Insert between bgLayer and objectsLayer
-  stage.add(gridLayer);
-  gridLayer.moveToBottom();
-  if (bgLayer) bgLayer.moveToBottom();
-  gridLayer.visible(gridVisible);
-}
-
-function toggleGrid() {
-  gridVisible = !gridVisible;
-  const btn = document.getElementById('btnGrid');
-  btn.classList.toggle('active', gridVisible);
-  if (gridLayer) {
-    gridLayer.visible(gridVisible);
-    gridLayer.batchDraw();
-  }
-}
-
-// Re-create grid when stage is initialized
-const _origInitStage = initStage;
-initStage = function(w, h) {
-  _origInitStage(w, h);
-  createGridLayer();
-  // Clear placed furniture on new image
-  placedFurniture = [];
-  selectedFurnitureId = null;
-};
-
-// Init catalog on page load
-renderFurnitureCatalog();
 </script>
+<script src="/support-widget.js"></script>
 </body>
 </html>

@@ -33,8 +33,8 @@ def cors(r):
     if origin in ALLOWED_ORIGINS:
         r.headers['Access-Control-Allow-Origin'] = origin
         r.headers['Access-Control-Allow-Credentials'] = 'true'
-    r.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        r.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return r
 
 app.after_request(cors)

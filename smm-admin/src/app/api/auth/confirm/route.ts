@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { consumeMagicToken, signToken } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 import pool from "@/lib/db";
 
 // GET — redirect to the confirm page which will POST the token
@@ -14,6 +16,11 @@ export async function GET(req: NextRequest) {
 
 // POST — actually consume the token and set cookie
 export async function POST(req: NextRequest) {
+  const ip = (await headers()).get("x-forwarded-for") ?? "unknown";
+  if (!rateLimit(ip, 10, 60000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { token } = await req.json();
 
   if (!token) {
