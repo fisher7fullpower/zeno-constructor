@@ -303,29 +303,28 @@ def homedesigns_v2(endpoint):
     if endpoint not in HOMEDESIGNS_ALLOWED_ENDPOINTS:
         return jsonify({'error': 'Unknown endpoint'}), 400
     data = request.get_json(force=True) or {}
-    form_fields = {}
+    json_payload = {}
     for key, value in data.items():
         if key not in HOMEDESIGNS_ALLOWED_FIELDS:
             continue
-        if isinstance(value, bool):
-            form_fields[key] = 'True' if value else 'False'
-        elif isinstance(value, (int, float)):
-            form_fields[key] = str(value)
-        else:
-            form_fields[key] = value
-    hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
+        # Strip data URL prefix from image so API receives pure base64
+        if key == 'image' and isinstance(value, str) and value.startswith('data:'):
+            comma = value.find(',')
+            value = value[comma + 1:] if comma != -1 else value
+        json_payload[key] = value
+    hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN, 'Content-Type': 'application/json'}
     try:
         resp = requests.post(
             f'https://homedesigns.ai/api/v2/{endpoint}',
             headers=hd_headers,
-            data=form_fields,
+            json=json_payload,
             timeout=120
         )
         try:
             rj = resp.json()
             if resp.status_code != 200:
                 import sys
-                print(f'[homedesigns] {endpoint} → {resp.status_code}: fields={list(form_fields.keys())} body={str(rj)[:300]}', file=sys.stderr, flush=True)
+                print(f'[homedesigns] {endpoint} → {resp.status_code}: fields={list(json_payload.keys())} body={str(rj)[:300]}', file=sys.stderr, flush=True)
             return jsonify(rj), resp.status_code
         except Exception:
             return jsonify({'success': False, 'message': 'Invalid response from upstream'}), resp.status_code
