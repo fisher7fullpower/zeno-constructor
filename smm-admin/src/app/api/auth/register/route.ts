@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (existing.length > 0) {
       // Send magic link for existing user
       const token = await createMagicToken(normalizedEmail, "login");
-      const link = `${APP_URL}/api/auth/confirm?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+      const link = `${APP_URL}/api/auth/confirm?token=${token}`;
       await sendMagicEmail(normalizedEmail, link, false);
       return NextResponse.json({ sent: true });
     }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // Send magic link
     const token = await createMagicToken(normalizedEmail, "register");
-    const link = `${APP_URL}/api/auth/confirm?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+    const link = `${APP_URL}/api/auth/confirm?token=${token}`;
     await sendMagicEmail(normalizedEmail, link, true, plan);
 
     return NextResponse.json({ sent: true });
@@ -81,8 +81,10 @@ async function sendMagicEmail(to: string, link: string, isNew: boolean, plan?: s
     ? "Добро пожаловать в SMM Admin — войдите по ссылке"
     : "Ссылка для входа — SMM Admin";
 
+  const safePlan = plan ? plan.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+
   const description = isNew
-    ? `Аккаунт успешно создан!${plan ? ` Пакет: <strong>${plan}</strong>.` : ""} Нажмите кнопку ниже для входа.`
+    ? `Аккаунт успешно создан!${safePlan ? ` Пакет: <strong>${safePlan}</strong>.` : ""} Нажмите кнопку ниже для входа.`
     : "Аккаунт уже существует. Нажмите кнопку ниже для входа без пароля.";
 
   await fetch("https://api.resend.com/emails", {

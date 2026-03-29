@@ -121,13 +121,16 @@ def replicate_create():
         if url:
             inp['image'] = url
     # Only forward safe fields
+    version = data.get('version', '')
+    if not isinstance(version, str) or not re.match(r'^[a-f0-9]{64}$', version):
+        return jsonify({'error': 'Invalid version'}), 400
     safe_data = {
-        'version': data['version'],
+        'version': version,
         'input': inp,
     }
     if 'webhook' in data:
         wh_parsed = urlparse(data['webhook'])
-        if wh_parsed.hostname and any(
+        if wh_parsed.scheme == 'https' and wh_parsed.hostname and any(
             wh_parsed.hostname == d or wh_parsed.hostname.endswith('.' + d)
             for d in ('morrowlab.by', 'zenohome.by')
         ):
@@ -235,9 +238,10 @@ def proxy_image():
         from flask import Response as FlaskResponse
         content_type = resp.headers.get('content-type', 'image/png')
         # Only proxy image content types
-        if not content_type.startswith(('image/', 'application/octet-stream')):
+        if not content_type.startswith('image/'):
             return jsonify({'error': 'Not an image'}), 400
         r = FlaskResponse(resp.content, content_type=content_type)
+        r.headers['X-Content-Type-Options'] = 'nosniff'
         origin = request.headers.get('Origin', '')
         if origin in ALLOWED_ORIGINS:
             r.headers['Access-Control-Allow-Origin'] = origin

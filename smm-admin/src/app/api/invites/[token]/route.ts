@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     user = await createUser(invite.email, password, invite.role === "owner" ? "admin" : "client");
   } catch {
     // User already exists - look them up
-    const existing = await pool.query("SELECT id FROM users WHERE email = $1", [invite.email.toLowerCase()]);
+    const existing = await pool.query("SELECT id, email, role FROM users WHERE email = $1", [invite.email.toLowerCase()]);
     if (existing.rows.length === 0) {
       return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
     }

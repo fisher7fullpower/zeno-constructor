@@ -329,6 +329,58 @@
 
 ---
 
+## 9. Раунд 3 — повторный review (2026-03-29)
+
+### 9.1 morrowlab.by (3 HIGH, 3 MEDIUM, 4 LOW)
+
+#### HIGH (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R3-H1 | **Blog card XSS** — `meta_title`, `excerpt` без `esc()` в card template | pages/blog.html | ✅ `esc()` на все поля |
+| R3-H2 | **Constructor setStatus XSS** — `e.message` через innerHTML | pages/constructor.html | ✅ Escaping в setStatus/setRestyleStatus |
+| R3-H3 | **prompt() name XSS** — user input через setStatus innerHTML | pages/constructor.html | ✅ Покрыто R3-H2 |
+
+#### MEDIUM (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R3-M1 | **Replicate version** без валидации формата | proxy.py | ✅ Regex `^[a-f0-9]{64}$` |
+| R3-M2 | **Webhook URL** без проверки scheme | proxy.py | ✅ `wh_parsed.scheme == 'https'` |
+| R3-M3 | **proxy-image** пропускает `octet-stream`, нет nosniff | proxy.py | ✅ Только `image/*` + nosniff header |
+
+#### LOW (4)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R3-L1 | Нет rate limiting в локальном proxy.py | proxy.py | ⏭️ Есть на сервере |
+| R3-L2 | Нет Replicate version allowlist | proxy.py | ⏭️ Format validated |
+| R3-L3 | `.env.example` с префиксами токенов | .env.example | ⏭️ Informational |
+| R3-L4 | Нет version format validation | proxy.py | ✅ = R3-M1 |
+
+### 9.2 SMM admin (0 HIGH, 4 MEDIUM, 3 LOW)
+
+#### HIGH — 0. Все предыдущие фиксы подтверждены.
+
+#### MEDIUM (4)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R3-SM1 | **Email HTML injection** — `plan` без escape в email template | auth/register/route.ts | ✅ HTML-escaped |
+| R3-SM2 | **Нет rate limit на /api/generate** — cost abuse | api/generate/route.ts | ✅ 10/мин/IP |
+| R3-SM3 | **Нет rate limit на invite creation** POST | api/invites/route.ts | ✅ 10/мин/IP |
+| R3-SM4 | **JWT missing claims** — existing user invite returns incomplete token | api/invites/[token]/route.ts | ✅ `SELECT id, email, role` |
+
+#### LOW (3)
+
+| # | Проблема | Файл | Статус |
+|---|---------|------|--------|
+| R3-SL1 | Invite token exposed в API response | api/invites/route.ts | ⏭️ Нужен для UI |
+| R3-SL2 | Media URL from user input в `<img>` src | content/new/page.tsx | ⏭️ Self-input, React escapes |
+| R3-SL3 | Email в magic link URL (unused param) | auth/register/route.ts | ✅ Удалён |
+
+---
+
 ## Общая статистика
 
 | Раунд | Объект | Находок | Исправлено | Отложено |
@@ -340,16 +392,20 @@
 | 1 | Серверная инфраструктура | 6 | 6 | 0 |
 | 2 | morrowlab.by (повторный) | 11 | 6 | 5 |
 | 2 | SMM admin (повторный) | 15 | 10 | 5 |
-| **Итого** | | **102** | **92** | **10** |
+| 3 | morrowlab.by (раунд 3) | 10 | 7 | 3 |
+| 3 | SMM admin (раунд 3) | 7 | 5 | 2 |
+| **Итого** | | **119** | **104** | **15** |
 
-> 10 отложенных — Low risk items, UX issues, или покрыты серверной конфигурацией (nginx, Flask-Limiter).
+> 15 отложенных — Low risk, UX issues, informational, или покрыты серверной конфигурацией.
+> 0 Critical, 0 High остаются открытыми.
 
 ---
 
 ## Коммиты безопасности
 
 ```
-(pending)  Round 2: fix XSS in blog/projects/constructor, rate limiting, safeColumn, workspace access
+(pending)  Round 3: blog card XSS, setStatus escape, version validation, webhook scheme, nosniff, rate limits
+85a2822  Round 2: fix XSS in blog/projects/constructor, rate limiting, safeColumn, workspace access
 ecef17f  Add SECURITY.md: comprehensive security review report (76 findings)
 (filter)  git filter-repo: remove secrets from commit history
 3cdf7fc  SMM admin: remove Postmypost integration, fix all 28 security findings
@@ -363,4 +419,4 @@ a9bfc9c  Fix WebP magic byte validation: check RIFF+WEBP signature, not just RIF
 
 ---
 
-*Документ сгенерирован на основе ручного code review, CodeRabbit CLI v0.3.11, и аудита серверной инфраструктуры. Обновлён 2026-03-29 (раунд 2).*
+*Обновлён 2026-03-29 (раунд 3). Ручной code review + CodeRabbit CLI v0.3.11.*

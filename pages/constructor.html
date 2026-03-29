@@ -1531,11 +1531,13 @@ function renderZonesList() {
   }).join('');
 }
 function setStatus(msg, type='idle', spinner=false) {
+  msg = typeof msg === 'string' ? msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') : msg;
   const el = document.getElementById('statusBar');
   el.className = `status-bar ${type}`;
   el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
 }
 function setRestyleStatus(msg, type='idle', spinner=false) {
+  msg = typeof msg === 'string' ? msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') : msg;
   const el = document.getElementById('restyleStatus');
   el.className = `status-bar ${type}`;
   el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;

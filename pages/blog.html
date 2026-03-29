@@ -171,14 +171,15 @@
       articles = (Array.isArray(data) ? data : data.articles || []).filter(a => a.article);
       if (!articles.length) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; return; }
       const cats = ['Дизайн интерьеров','Материалы','Ремонт','Советы','Тренды 2026'];
+      function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
       document.getElementById('blogArea').innerHTML = '<div class="blog-grid">' + articles.map((a, i) => {
         const excerpt = (a.meta_description || a.article.replace(/<[^>]+>/g,'')).slice(0, 180);
         const cat = cats[i % cats.length];
         return `<div class="blog-card" onclick="openArticle(${i})">
-          <div class="blog-tag">${cat}</div>
-          <div class="blog-title">${a.meta_title || a.topic || 'Статья'}</div>
-          <div class="blog-excerpt">${excerpt}...</div>
-          <div class="blog-meta"><span>${a.generated_at || '2026'} · Morrow Lab</span><span class="blog-read">Читать →</span></div>
+          <div class="blog-tag">${esc(cat)}</div>
+          <div class="blog-title">${esc(a.meta_title || a.topic || 'Статья')}</div>
+          <div class="blog-excerpt">${esc(excerpt)}...</div>
+          <div class="blog-meta"><span>${esc(a.generated_at || '2026')} · Morrow Lab</span><span class="blog-read">Читать →</span></div>
         </div>`;
       }).join('') + '</div>';
     } catch(e) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; }
