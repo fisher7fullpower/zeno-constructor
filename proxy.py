@@ -810,7 +810,7 @@ def api_moodboard():
         return jsonify({'error': 'AI service not configured'}), 503
     data = request.get_json(force=True) or {}
     image_b64 = data.get('image', '')
-    if not image_b64 or not isinstance(image_b64, str) or len(image_b64) > 10_000_000:
+    if not image_b64 or not isinstance(image_b64, str) or len(image_b64) > 13_500_000:
         return jsonify({'error': 'Invalid image'}), 400
     # Extract MIME type and base64 data from data URL
     img_mime = 'image/jpeg'
@@ -822,8 +822,7 @@ def api_moodboard():
     else:
         img_data = image_b64
     try:
-        import base64 as _b64
-        decoded = _b64.b64decode(img_data, validate=True)
+        decoded = base64.b64decode(img_data, validate=True)
         if len(decoded) > 10 * 1024 * 1024:
             return jsonify({'error': 'Image too large'}), 400
     except Exception:
@@ -878,6 +877,7 @@ def api_consultant():
         return jsonify({'error': 'Invalid message'}), 400
     if not isinstance(history, list):
         history = []
+    history = history[-20:]
     system_prompt = (
         'Ты — AI-консультант по дизайну интерьеров и ремонту для платформы Morrow Lab (morrowlab.by). '
         'Отвечай на русском языке, кратко и по существу. '
