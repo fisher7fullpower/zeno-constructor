@@ -651,6 +651,10 @@
     'лофт':'Industrial','классический':'Neoclassical','барокко':'Baroque'
   };
   const EXTERIOR_NICHES = new Set(['экстерьер','терраса','беседка']);
+  const EXTERIOR_STYLE_MAP = {
+    'минимализм':'Modern','современный':'Contemporary','скандинавский':'Modern Scandinavian',
+    'лофт':'Urban Industrial','классический':'Neo Classical','барокко':'Baroque'
+  };
 
   // header scroll
   window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', scrollY > 10));
@@ -768,8 +772,8 @@
       }, 800);
 
       const roomType = NICHE_MAP[selectedNiche] || 'Living Room';
-      const hdStyle = STYLE_MAP[selectedStyle] || 'Modern';
       const isExterior = EXTERIOR_NICHES.has(selectedNiche);
+      const hdStyle = isExterior ? (EXTERIOR_STYLE_MAP[selectedStyle] || 'Modern') : (STYLE_MAP[selectedStyle] || 'Modern');
 
       const resp = await fetch('/api/homedesigns/v2/creative_redesign', {
         method: 'POST',
