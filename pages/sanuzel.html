@@ -706,7 +706,21 @@
     try {
       const fileDataUrl = await new Promise((res, rej) => {
         const r = new FileReader();
-        r.onload = e => res(e.target.result); r.onerror = rej;
+        r.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const maxPx = 1024;
+            const scale = Math.min(maxPx / img.width, maxPx / img.height, 1);
+            const c = document.createElement('canvas');
+            c.width = Math.round(img.width * scale);
+            c.height = Math.round(img.height * scale);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            res(c.toDataURL('image/jpeg', 0.88));
+          };
+          img.onerror = rej;
+          img.src = e.target.result;
+        };
+        r.onerror = rej;
         r.readAsDataURL(fileInput.files[0]);
       });
 
