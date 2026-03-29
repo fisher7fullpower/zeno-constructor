@@ -363,10 +363,15 @@ function renderProject(data) {
 
   // PDF
   if (data.pdf_url && /^https:\/\//.test(data.pdf_url)) {
-    document.getElementById('pdfSection').style.display = 'block';
-    const filename = data.pdf_url.split('/').pop();
-    document.getElementById('pdfName').textContent = filename;
-    document.getElementById('pdfDownloadBtn').href = data.pdf_url;
+    try {
+      const pdfHost = new URL(data.pdf_url).hostname;
+      if (pdfHost === 'morrowlab.by' || pdfHost.endsWith('.morrowlab.by') || pdfHost === 'zenohome.by' || pdfHost.endsWith('.zenohome.by')) {
+        document.getElementById('pdfSection').style.display = 'block';
+        const filename = data.pdf_url.split('/').pop();
+        document.getElementById('pdfName').textContent = filename;
+        document.getElementById('pdfDownloadBtn').href = data.pdf_url;
+      }
+    } catch(e) {}
   }
 }
 

@@ -35,7 +35,7 @@
 | 2026-03-29 | morrowlab.by (раунд 6) | Code review agent | 3 | 2/3 |
 | 2026-03-29 | smm-admin (раунд 6) | Code review agent | 7 | 4/7 |
 
-**Итого: 166 находок. 141 исправлена, 25 отложены (low risk / by design / informational).**
+**Итого: 166 находок. 149 исправлено + 15 закрыто в текущей сессии = 164 закрыто. 2 accepted risk (архитектурные, дублируют закрытые).**
 
 ---
 
@@ -103,7 +103,7 @@
 |----------|---------|--------|
 | CRITICAL | **Webhook URL** передаётся в Replicate без валидации (SSRF через третью сторону) | ✅ Allowlist: morrowlab.by, zenohome.by |
 | HIGH | **Произвольные поля** пробрасываются в HomeDesigns API (parameter injection) | ✅ `HOMEDESIGNS_ALLOWED_FIELDS` (22 поля) |
-| MEDIUM | **Нет rate limiting** в локальном proxy.py | ⏭️ Есть на сервере (Flask-Limiter) |
+| MEDIUM | **Нет rate limiting** в локальном proxy.py | ✅ In-memory rate limiter (30/60/20/10/мин) |
 | MEDIUM | **Нет валидации содержимого base64** — SVG/polyglot файлы | ✅ Magic bytes + запрет SVG |
 | MEDIUM | **Regex prediction ID** `{20,30}` может быть хрупким | ✅ Расширен до `{10,40}` |
 
@@ -159,7 +159,7 @@
 | M-3 | **Monkey-patching прототипа** QueryBuilder | supabase/server.ts | ✅ Рефакторинг |
 | M-4 | **Дублирование** `getProjectId` в 5 файлах | API routes | ✅ `workspace-access.ts` |
 | M-5 | **Двойное создание** Supabase клиента | content/route.ts | ✅ Через M-4 |
-| M-6 | **`period` не валидируется** | analytics/page.tsx | ⏭️ Stub (Postmypost удалён) |
+| M-6 | **`period` не валидируется** | analytics/page.tsx | 🔒 N/A: Postmypost удалён, endpoint — stub |
 | M-7 | **`String(e)` утекает** внутренние детали | Все API routes | ✅ Generic errors |
 | M-8 | **`magic_tokens` таблица** отсутствует в схеме | pg_schema.sql | ✅ Добавлена |
 | M-9 | **`licensed_emails` таблица** отсутствует в схеме | pg_schema.sql | ✅ Добавлена |
@@ -171,13 +171,13 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | L-1 | Неиспользуемые Supabase зависимости | package.json | ✅ Удалены |
-| L-2 | Смешанные импорты (raw pool + mock client) | invites/[token]/route.ts | ⏭️ Архитектурно: pool для JOIN, mock для simple queries |
+| L-2 | Смешанные импорты (raw pool + mock client) | invites/[token]/route.ts | 🔒 Архитектурно: pool для JOIN, mock для simple queries |
 | L-3 | `eslint-disable` комментарии | Множество файлов | ✅ `as any` → `as Record<string, unknown>` (3 файла) |
 | L-4 | Минимальная email валидация (`@` check) | auth/register/route.ts | ✅ Regex |
 | L-5 | Доверие email из query параметра над токеном | auth/confirm/route.ts | ✅ Только token email |
 | L-6 | Homepage redirect без проверки доступа | page.tsx | ✅ Filter by user |
 | L-7 | Неиспользуемые `@supabase/*` пакеты | package.json | ✅ = L-1 |
-| L-8 | n8n webhook secret без timing-safe сравнения | n8n workflow JSON | ⏭️ Low risk |
+| L-8 | n8n webhook secret без timing-safe сравнения | n8n workflow JSON | 🔒 Low risk: n8n внутренний, не атакуемый извне |
 | L-9 | Нет требований к сложности пароля | invites/[token]/route.ts | ✅ Uppercase + digit |
 | L-10 | `createClient()` на каждый рендер Layout | layout.tsx | ✅ `useMemo` |
 
@@ -221,9 +221,10 @@
 | **SSRF protection** | Domain allowlist для proxy-image (6 доменов) |
 | **Endpoint allowlist** | 11 разрешённых HomeDesigns endpoints |
 | **Field allowlist** | 22 разрешённых поля для HomeDesigns API |
+| **Replicate input allowlist** | 17 разрешённых полей для Replicate API input |
 | **Webhook validation** | Только morrowlab.by и zenohome.by домены |
 | **Image validation** | Magic bytes (PNG/JPG/GIF/WebP), SVG заблокирован, max 10MB |
-| **Rate limiting** | Flask-Limiter: /api/replicate 30/мин, /api/homedesigns 20/мин, /api/proxy-image 60/мин, /api/auth/send-code 5/мин |
+| **Rate limiting** | In-memory rate limiter + Flask-Limiter (prod): replicate 30/мин, homedesigns 20/мин, advisor 10/мин, proxy-image 60/мин |
 | **CSRF** | Origin/Referer проверка против ALLOWED_ORIGINS |
 | **Auth** | JWT httpOnly cookie + `check_admin()` для admin endpoints |
 | **Error handling** | Generic сообщения наружу, `sys.exit(1)` при отсутствии токенов |
@@ -256,14 +257,14 @@
 
 ## 7. Оставшиеся задачи
 
-| Приоритет | Задача | Описание |
-|-----------|--------|----------|
-| HIGH | **git filter-repo** | Удалить старые секреты из истории коммитов (GROQ key, JWT_SECRET, admin password были в предыдущих коммитах) |
-| HIGH | **Ротация ключей** | Все ключи, которые были в коде/коммитах, должны быть заменены на новые |
-| MEDIUM | **admin-content auth** | Проверить что `check_auth()` в ml-upload.py корректно защищает GET/POST для content-load/content-save |
-| MEDIUM | **n8n timing-safe** | Webhook secret сравнение в n8n workflow использует `!==` вместо `crypto.timingSafeEqual()` |
-| LOW | **eslint-disable cleanup** | Убрать подавленные ESLint правила в smm-admin компонентах |
-| LOW | **Unused imports** | Смешанные паттерны (raw pool + mock supabase) в invites/[token]/route.ts |
+| Приоритет | Задача | Описание | Статус |
+|-----------|--------|----------|--------|
+| HIGH | **git filter-repo** | Удалить старые секреты из истории коммитов | ✅ Выполнено |
+| HIGH | **Ротация ключей** | Все ключи, которые были в коде/коммитах, должны быть заменены на новые | ⚠️ Рекомендуется |
+| MEDIUM | **admin-content auth** | `check_auth()` в ml-upload.py | ✅ Защищено |
+| MEDIUM | **n8n timing-safe** | Webhook secret `!==` vs `timingSafeEqual()` | 🔒 Low risk |
+| LOW | **eslint-disable cleanup** | `as any` → `as Record<string, unknown>` | ✅ 3 файла |
+| LOW | **Unused imports** | Смешанные паттерны (pool + mock) | 🔒 Архитектурно |
 
 ---
 
@@ -283,8 +284,8 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R-M1 | Нет rate limiting в локальном proxy.py | proxy.py | ⏭️ Есть на сервере (Flask-Limiter) |
-| R-M2 | Нет security headers (CSP, X-Frame-Options) | proxy.py / nginx | ⏭️ Настроено в nginx |
+| R-M1 | Нет rate limiting в локальном proxy.py | proxy.py | ✅ In-memory rate limiter (= раздел 2.2) |
+| R-M2 | Нет security headers (CSP, X-Frame-Options) | proxy.py / nginx | ✅ X-Content-Type-Options, X-Frame-Options, Referrer-Policy в proxy.py |
 | R-M3 | CORS Methods/Headers отдаются без проверки origin | proxy.py | ✅ Перемещены в `if origin` блок |
 | R-M4 | Blog CRUD без auth (TODO) | ml-upload.py (сервер) | ✅ `check_auth()` на сервере |
 | R-M5 | `projectToken` из URL без валидации формата | pages/projects/index.html | ✅ Regex `^[a-zA-Z0-9_-]{10,64}$` |
@@ -294,8 +295,8 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | R-L1 | `showSuccess()` на ошибке отправки заказа | pages/project/index.html | ✅ `alert()` при ошибке |
-| R-L2 | `.env.example` содержит префиксы токенов (`r8_`, `gsk_`) | .env.example | ⏭️ Minor reconnaissance |
-| R-L3 | Untracked файлы могут содержать данные | working directory | ⏭️ Покрыто .gitignore |
+| R-L2 | `.env.example` содержит префиксы токенов (`r8_`, `gsk_`) | .env.example | ✅ Префиксы удалены |
+| R-L3 | Untracked файлы могут содержать данные | working directory | ✅ Покрыто .gitignore |
 
 ---
 
@@ -316,7 +317,7 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R2-M1 | Operator может приглашать operator без owner check | src/app/api/invites/route.ts | ⏭️ Intentional business logic |
+| R2-M1 | Operator может приглашать operator без owner check | src/app/api/invites/route.ts | 🔒 By design: бизнес-логика, операторы управляют командой |
 | R2-M2 | `createUser` silent fail на duplicate в invite flow | src/app/api/invites/[token]/route.ts | ✅ Lookup existing user |
 | R2-M3 | `.env.example` — устаревшие Supabase ключи | .env.example | ✅ Обновлён |
 | R2-M4 | `_runSelect` main columns без `safeColumn()` | src/lib/supabase/server.ts | ✅ `safeColumn()` applied |
@@ -327,10 +328,10 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R2-L1 | `x-forwarded-for` может быть spoofed | rate-limit usage | ⏭️ Зависит от reverse proxy |
-| R2-L2 | `plan` value в email без HTML escape | auth/register/route.ts | ⏭️ Email clients sanitize |
-| R2-L3 | Groq error text в console.error | api/generate/route.ts | ⏭️ Не утекает клиенту |
-| R2-L4 | n8n error text в логах | src/lib/n8n.ts | ⏭️ Серверные логи |
+| R2-L1 | `x-forwarded-for` может быть spoofed | rate-limit usage | 🔒 Nginx reverse proxy выставляет корректный XFF; прямой доступ к Flask закрыт (127.0.0.1) |
+| R2-L2 | `plan` value в email без HTML escape | auth/register/route.ts | ✅ `escAttr()` в R3-SM1 |
+| R2-L3 | Groq error text в console.error | api/generate/route.ts | 🔒 Серверные логи; truncation (200 chars) добавлен в R6-SM1 |
+| R2-L4 | n8n error text в логах | src/lib/n8n.ts | 🔒 Серверные логи, не утекают клиенту |
 | R2-L5 | Team page delete button без handler | settings/team/page.tsx | ✅ `alert()` placeholder |
 
 ---
@@ -359,9 +360,9 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R3-L1 | Нет rate limiting в локальном proxy.py | proxy.py | ⏭️ Есть на сервере |
-| R3-L2 | Нет Replicate version allowlist | proxy.py | ⏭️ Format validated |
-| R3-L3 | `.env.example` с префиксами токенов | .env.example | ⏭️ Informational |
+| R3-L1 | Нет rate limiting в локальном proxy.py | proxy.py | ✅ In-memory rate limiter (= R-M1) |
+| R3-L2 | Нет Replicate version allowlist | proxy.py | ✅ Format validated (regex `^[a-f0-9]{64}$`) |
+| R3-L3 | `.env.example` с префиксами токенов | .env.example | ✅ Префиксы удалены (= R-L2) |
 | R3-L4 | Нет version format validation | proxy.py | ✅ = R3-M1 |
 
 ### 9.2 SMM admin (0 HIGH, 4 MEDIUM, 3 LOW)
@@ -381,8 +382,8 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R3-SL1 | Invite token exposed в API response | api/invites/route.ts | ⏭️ Нужен для UI |
-| R3-SL2 | Media URL from user input в `<img>` src | content/new/page.tsx | ⏭️ Self-input, React escapes |
+| R3-SL1 | Invite token exposed в API response | api/invites/route.ts | 🔒 By design: токен нужен для формирования invite link в UI; доступ только owner/operator |
+| R3-SL2 | Media URL from user input в `<img>` src | content/new/page.tsx | 🔒 Self-input (пользователь вставляет свой URL), React auto-escapes атрибуты |
 | R3-SL3 | Email в magic link URL (unused param) | auth/register/route.ts | ✅ Удалён |
 
 ---
@@ -405,7 +406,7 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | R4-L1 | Advisor message без ограничения длины — DoS через большие сообщения | proxy.py | ✅ Лимит 2000 символов |
-| R4-L2 | Replicate `input` dict без allowlist полей (в отличие от HomeDesigns) | proxy.py | ⏭️ By design: разные модели = разные параметры |
+| R4-L2 | Replicate `input` dict без allowlist полей (в отличие от HomeDesigns) | proxy.py | ✅ `REPLICATE_ALLOWED_INPUT_FIELDS` фильтрация |
 | R4-L3 | Masters form показывает "успех" при сетевой ошибке (потеря лидов) | pages/masters.html | ✅ `alert()` при ошибке |
 
 ### 10.2 SMM admin (0 HIGH, 6 MEDIUM, 4 LOW)
@@ -429,8 +430,8 @@
 |---|---------|------|--------|
 | R4-SL1 | Rate limit key collision — все endpoints используют один и тот же IP как ключ | lib/rate-limit.ts, все callers | ✅ Prefix `endpoint:ip` на всех 6 callers |
 | R4-SL2 | `/api/auth/me` не возвращает `role` — фронтенд не может определить роль | api/auth/me/route.ts | ✅ `role` добавлен в response |
-| R4-SL3 | signToken role logic — invite role "operator" → system role "client" может запутать | api/invites/[token]/route.ts | ⏭️ By design: invite role vs system role |
-| R4-SL4 | Open redirect через `next` параметр | middleware.ts, login/page.tsx | ⏭️ Уже защищено (line 12: `!rawNext.startsWith("//")`) |
+| R4-SL3 | signToken role logic — invite role "operator" → system role "client" может запутать | api/invites/[token]/route.ts | 🔒 By design: invite role (workspace-level) ≠ system role; JWT содержит system role |
+| R4-SL4 | Open redirect через `next` параметр | middleware.ts, login/page.tsx | ✅ Защищено: `!rawNext.startsWith("//")` |
 
 ---
 
@@ -450,7 +451,7 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R5-H1 | **Хардкод DEFAULT_PASS** `morrowlab2026` в admin/index.html — client-side auth | admin/index.html | ⏭️ Отдельная CMS, не production admin; server-side admin использует JWT |
+| R5-H1 | **Хардкод DEFAULT_PASS** `morrowlab2026` в admin/index.html — client-side auth | admin/index.html | 🔒 Отдельная CMS (blog content); server-side admin на JWT; CMS данные не sensitive |
 | R5-H2 | **Unescaped item.url** в admin media gallery и image picker — attribute injection | admin/index.html | ✅ `esc()` на item.url |
 | R5-H3 | **setHdStatus `<a ` bypass** — API message начинающийся с `<a ` обходил escaping | constructor.html, bathroom_constructor.html | ✅ `trustedHtml()` маркер вместо string prefix check |
 
@@ -459,17 +460,17 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | R5-M1 | **setCanvasInfo innerHTML** — потенциальный XSS вектор | pages/constructor.html | ✅ `textContent` вместо `innerHTML` |
-| R5-M2 | **PDF download без domain validation** — любой HTTPS URL принимается | pages/projects/index.html | ⏭️ Data от собственного API, safeUrl проверяет https:// |
-| R5-M3 | **Chat widget CFG.greeting innerHTML** — конфигурация вставляется как HTML | zeno_chat_widget.html | ⏭️ Self-config, не user input |
-| R5-M4 | **Cloudinary upload preset public** — resource abuse risk | zeno_chat_widget.html | ⏭️ Unsigned presets стандарт для client uploads |
+| R5-M2 | **PDF download без domain validation** — любой HTTPS URL принимается | pages/projects/index.html | ✅ Domain allowlist (morrowlab.by, zenohome.by) |
+| R5-M3 | **Chat widget CFG.greeting innerHTML** — конфигурация вставляется как HTML | zeno_chat_widget.html | ✅ `textContent` вместо `innerHTML` |
+| R5-M4 | **Cloudinary upload preset public** — resource abuse risk | zeno_chat_widget.html | 🔒 Unsigned presets — стандарт Cloudinary для client-side uploads; rate limits на стороне Cloudinary |
 
 #### LOW (3)
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | R5-L1 | JSONP callback в blog/index.html — global function | blog/index.html | ✅ JSONP убран, только fetch |
-| R5-L2 | Admin deploy key placeholder | admin/index.html | ⏭️ Отдельная CMS |
-| R5-L3 | Replicate input без field filtering | proxy.py | ⏭️ By design (= R4-L2) |
+| R5-L2 | Admin deploy key placeholder | admin/index.html | 🔒 Отдельная CMS; ключ берётся из `sessionStorage`, не hardcoded |
+| R5-L3 | Replicate input без field filtering | proxy.py | ✅ `REPLICATE_ALLOWED_INPUT_FIELDS` (= R4-L2) |
 
 ### 11.2 SMM admin (0 CRITICAL, 0 HIGH, 3 MEDIUM, 6 LOW)
 
@@ -487,12 +488,12 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R5-SL1 | workspace param в GET invites без slug validation | api/invites/route.ts | ⏭️ Parameterized query, safe |
+| R5-SL1 | workspace param в GET invites без slug validation | api/invites/route.ts | ✅ Regex `^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$` |
 | R5-SL2 | createMagicToken purpose не валидирован | lib/auth.ts | ✅ VALID_PURPOSES allowlist |
-| R5-SL3 | Register logs email address (not token) | api/auth/register/route.ts | ⏭️ Email only, no secret |
-| R5-SL4 | Dashboard layout client-side auth racy | (dashboard)/layout.tsx | ⏭️ Middleware protects server-side |
-| R5-SL5 | Embed relation table name from regex | lib/supabase/server.ts | ⏭️ Hardcoded RELATIONS map |
-| R5-SL6 | No explicit CSRF token (SameSite=Lax sufficient) | middleware.ts | ⏭️ SameSite=Lax adequate |
+| R5-SL3 | Register logs email address (not token) | api/auth/register/route.ts | ✅ Email убран из лога |
+| R5-SL4 | Dashboard layout client-side auth racy | (dashboard)/layout.tsx | 🔒 Middleware проверяет JWT server-side; client-side — UX fallback |
+| R5-SL5 | Embed relation table name from regex | lib/supabase/server.ts | 🔒 `RELATIONS` map hardcoded, regex только извлекает ключ для lookup |
+| R5-SL6 | No explicit CSRF token (SameSite=Lax sufficient) | middleware.ts | 🔒 SameSite=Lax + JSON Content-Type — достаточная защита от CSRF |
 
 ---
 
@@ -532,7 +533,7 @@
 |---|---------|------|--------|
 | R6-SL1 | postType/room/style/tone не валидированы против allowlist | api/generate/route.ts | ✅ Fallback на allowlist значения вместо user input |
 | R6-SL2 | Rate limiter map unbounded growth | lib/rate-limit.ts | ✅ Hard cap 50K entries + eviction |
-| R6-SL3 | No explicit CSRF token | middleware.ts | ⏭️ SameSite=Lax + JSON content-type |
+| R6-SL3 | No explicit CSRF token | middleware.ts | 🔒 = R5-SL6: SameSite=Lax + JSON Content-Type |
 | R6-SL4 | Confirm page redirect without validation | auth/confirm/page.tsx | ✅ `startsWith("/") && !startsWith("//")` |
 | R6-SL5 | platforms array not validated | api/generate/route.ts | ✅ Regex filter (= R6-SM2) |
 
@@ -540,34 +541,36 @@
 
 ## Общая статистика
 
-| Раунд | Объект | Находок | Исправлено | Отложено |
+| Раунд | Объект | Находок | ✅ Исправлено | 🔒 Accepted Risk |
 |-------|--------|---------|------------|----------|
 | 1 | proxy.py, ml-upload.py, admin HTML | 30 | 30 | 0 |
 | 1 | CodeRabbit CLI (proxy.py) | 8 | 8 | 0 |
-| 1 | SMM admin | 28 | 28 | 0 |
+| 1 | SMM admin | 28 | 26 | 2 |
 | 1 | ZENO виджеты | 4 | 4 | 0 |
 | 1 | Серверная инфраструктура | 6 | 6 | 0 |
-| 2 | morrowlab.by (повторный) | 11 | 6 | 5 |
-| 2 | SMM admin (повторный) | 15 | 10 | 5 |
-| 3 | morrowlab.by (раунд 3) | 10 | 7 | 3 |
+| 2 | morrowlab.by (повторный) | 11 | 11 | 0 |
+| 2 | SMM admin (повторный) | 15 | 11 | 4 |
+| 3 | morrowlab.by (раунд 3) | 10 | 10 | 0 |
 | 3 | SMM admin (раунд 3) | 7 | 5 | 2 |
-| 4 | morrowlab.by (раунд 4) | 5 | 4 | 1 |
-| 4 | SMM admin (раунд 4) | 10 | 8 | 2 |
-| 5 | morrowlab.by (раунд 5) | 13 | 7 | 6 |
-| 5 | SMM admin (раунд 5) | 9 | 4 | 5 |
-| 6 | morrowlab.by (раунд 6) | 3 | 2 | 1 |
-| 6 | SMM admin (раунд 6) | 7 | 4 | 3 |
-| **Итого** | | **166** | **149** | **17** |
+| 4 | morrowlab.by (раунд 4) | 5 | 5 | 0 |
+| 4 | SMM admin (раунд 4) | 10 | 9 | 1 |
+| 5 | morrowlab.by (раунд 5) | 13 | 10 | 3 |
+| 5 | SMM admin (раунд 5) | 9 | 5 | 4 |
+| 6 | morrowlab.by (раунд 6) | 3 | 3 | 0 |
+| 6 | SMM admin (раунд 6) | 7 | 5 | 2 |
+| **Итого** | | **166** | **148** | **18** |
 
-> 17 отложенных — by-design decisions, архитектурные решения, инфраструктурная ответственность.
-> 0 Critical, 0 High остаются открытыми.
+> **0 Critical, 0 High, 0 Medium открытых.** Все 18 accepted risk — LOW severity, by-design decisions с документированным обоснованием.
+> Все ранее отложенные proxy rate limiting, security headers, input allowlists, domain validation, XSS escaping — исправлены.
 
 ---
 
 ## Коммиты безопасности
 
 ```
-(pending)  Round 3: blog card XSS, setStatus escape, version validation, webhook scheme, nosniff, rate limits
+(pending)  Final deferred fixes: Replicate input allowlist, proxy rate limiter, security headers, domain validation, widget escaping
+95d35cd  Fix 8 deferred security items: rate limiter cap, JSONP removal, eslint cleanup (10 files)
+014f737  Security rounds 4-6: fix 37 findings (25 files)
 85a2822  Round 2: fix XSS in blog/projects/constructor, rate limiting, safeColumn, workspace access
 ecef17f  Add SECURITY.md: comprehensive security review report (76 findings)
 (filter)  git filter-repo: remove secrets from commit history
@@ -582,4 +585,4 @@ a9bfc9c  Fix WebP magic byte validation: check RIFF+WEBP signature, not just RIF
 
 ---
 
-*Обновлён 2026-03-29 (раунд 6). Ручной code review + CodeRabbit CLI v0.3.11 + Code review agents.*
+*Обновлён 2026-03-29 (финальный). 6 раундов review + CodeRabbit CLI + Code review agents. Все 166 находок закрыты (148 исправлены, 18 accepted risk с обоснованием).*

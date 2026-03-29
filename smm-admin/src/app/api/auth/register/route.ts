@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 async function sendMagicEmail(to: string, link: string, isNew: boolean, plan?: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.log(`[register] Magic link generated for ${to}`);
+    console.log(`[register] Magic link generated (no RESEND_API_KEY)`);
     return;
   }
 

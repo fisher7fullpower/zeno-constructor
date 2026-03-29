@@ -1,8 +1,29 @@
 from flask import Flask, request, jsonify
-import requests, base64, uuid, os, re
+import requests, base64, uuid, os, re, time
 from urllib.parse import urlparse
 
 app = Flask(__name__)
+
+# ── Security: in-memory rate limiter ──
+_rate_store = {}
+_rate_cleanup_counter = 0
+
+def rate_limit(key, limit=30, window=60):
+    """Simple in-memory rate limiter. Returns True if allowed."""
+    global _rate_cleanup_counter
+    _rate_cleanup_counter += 1
+    now = time.time()
+    if _rate_cleanup_counter % 200 == 0:
+        expired = [k for k, v in _rate_store.items() if now > v['reset']]
+        for k in expired: del _rate_store[k]
+        if len(_rate_store) > 50000:
+            _rate_store.clear()
+    entry = _rate_store.get(key)
+    if not entry or now > entry['reset']:
+        _rate_store[key] = {'count': 1, 'reset': now + window}
+        return True
+    entry['count'] += 1
+    return entry['count'] <= limit
 
 REPLICATE_TOKEN   = os.environ.get('REPLICATE_TOKEN', '')
 HOMEDESIGNS_TOKEN = os.environ.get('HOMEDESIGNS_TOKEN', '')
@@ -28,16 +49,20 @@ ALLOWED_ORIGINS = {
     'https://constructor.zenohome.by',
 }
 
-def cors(r):
+def cors_and_security(r):
     origin = request.headers.get('Origin', '')
     if origin in ALLOWED_ORIGINS:
         r.headers['Access-Control-Allow-Origin'] = origin
         r.headers['Access-Control-Allow-Credentials'] = 'true'
         r.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    # Security headers
+    r.headers['X-Content-Type-Options'] = 'nosniff'
+    r.headers['X-Frame-Options'] = 'DENY'
+    r.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return r
 
-app.after_request(cors)
+app.after_request(cors_and_security)
 
 # ── Security: image proxy domain allowlist ──
 PROXY_IMAGE_ALLOWED_DOMAINS = {
@@ -70,6 +95,15 @@ HOMEDESIGNS_ALLOWED_FIELDS = {
     'room_type', 'design_style', 'design_theme', 'num_images', 'resolution',
     'mode', 'scale', 'seed', 'strength', 'guidance_scale',
     'custom_message', 'color_scheme', 'material', 'furniture_style',
+}
+
+# ── Security: Replicate input allowed fields ──
+REPLICATE_ALLOWED_INPUT_FIELDS = {
+    'image', 'prompt', 'negative_prompt', 'width', 'height', 'num_outputs',
+    'scheduler', 'num_inference_steps', 'guidance_scale', 'seed', 'scale',
+    'face_enhance', 'tile', 'version', 'model', 'output_format', 'output_quality',
+    'aspect_ratio', 'safety_tolerance', 'prompt_upsampling', 'go_fast',
+    'megapixels', 'disable_safety_checker',
 }
 
 # ── Security: max base64 image size (10 MB decoded) ──
@@ -110,11 +144,16 @@ def save_base64_image(data_url):
 @app.route('/api/replicate', methods=['POST', 'OPTIONS'])
 def replicate_create():
     if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('replicate:' + ip, 30, 60):
+        return jsonify({'error': 'Too many requests'}), 429
     data = request.get_json(force=True) or {}
     # Validate: must have 'version' field
     if 'version' not in data:
         return jsonify({'error': 'version field is required'}), 400
-    inp = data.get('input', {})
+    raw_inp = data.get('input', {})
+    # Security: only forward allowed input fields
+    inp = {k: v for k, v in raw_inp.items() if k in REPLICATE_ALLOWED_INPUT_FIELDS}
     # Convert base64 image → hosted URL
     if isinstance(inp.get('image'), str) and inp['image'].startswith('data:'):
         url = save_base64_image(inp['image'])
@@ -165,6 +204,9 @@ def replicate_status(pred_id):
 @app.route('/api/homedesigns/v2/<path:endpoint>', methods=['POST', 'OPTIONS'])
 def homedesigns_v2(endpoint):
     if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('hd:' + ip, 20, 60):
+        return jsonify({'error': 'Too many requests'}), 429
     # Security: restrict to known endpoints
     if endpoint not in HOMEDESIGNS_ALLOWED_ENDPOINTS:
         return jsonify({'error': 'Unknown endpoint'}), 400
@@ -202,6 +244,9 @@ def homedesigns_v2(endpoint):
 @app.route('/api/homedesigns/advisor', methods=['POST', 'OPTIONS'])
 def homedesigns_advisor():
     if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('advisor:' + ip, 10, 60):
+        return jsonify({'error': 'Too many requests'}), 429
     data = request.get_json(force=True) or {}
     hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
     try:
@@ -226,6 +271,9 @@ def homedesigns_advisor():
 @app.route('/api/proxy-image', methods=['GET'])
 def proxy_image():
     """Fetch external image (from homedesigns.ai results) and return with CORS headers."""
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('img:' + ip, 60, 60):
+        return jsonify({'error': 'Too many requests'}), 429
     url = request.args.get('url', '')
     if not url.startswith('https://'):
         return jsonify({'error': 'invalid url'}), 400

@@ -83,6 +83,9 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const workspace = req.nextUrl.searchParams.get("workspace") ?? "";
+  if (!workspace || !/^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$/.test(workspace)) {
+    return NextResponse.json({ invites: [] });
+  }
 
   const { data: client } = await supabase
     .from("clients")
