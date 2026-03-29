@@ -87,6 +87,7 @@ HOMEDESIGNS_ALLOWED_ENDPOINTS = {
     'style_transfer',
     'sketch_to_render',
     'floor_plan_to_render',
+    'creative_redesign',
 }
 
 # ── Security: HomeDesigns allowed form fields ──
@@ -95,6 +96,7 @@ HOMEDESIGNS_ALLOWED_FIELDS = {
     'room_type', 'design_style', 'design_theme', 'num_images', 'resolution',
     'mode', 'scale', 'seed', 'strength', 'guidance_scale',
     'custom_message', 'color_scheme', 'material', 'furniture_style',
+    'design_type', 'ai_intervention', 'no_design',
 }
 
 # ── Security: Replicate input allowed fields ──

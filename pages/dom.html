@@ -33,6 +33,8 @@
     .nav-item:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
     .dd-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;text-decoration:none;color:#fff;transition:background .2s}
     .dd-item:hover{background:rgba(255,255,255,.05)}
+    .badge-soon{font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(209,254,23,.12);color:var(--lime);font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:5px}
+    .dd-soon-item{opacity:.55;cursor:default;pointer-events:none}
     .dd-icon{width:34px;height:34px;border-radius:8px;background:var(--lime-dim);border:1px solid var(--lime-border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
     .dd-text{display:flex;flex-direction:column;gap:2px}
     .dd-name{font-size:13px;font-weight:600}
@@ -124,12 +126,12 @@
     .progress-bar-fill{height:100%;background:var(--lime);border-radius:2px;transition:width .5s ease;width:0}
 
     /* SUCCESS */
-    .success-wrap{display:none;flex-direction:column;align-items:center;gap:16px;padding:24px 0;text-align:center}
-    .success-wrap.visible{display:flex}
-    .success-icon{font-size:48px}
-    .success-title{font-size:18px;font-weight:700}
-    .success-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:300px}
-    .success-email{color:var(--lime);font-weight:600}
+    .result-ba{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .result-side{}
+    .result-label{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+    .result-img{width:100%;border-radius:10px;border:1px solid var(--border);display:block;object-fit:cover;max-height:200px}
+    .result-actions{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:500px){.result-ba{grid-template-columns:1fr}}
 
     /* SECTIONS */
     .section-wrap{max-width:1400px;margin:0 auto;padding:80px 32px;border-top:1px solid var(--border)}
@@ -335,7 +337,7 @@
         <a href="/room/" class="dd-item"><div class="dd-icon">🛋️</div><div class="dd-text"><div class="dd-name">Комната</div><div class="dd-desc">Гостиная, спальня, кабинет</div></div></a>
         <a href="/business/" class="dd-item"><div class="dd-icon">💼</div><div class="dd-text"><div class="dd-name">Бизнес</div><div class="dd-desc">Офис, кафе, магазин</div></div></a>
         <a href="/dom/" class="dd-item"><div class="dd-icon">🏡</div><div class="dd-text"><div class="dd-name">Дом</div><div class="dd-desc">Загородный, коттедж</div></div></a>
-        <a href="/constructor/" class="dd-item"><div class="dd-icon">📐</div><div class="dd-text"><div class="dd-name">Конструктор</div><div class="dd-desc">Планировка помещения</div></div></a>
+        <a class="dd-item dd-soon-item"><div class="dd-icon" style="opacity:.4">📐</div><div class="dd-text"><div class="dd-name">Конструктор <span class="badge-soon">soon</span></div><div class="dd-desc">Планировка помещения</div></div></a>
       </div>
     </div>
     <a href="/#examples" class="nav-link">Примеры</a>
@@ -367,10 +369,10 @@
     <!-- LEFT -->
     <div>
       <div class="hero-tag"><span class="hero-tag-dot"></span><span data-cms="hero_badge">Дом · AI-дизайн</span></div>
-      <h1 class="page-h1" data-cms="hero_title">Дизайн <span>загородного дома</span><br>за 2 минуты</h1>
-      <p class="page-sub" data-cms="hero_sub">1 фото комнаты в доме → дизайн + материалы с ценами из магазинов РБ. Без дизайнеров.</p>
+      <h1 class="page-h1" data-cms="hero_title">Дизайн <span>дома и коттеджа</span><br>за 2 минуты</h1>
+      <p class="page-sub" data-cms="hero_sub">Фасад, интерьер, ландшафт — загрузите фото и получите AI-дизайн с материалами из магазинов РБ.</p>
       <div class="hero-features">
-        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat1">Результат на email за 2 минуты</span></div>
+        <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat1">Результат прямо на странице</span></div>
         <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat2">Отделка, мебель — с ценами и ссылками</span></div>
         <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat3">План ремонта с этапами и стоимостью</span></div>
         <div class="hero-feat"><span class="hero-feat-dot"></span><span data-cms="feat4">Первый рендер бесплатно</span></div>
@@ -395,7 +397,7 @@
     <!-- FORM -->
     <div class="form-card" id="formCard">
       <div class="form-title" data-cms="form_title">Создать AI-дизайн</div>
-      <div class="form-sub" data-cms="form_sub">Заполните форму — результат придёт на email</div>
+      <div class="form-sub" data-cms="form_sub">Загрузите фото — результат появится прямо здесь</div>
 
       <!-- UPLOAD -->
       <div class="upload-zone" id="uploadZone">
@@ -413,8 +415,8 @@
       <div class="form-group">
         <div class="form-label">Состояние помещения</div>
         <div class="chips" id="stateChips">
-          <div class="chip sel" onclick="selChip('stateChips',this,'empty')">Черновая / пустая</div>
-          <div class="chip" onclick="selChip('stateChips',this,'furnished')">Текущий дизайн</div>
+          <div class="chip sel" onclick="selChip('stateChips',this,'empty')">Существующий вид</div>
+          <div class="chip" onclick="selChip('stateChips',this,'furnished')">Участок / эскиз</div>
         </div>
       </div>
 
@@ -422,11 +424,13 @@
       <div class="form-group">
         <div class="form-label">Тип помещения</div>
         <div class="chips" id="nicheChips">
-          <div class="chip sel" onclick="selChip('nicheChips',this,'гостиная')">Гостиная</div>
+          <div class="chip sel" onclick="selChip('nicheChips',this,'экстерьер')">Экстерьер / Фасад</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'гостиная')">Гостиная</div>
           <div class="chip" onclick="selChip('nicheChips',this,'кухня')">Кухня</div>
           <div class="chip" onclick="selChip('nicheChips',this,'спальня')">Спальня</div>
-          <div class="chip" onclick="selChip('nicheChips',this,'детская')">Детская</div>
-          <div class="chip" onclick="selChip('nicheChips',this,'прихожая')">Прихожая</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'терраса')">Терраса / Веранда</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'прихожая')">Прихожая / Холл</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'беседка')">Беседка</div>
         </div>
       </div>
 
@@ -455,12 +459,6 @@
         </div>
       </div>
 
-      <!-- EMAIL -->
-      <div class="form-group" style="margin-top:14px">
-        <div class="form-label">Email для результата</div>
-        <input class="form-input" id="emailInput" placeholder="you@example.com" type="email">
-      </div>
-
       <!-- PACKAGE -->
       <div class="form-group">
         <div class="form-label">Тариф</div>
@@ -484,17 +482,26 @@
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
       </div>
 
-      <!-- SUCCESS -->
-      <div class="success-wrap" id="successWrap">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Заявка отправлена!</div>
-        <div class="success-sub">Рендер будет готов через 1–2 минуты и придёт на <span class="success-email" id="successEmail"></span></div>
+      <!-- RESULT -->
+      <div id="resultWrap" style="display:none;margin-top:16px">
+        <div class="result-ba">
+          <div class="result-side"><div class="result-label">До</div><img id="imgBefore" class="result-img" alt="До"></div>
+          <div class="result-side"><div class="result-label">После</div><img id="imgAfter" class="result-img" alt="После"></div>
+        </div>
+        <div class="result-actions">
+          <a id="btnDownload" class="btn-lime" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 20px" download="morrow-design.jpg">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Скачать
+          </a>
+          <a href="/estimate/" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">Отправить на оценку →</a>
+        </div>
+        <button class="btn-ghost" onclick="resetResult()" style="margin-top:10px;width:100%;font-size:13px">↺ Новый дизайн</button>
       </div>
 
       <!-- SUBMIT -->
       <button class="btn-submit" id="submitBtn" onclick="submitForm()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Отправить на рендер
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Создать дизайн
       </button>
       <div class="form-note">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных</div>
     </div>
@@ -621,8 +628,21 @@
     move(e);
   }
 
-  const WEBHOOK = 'https://n8n.zenohome.by/webhook/morrow-render';
   const CHAT_WEBHOOK = 'https://n8n.zenohome.by/webhook/morrow-chat';
+
+  const NICHE_MAP = {
+    'гостиная':'Living Room','спальня':'Bedroom','детская':'Kids Room','кабинет':'Office',
+    'прихожая':'Hallway','кухня':'Kitchen','кухня-гостиная':'Kitchen','столовая':'Dining Room',
+    'совмещённый санузел':'Bathroom','ванная':'Bathroom','туалет':'Bathroom','душевая':'Bathroom',
+    'офис':'Office','кафе':'Cafe','ресторан':'Restaurant','барбершоп':'Barber Shop',
+    'салон красоты':'Beauty Salon','магазин':'Retail',
+    'экстерьер':'Exterior','терраса':'Patio','беседка':'Patio'
+  };
+  const STYLE_MAP = {
+    'минимализм':'Minimalist','современный':'Modern','скандинавский':'Scandinavian',
+    'лофт':'Industrial','классический':'Classic','барокко':'Classic'
+  };
+  const EXTERIOR_NICHES = new Set(['экстерьер','терраса','беседка']);
 
   // header scroll
   window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', scrollY > 10));
@@ -634,7 +654,7 @@
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
   // form state
-  let uploadedUrl = '', selectedState = 'empty', selectedNiche = 'гостиная', selectedStyle = 'минимализм', selectedPkg = 'free';
+  let selectedState = 'empty', selectedNiche = 'экстерьер', selectedStyle = 'минимализм', selectedPkg = 'free';
 
   function selChip(groupId, el, val) {
     document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('sel'));
@@ -683,62 +703,79 @@
     document.getElementById('progressText').textContent = text;
   }
 
-  // submit
-  async function submitForm() {
-    const email = document.getElementById('emailInput').value.trim();
-    const name = document.getElementById('nameInput').value.trim() || 'Клиент';
-    const city = document.getElementById('cityInput').value.trim();
-    const fileInput = document.getElementById('photoInput');
+  function resetResult() {
+    document.getElementById('resultWrap').style.display = 'none';
+    document.getElementById('submitBtn').style.display = 'flex';
+    document.getElementById('photoPreview').classList.remove('visible');
+    document.getElementById('uploadContent').style.display = '';
+    document.getElementById('photoInput').value = '';
+    document.getElementById('fileName').textContent = '';
+    document.getElementById('fileName').classList.remove('visible');
+  }
 
-    if (!email || !email.includes('@')) { alert('Введите корректный email'); return; }
+  // submit — inline render via homedesigns.ai
+  async function submitForm() {
+    const fileInput = document.getElementById('photoInput');
     if (!fileInput.files[0]) { alert('Загрузите фото помещения'); return; }
 
     const submitBtn = document.getElementById('submitBtn');
     const progressWrap = document.getElementById('progressWrap');
-
     submitBtn.style.display = 'none';
     progressWrap.classList.add('visible');
     setProgress(10, 'Загружаем фото...');
 
+    let progTimer = null;
     try {
-      // Upload to Morrow Lab server
-      const reader = new FileReader();
-      const fileDataUrl = await new Promise((res, rej) => { reader.onload = e => res(e.target.result); reader.onerror = rej; reader.readAsDataURL(fileInput.files[0]); });
-      const fname = Date.now() + '_' + fileInput.files[0].name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const fileDataUrl = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result); r.onerror = rej;
+        r.readAsDataURL(fileInput.files[0]);
+      });
 
-      setProgress(30, 'Загружаем фото...');
-      const clRes = await fetch('/webhook/photo-upload', {
+      setProgress(30, 'Подготовка...');
+      const pMsgs = ['Генерируем дизайн...','Применяем стиль...','Почти готово...'];
+      let prog = 30;
+      progTimer = setInterval(() => {
+        prog = Math.min(prog + 1, 88);
+        setProgress(prog, pMsgs[Math.min(Math.floor((prog - 30) / 20), 2)]);
+      }, 800);
+
+      const roomType = NICHE_MAP[selectedNiche] || 'Living Room';
+      const hdStyle = STYLE_MAP[selectedStyle] || 'Modern';
+      const isExterior = EXTERIOR_NICHES.has(selectedNiche);
+
+      const resp = await fetch('/api/homedesigns/v2/creative_redesign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: fname, data: fileDataUrl })
+        body: JSON.stringify({
+          image: fileDataUrl,
+          design_type: isExterior ? 'Exterior' : 'Interior',
+          room_type: roomType,
+          design_style: hdStyle,
+          ai_intervention: 'Medium',
+          no_design: 1
+        })
       });
-      if (!clRes.ok) throw new Error('Upload failed');
-      const clData = await clRes.json();
-      uploadedUrl = 'https://morrowlab.by' + clData.url;
 
-      setProgress(60, 'Отправляем на рендер...');
-
-      // Submit to n8n
-      const payload = {
-        Email: email, Name: name, city, style: selectedStyle,
-        package: selectedPkg, vertical: 'dom', niche: selectedNiche,
-        room_state: selectedState, file_url: uploadedUrl
-      };
-
-      const res = await fetch(WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      clearInterval(progTimer); progTimer = null;
+      const data = await resp.json();
+      const imgs = data?.success?.generated_image || data?.success?.output_images || data?.output_images;
+      const resultUrl = imgs?.[0];
+      if (!resultUrl) throw new Error(data.message || data.error || 'Не удалось получить результат');
 
       setProgress(100, 'Готово!');
-      await new Promise(r => setTimeout(r, 500));
-
+      await new Promise(r => setTimeout(r, 400));
       progressWrap.classList.remove('visible');
-      document.getElementById('successEmail').textContent = email;
-      document.getElementById('successWrap').classList.add('visible');
 
-    } catch (err) {
+      document.getElementById('imgBefore').src = fileDataUrl;
+      document.getElementById('imgAfter').src = resultUrl;
+      const dl = document.getElementById('btnDownload');
+      dl.href = resultUrl; dl.download = 'morrow-design.jpg';
+      document.getElementById('resultWrap').style.display = 'block';
+      document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch(err) {
+      if (progTimer) { clearInterval(progTimer); progTimer = null; }
       progressWrap.classList.remove('visible');
       submitBtn.style.display = 'flex';
       alert('Ошибка: ' + err.message + '. Попробуйте ещё раз.');
