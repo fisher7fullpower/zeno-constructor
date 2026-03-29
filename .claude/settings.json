@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/adm/Documents/rep/REP_test/.claude/scripts/pre-tool-use.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/adm/Documents/rep/REP_test/.claude/scripts/stop-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

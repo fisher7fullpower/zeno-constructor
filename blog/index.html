@@ -1,545 +1,224 @@
-<!-- ZENO Blog — вставить в Tilda: страница /blog → T123 HTML-блок → вставить весь код -->
-<!-- SEO: meta-теги инжектируются скриптом в head при загрузке и при смене view -->
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  #zeno-blog{background:#0a0a0a;color:#ccc;font-family:Inter,-apple-system,Arial,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden;position:relative}
-  #zeno-blog a{color:#d1fe17;text-decoration:none;transition:opacity .2s}
-  #zeno-blog a:hover{opacity:.85}
-  #zeno-blog .zb-card h2,#zeno-blog .zb-card h2 a,#zeno-blog .zb-art h1{color:#fff !important}
-  #zeno-blog .zb-card h2 a:hover{color:#d1fe17 !important}
-
-  /* ========= DECORATIVE ========= */
-  .zb-glow{position:absolute;border-radius:50%;pointer-events:none;filter:blur(120px);opacity:.07;z-index:0}
-  .zb-glow-1{width:500px;height:500px;background:#d1fe17;top:-120px;left:-100px}
-  .zb-glow-2{width:400px;height:400px;background:#d1fe17;bottom:200px;right:-80px}
-  .zb-glow-3{width:300px;height:300px;background:#4af;top:50%;left:50%;transform:translate(-50%,-50%)}
-
-  .zb-dots{position:absolute;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(rgba(209,254,23,.06) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
-
-  .zb-line{position:absolute;width:1px;background:linear-gradient(180deg,transparent,rgba(209,254,23,.15),transparent);height:200px;z-index:0;pointer-events:none}
-  .zb-line-1{top:80px;left:15%}
-  .zb-line-2{top:300px;right:20%;height:160px}
-  .zb-line-3{bottom:100px;left:40%;height:180px}
-
-  /* ========= NAV ========= */
-  .zb-nav{position:sticky;top:0;z-index:100;background:rgba(10,10,10,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(209,254,23,.1);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
-  .zb-logo{font-size:20px;font-weight:800;color:#fff;letter-spacing:1.5px}
-  .zb-logo i{color:#d1fe17;font-style:normal}
-  .zb-links{display:flex;gap:20px;font-size:13px;flex-wrap:wrap}
-  #zeno-blog .zb-links a{color:#aaa}
-  #zeno-blog .zb-links a:hover,#zeno-blog .zb-links a.active{color:#d1fe17}
-  .zb-back-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(209,254,23,.08);border:1px solid rgba(209,254,23,.25);border-radius:8px;color:#d1fe17;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s;margin-right:16px}
-  .zb-back-btn:hover{background:rgba(209,254,23,.15);border-color:rgba(209,254,23,.4);color:#fff}
-  .zb-nav-left{display:flex;align-items:center;gap:12px}
-
-  /* ========= HERO ========= */
-  .zb-hero{text-align:center;padding:64px 24px 36px;max-width:720px;margin:0 auto;position:relative;z-index:1}
-  .zb-hero h1{font-size:42px;color:#fff;font-weight:800;margin:0 0 10px;background:linear-gradient(135deg,#fff 40%,#d1fe17);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .zb-hero p{font-size:15px;color:rgba(255,255,255,.4)}
-  .zb-hero-badge{display:inline-block;margin:0 0 14px;padding:4px 14px;border:1px solid rgba(209,254,23,.25);border-radius:20px;font-size:11px;color:#d1fe17;letter-spacing:.5px;text-transform:uppercase;background:rgba(209,254,23,.05)}
-
-  .zb-search{max-width:460px;margin:22px auto 0;position:relative}
-  .zb-search input{width:100%;padding:12px 16px 12px 42px;background:rgba(17,17,17,.8);border:1px solid #2a3305;border-radius:12px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:all .3s}
-  .zb-search input:focus{border-color:#d1fe17;box-shadow:0 0 20px rgba(209,254,23,.08)}
-  .zb-search input::placeholder{color:#555}
-  .zb-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:#555}
-
-  .zb-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:24px auto 0;max-width:600px;position:relative;z-index:1}
-  .zb-tag{padding:6px 16px;background:transparent;border:1px solid rgba(42,51,5,.6);border-radius:20px;color:#777;font-size:12px;cursor:pointer;transition:all .25s;font-family:inherit}
-  .zb-tag:hover{border-color:rgba(209,254,23,.3);color:#bbb}
-  .zb-tag.on{background:rgba(209,254,23,.12);color:#d1fe17;border-color:rgba(209,254,23,.5);box-shadow:0 0 12px rgba(209,254,23,.08)}
-
-  /* ========= GRID ========= */
-  .zb-grid{max-width:980px;margin:40px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px;position:relative;z-index:1}
-
-  .zb-card{background:rgba(17,17,17,.6);border:1px solid rgba(255,255,255,.05);border-radius:16px;overflow:hidden;transition:all .35s;cursor:pointer;backdrop-filter:blur(4px);position:relative}
-  .zb-card:hover{border-color:rgba(209,254,23,.25);transform:translateY(-6px);box-shadow:0 12px 40px rgba(209,254,23,.06)}
-  .zb-card-thumb{width:100%;height:120px;position:relative;overflow:hidden}
-  .zb-card-thumb-bg{width:100%;height:100%;display:block;background:linear-gradient(135deg,#1a2003 0%,#0d1302 100%)}
-  .zb-card-number{position:absolute;top:10px;right:12px;font-size:40px;font-weight:800;color:rgba(209,254,23,.06);z-index:0}
-  .zb-card-body{padding:18px 20px 22px}
-  .zb-card-meta{display:flex;align-items:center;gap:8px;margin:0 0 10px}
-  .zb-card-cat{font-size:10px;color:#d1fe17;background:rgba(209,254,23,.1);padding:3px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-  .zb-card-date{font-size:11px;color:#444}
-  .zb-card h2{font-size:16px;color:#fff;font-weight:600;margin:0 0 8px;line-height:1.45}
-  .zb-card h2 a{color:inherit;text-decoration:none}
-  .zb-card p{font-size:13px;color:rgba(255,255,255,.35);line-height:1.55;margin:0}
-  .zb-card-more{display:inline-flex;align-items:center;gap:5px;margin-top:16px;font-size:12px;color:#d1fe17;font-weight:600;transition:gap .2s}
-  .zb-card:hover .zb-card-more{gap:8px}
-  .zb-card-more svg{width:14px;height:14px;fill:#d1fe17;transition:transform .2s}
-  .zb-card:hover .zb-card-more svg{transform:translateX(3px)}
-
-  .zb-msg{text-align:center;padding:48px;color:#555;font-size:14px;display:none;position:relative;z-index:1}
-
-  /* ========= ARTICLE ========= */
-  .zb-art{max-width:720px;margin:0 auto;padding:40px 24px 0;display:none;position:relative;z-index:1}
-  .zb-art-header{margin:0 0 20px}
-  .zb-home-link{display:inline-block;font-size:13px;color:rgba(209,254,23,.8);text-decoration:none;margin-bottom:8px}
-  .zb-home-link:hover{color:#d1fe17}
-  .zb-bc{font-size:12px;color:#555;margin:0 0 14px}
-  #zeno-blog .zb-bc a{color:#888}
-  #zeno-blog .zb-bc a:hover{color:#d1fe17}
-  .zb-art-cat{display:inline-block;font-size:10px;color:#d1fe17;background:rgba(209,254,23,.1);padding:3px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
-  .zb-art h1{font-size:30px;color:#fff;font-weight:700;line-height:1.3;margin:0 0 10px}
-  #zeno-blog .zb-toc b{color:#fff}
-  .zb-art-info{font-size:12px;color:#555;margin:0 0 28px}
-  .zb-art-info span{margin-left:14px;color:#666}
-
-  .zb-toc{background:rgba(17,17,17,.6);border:1px solid rgba(209,254,23,.08);border-radius:14px;padding:18px 22px;margin:0 0 28px;backdrop-filter:blur(4px)}
-  .zb-toc b{font-size:13px;color:#fff;display:block;margin:0 0 8px}
-  #zeno-blog .zb-toc a{display:block;padding:3px 0;color:#888;font-size:13px}
-  #zeno-blog .zb-toc a:hover{color:#d1fe17}
-
-  .zb-body{font-size:15px;color:#ccc;line-height:1.8}
-  .zb-body h2{font-size:21px;color:#fff;font-weight:600;margin:32px 0 10px;padding-top:8px;border-top:1px solid #1a2003}
-  .zb-body h3{font-size:17px;color:#eee;font-weight:600;margin:22px 0 8px}
-  .zb-body p{margin:0 0 14px}
-  .zb-body ul,.zb-body ol{margin:0 0 14px;padding-left:20px}
-  .zb-body li{margin:5px 0}
-  .zb-body strong{color:#fff}
-  #zeno-blog .zb-body a{border-bottom:1px solid rgba(209,254,23,.3)}
-  #zeno-blog .zb-body a:hover{border-bottom-color:#d1fe17}
-  .zb-body blockquote{border-left:3px solid #d1fe17;padding:10px 18px;margin:18px 0;background:#111;border-radius:0 10px 10px 0;font-style:italic;color:#aaa}
-  .zb-body table{width:100%;border-collapse:collapse;margin:18px 0}
-  .zb-body th,.zb-body td{padding:9px 12px;border:1px solid #222;text-align:left;font-size:13px}
-  .zb-body th{background:#111;color:#fff;font-weight:600}
-
-  .zb-faq{margin:36px 0 0}
-  .zb-faq>h2{font-size:21px;color:#fff;font-weight:600;margin:0 0 14px;border:none;padding:0}
-  .zb-faq-item{border:1px solid rgba(255,255,255,.06);border-radius:12px;margin:0 0 8px;overflow:hidden}
-  .zb-faq-q{padding:13px 16px;cursor:pointer;color:#fff;font-size:14px;font-weight:500;display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,17,.6);transition:background .2s}
-  .zb-faq-q:hover{background:rgba(209,254,23,.04)}
-  .zb-faq-q svg{width:16px;height:16px;fill:#666;transition:transform .3s;flex-shrink:0;margin-left:10px}
-  .zb-faq-q.open svg{transform:rotate(180deg)}
-  .zb-faq-a{padding:0 16px;max-height:0;overflow:hidden;transition:all .3s ease;font-size:13px;color:#999;line-height:1.7}
-  .zb-faq-a.open{padding:12px 16px;max-height:500px}
-
-  .zb-share{display:flex;gap:10px;align-items:center;margin:28px 0 0}
-  .zb-share span{font-size:12px;color:#555}
-  #zeno-blog .zb-share a{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(17,17,17,.6);border:1px solid rgba(255,255,255,.06);border-radius:8px;transition:all .2s}
-  #zeno-blog .zb-share a:hover{border-color:#d1fe17;background:rgba(209,254,23,.08)}
-  .zb-share a svg{width:14px;height:14px;fill:#888}
-
-  .zb-cta{margin:36px 0;padding:28px;background:rgba(17,17,17,.6);border:1px solid rgba(209,254,23,.12);border-radius:16px;text-align:center;position:relative;overflow:hidden}
-  .zb-cta::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at center,rgba(209,254,23,.03) 0%,transparent 50%);pointer-events:none}
-  .zb-cta h3{font-size:17px;color:#fff;font-weight:600;margin:0 0 8px;position:relative}
-  .zb-cta>p{font-size:13px;color:#777;margin:0 0 14px;position:relative}
-  #zeno-blog .zb-cta a.zb-cta-link{display:inline-block;padding:12px 26px;background:#d1fe17;color:#000;font-weight:700;border-radius:10px;font-size:14px;transition:all .25s;box-shadow:0 4px 20px rgba(209,254,23,.2);position:relative}
-  #zeno-blog .zb-cta a.zb-cta-link:hover{background:#b8e010;box-shadow:0 6px 28px rgba(209,254,23,.3)}
-
-  /* ========= FOOTER ========= */
-  .zb-foot{text-align:center;padding:52px 24px 36px;border-top:1px solid rgba(209,254,23,.06);margin-top:52px;position:relative;z-index:1}
-  #zeno-blog .zb-foot a.zb-btn{display:inline-block;padding:14px 30px;background:#d1fe17;color:#000;font-weight:700;font-size:15px;border-radius:12px;transition:all .25s;box-shadow:0 4px 24px rgba(209,254,23,.2)}
-  #zeno-blog .zb-foot a.zb-btn:hover{background:#b8e010;box-shadow:0 6px 32px rgba(209,254,23,.3)}
-  .zb-foot p{margin-top:14px;font-size:12px;color:#444}
-
-  /* ========= STATS BAR ========= */
-  .zb-stats{max-width:650px;margin:0 auto;padding:22px 0 0;display:flex;justify-content:center;gap:32px;position:relative;z-index:1}
-  .zb-stat{text-align:center}
-  .zb-stat-num{font-size:26px;font-weight:800;color:#d1fe17;display:block;line-height:1.2}
-  .zb-stat-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px}
-
-  @media(max-width:600px){
-    .zb-hero h1{font-size:28px}
-    .zb-grid{grid-template-columns:1fr;padding:0 16px}
-    .zb-links{gap:12px;font-size:12px}
-    .zb-art h1{font-size:24px}
-    .zb-body{font-size:14px}
-    .zb-body h2{font-size:18px}
-    .zb-stats{gap:16px;flex-wrap:wrap}
-    .zb-glow{display:none}
-  }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Блог Morrow Lab — дизайн интерьеров, ремонт, материалы</title>
+  <meta name="description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах. AI-советы по стилю, материалам, планировке и бюджету от экспертов Morrow Lab.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://morrowlab.by/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Блог Morrow Lab — дизайн интерьеров, ремонт, материалы">
+  <meta property="og:description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах. AI-советы по стилю, материалам, планировке и бюджету.">
+  <meta property="og:url" content="https://morrowlab.by/blog/">
+  <meta property="og:image" content="https://morrowlab.by/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Morrow Lab">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Блог Morrow Lab — дизайн интерьеров, ремонт, материалы">
+  <meta name="twitter:description" content="Полезные статьи о дизайне интерьеров, ремонте и отделочных материалах.">
+  <meta name="twitter:image" content="https://morrowlab.by/og-image.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--lime:#d1fe17;--lime-dim:rgba(209,254,23,.07);--lime-border:rgba(209,254,23,.2);--bg:#000;--card:#0a0a0a;--card2:#111;--border:#1c1c1c;--border2:#242424;--gray:#666;--muted:rgba(255,255,255,.45)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1a2003;border-radius:4px}
+    .header{position:fixed;top:0;left:0;right:0;z-index:1000;height:60px;display:flex;align-items:center;padding:0 40px;background:rgba(4,4,4,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:border-color .3s}
+    .header.scrolled{border-color:var(--border2)}
+    .logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:2px}
+    .nav-link{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;cursor:pointer;background:none;border:none;font-family:inherit}
+    .nav-link:hover,.nav-link.cur{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .burger{display:none;flex-direction:column;gap:4px;padding:8px;background:none;border:none;cursor:pointer}
+    .burger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}
+    @media(max-width:960px){.nav-center{display:none}.burger{display:flex}}
+    .btn-ghost{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;background:transparent;border:1px solid var(--border2);color:rgba(255,255,255,.55);cursor:pointer;text-decoration:none;transition:all .2s}
+    .btn-ghost:hover{border-color:var(--lime-border);color:var(--lime)}
+    .btn-lime{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;background:var(--lime);color:#000;border:none;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+    .btn-lime:hover{background:#bcf000;transform:translateY(-1px)}
+    .page-hero{max-width:1400px;margin:0 auto;padding:100px 32px 56px;border-bottom:1px solid var(--border)}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border:1px solid var(--lime-border);border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:20px}
+    .hero-tag-dot{width:5px;height:5px;background:var(--lime);border-radius:50%}
+    .page-h1{font-size:clamp(32px,5vw,64px);font-weight:800;letter-spacing:-2px;line-height:1.06;margin-bottom:16px}
+    .page-h1 span{color:var(--lime)}
+    .page-sub{font-size:17px;color:var(--muted);line-height:1.65;max-width:520px}
+    .blog-wrap{max-width:1400px;margin:0 auto;padding:56px 32px}
+    .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .blog-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;text-decoration:none;color:#fff;display:flex;flex-direction:column;gap:12px;transition:all .25s;cursor:pointer}
+    .blog-card:hover{border-color:var(--lime-border);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+    .blog-tag{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime)}
+    .blog-title{font-size:16px;font-weight:700;line-height:1.45;color:#fff}
+    .blog-excerpt{font-size:13px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .blog-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray);margin-top:auto;padding-top:12px;border-top:1px solid var(--border)}
+    .blog-read{color:var(--lime);font-weight:600}
+    .skel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .skel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:10px}
+    .skel-line{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shim 1.5s infinite}
+    @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* ARTICLE MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:60px 20px;overflow-y:auto}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;max-width:780px;width:100%;padding:48px;position:relative;margin:auto}
+    .modal-close{position:absolute;top:20px;right:20px;background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;transition:color .2s}
+    .modal-close:hover{color:#fff}
+    .modal-tag{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--lime);margin-bottom:14px}
+    .modal-title{font-size:clamp(22px,3vw,36px);font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:20px}
+    .modal-meta{font-size:13px;color:var(--gray);margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+    .modal-body{font-size:15px;color:rgba(255,255,255,.75);line-height:1.8;white-space:pre-wrap}
+    .modal-body h2,.modal-body h3{color:#fff;margin:24px 0 10px;letter-spacing:-.5px}
+    .modal-cta{margin-top:32px;padding:24px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:14px;text-align:center}
+    .modal-cta p{margin-bottom:14px;color:rgba(255,255,255,.7);font-size:14px}
+    .footer-wrap{border-top:1px solid var(--border);max-width:1400px;margin:0 auto;padding:48px 32px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px}
+    .footer-logo{font-size:15px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+    .footer-desc{font-size:13px;color:var(--gray);line-height:1.6;max-width:260px}
+    .footer-copy{font-size:12px;color:#333;margin-top:14px}
+    .fc-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);margin-bottom:12px}
+    .footer-links{display:flex;flex-direction:column;gap:8px}
+    .footer-links a{font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#fff}
+    @media(max-width:900px){.blog-grid,.skel-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.blog-grid,.skel-grid{grid-template-columns:1fr}.page-hero{padding:88px 20px 40px}.blog-wrap{padding:40px 20px}.modal{padding:28px 20px}.footer-grid{grid-template-columns:1fr;gap:28px}.footer-wrap{padding:36px 20px}.header{padding:0 20px}}
+        .logo-icon{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0}
+    .logo-icon-sm{width:22px;height:22px;border-radius:6px;object-fit:cover;flex-shrink:0}
 </style>
-
-<div id="zeno-blog">
-  <span id="blog" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none" aria-hidden="true"></span>
-
-  <!-- Decorative elements -->
-  <div class="zb-glow zb-glow-1"></div>
-  <div class="zb-glow zb-glow-2"></div>
-  <div class="zb-glow zb-glow-3"></div>
-  <div class="zb-dots"></div>
-  <div class="zb-line zb-line-1"></div>
-  <div class="zb-line zb-line-2"></div>
-  <div class="zb-line zb-line-3"></div>
-
-  <nav class="zb-nav">
-    <div class="zb-nav-left">
-      <a class="zb-back-btn" href="#" id="zb-nav-back" style="display:none">← К списку статей</a>
-      <a class="zb-logo" href="https://zeno.by">ZENO<i>.</i></a>
-    </div>
-    <div class="zb-links">
-      <a href="https://zeno.by">Главная</a>
-      <a href="https://zeno.by/bathroom">Ванная</a>
-      <a href="https://zeno.by/kitchen">Кухня</a>
-      <a href="https://zeno.by/room">Комната</a>
-      <a href="https://zeno.by/business">Бизнес</a>
-      <a href="https://zeno.by/#rec-examples">Примеры</a>
-      <a href="https://zeno.by/#rec1910727331">Тарифы</a>
-      <a href="https://zeno.by/#faq">FAQ</a>
-      <a href="https://zeno.by/page122751906.html" class="active">Блог</a>
-    </div>
+</head>
+<body>
+<header class="header" id="hdr">
+  <a href="/" class="logo"><img src="/logo.png" class="logo-icon" alt="Morrow Lab">Morrow Lab</a>
+  <nav class="nav-center">
+    <a href="/#examples" class="nav-link">Примеры</a>
+    <a href="/#pricing" class="nav-link">Тарифы</a>
+    <a href="/#faq" class="nav-link">FAQ</a>
+    <a href="/blog/" class="nav-link cur">Блог</a>
+    <a href="/masters/" class="nav-link">Мастера</a>
   </nav>
-
-  <!-- === LISTING VIEW === -->
-  <main id="zb-list" role="main">
-    <div class="zb-hero">
-      <div class="zb-hero-badge">AI &bull; Интерьеры &bull; Ремонт</div>
-      <h1>Блог ZENO — AI-дизайн интерьеров, ремонт и отделочные материалы</h1>
-      <p>Полезные статьи о ремонте, материалах и AI-дизайне интерьера. Советы по ванной, кухне и дизайну помещений.</p>
-      <div class="zb-stats" id="zb-stats">
-        <div class="zb-stat"><span class="zb-stat-num" id="zb-s-count">0</span><span class="zb-stat-label">статей</span></div>
-        <div class="zb-stat"><span class="zb-stat-num" id="zb-s-topics">0</span><span class="zb-stat-label">тем</span></div>
-        <div class="zb-stat"><span class="zb-stat-num" id="zb-s-words">0</span><span class="zb-stat-label">слов</span></div>
-        <div class="zb-stat"><span class="zb-stat-num" id="zb-s-time">0</span><span class="zb-stat-label">мин чтения</span></div>
-      </div>
-      <div class="zb-search">
-        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <input type="text" id="zb-q" placeholder="Поиск по статьям...">
-      </div>
-      <div class="zb-tags" id="zb-tags">
-        <button class="zb-tag on" data-t="all">Все</button>
-        <button class="zb-tag" data-t="ванная">Ванная</button>
-        <button class="zb-tag" data-t="кухня">Кухня</button>
-        <button class="zb-tag" data-t="дизайн">Дизайн</button>
-        <button class="zb-tag" data-t="материалы">Материалы</button>
-        <button class="zb-tag" data-t="AI">AI</button>
-      </div>
-    </div>
-    <section class="zb-grid" id="zb-grid" aria-label="Список статей"></section>
-    <div class="zb-msg" id="zb-load">Загрузка статей...</div>
-    <div class="zb-msg" id="zb-empty">Статей пока нет. Скоро появятся!</div>
-  </main>
-
-  <!-- === ARTICLE VIEW === -->
-  <main class="zb-art" id="zb-art" role="main">
-    <article itemscope itemtype="https://schema.org/Article">
-      <header class="zb-art-header">
-        <a class="zb-home-link" href="https://zeno.by">На главную</a>
-        <nav class="zb-bc" aria-label="Хлебные крошки"><a href="https://zeno.by">ZENO</a> / <a href="#" id="zb-bc-blog" onclick="ZB.back();return false">Блог</a> / <span id="zb-bc-t"></span></nav>
-      </header>
-      <div class="zb-art-cat" id="zb-a-cat"></div>
-      <h1 id="zb-a-title" itemprop="headline"></h1>
-    <div class="zb-art-info"><span id="zb-a-date"></span><span id="zb-a-read"></span></div>
-    <div class="zb-toc" id="zb-a-toc" style="display:none"><b>Содержание</b><div id="zb-a-toc-list"></div></div>
-    <div class="zb-body" id="zb-a-body"></div>
-    <div class="zb-faq" id="zb-a-faq" style="display:none"><h2>Часто задаваемые вопросы</h2><div id="zb-a-faq-list"></div></div>
-      <div class="zb-share">
-        <span>Поделиться:</span>
-        <a id="zb-sh-tg" href="#" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>
-        <a id="zb-sh-vk" href="#" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2zm3.59 14.56h-1.72c-.65 0-.85-.52-2.02-1.72-1.02-1-1.47-1.13-1.72-1.13-.35 0-.45.1-.45.58v1.57c0 .41-.13.66-1.22.66-1.8 0-3.8-1.09-5.21-3.13C4.42 10.78 3.9 8.79 3.9 8.31c0-.25.1-.48.58-.48h1.72c.44 0 .6.19.77.65.85 2.45 2.27 4.59 2.85 4.59.22 0 .32-.1.32-.66V10.4c-.07-1.14-.66-1.24-.66-1.65 0-.19.16-.39.42-.39h2.71c.37 0 .5.19.5.63v3.1c0 .37.17.5.27.5.22 0 .4-.13.81-.54 1.25-1.4 2.14-3.55 2.14-3.55.12-.25.32-.48.76-.48h1.72c.52 0 .63.27.52.63-.22.98-2.33 3.99-2.33 3.99-.19.29-.26.43 0 .76.19.25.81.76 1.22 1.22.77.84 1.35 1.55 1.51 2.04.17.48-.08.73-.57.73z"/></svg></a>
-      </div>
-    </article>
-    <div class="zb-cta">
-      <h3>Попробуйте AI-дизайн ZENO</h3>
-      <p>Загрузите фото помещения — получите визуализацию за 2 минуты</p>
-      <a class="zb-cta-link" href="https://zeno.by/bathroom">Попробовать бесплатно</a>
-    </div>
-  </main>
-
-  <div class="zb-foot" id="zb-foot-list">
-    <a class="zb-btn" href="https://zeno.by/bathroom">Попробовать AI-дизайн бесплатно</a>
-    <p>&copy; 2026 ZENO — AI-дизайн интерьеров</p>
+  <div class="nav-right">
+    <a href="/" class="nav-link" style="opacity:.7">← Главная</a>
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
   </div>
-  <div class="zb-foot" id="zb-foot-art" style="display:none">
-    <p>&copy; 2026 ZENO — AI-дизайн интерьеров</p>
-  </div>
+</header>
 
+<div class="page-hero">
+  <div class="hero-tag"><span class="hero-tag-dot"></span>Блог · Morrow Lab</div>
+  <h1 class="page-h1">Полезные статьи<br>о <span>дизайне</span> и ремонте</h1>
+  <p class="page-sub">Советы по выбору материалов, стилей интерьера, планировке и ремонту помещений.</p>
 </div>
 
-<script type="application/ld+json" id="zb-schema-faq"></script>
-<script type="application/ld+json" id="zb-schema-art"></script>
-<script type="application/ld+json" id="zb-schema-blog"></script>
+<div class="blog-wrap">
+  <div id="blogArea">
+    <div class="skel-grid">
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+      <div class="skel"><div class="skel-line" style="width:35%"></div><div class="skel-line" style="width:88%"></div><div class="skel-line" style="width:70%"></div><div class="skel-line" style="width:60%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-tag" id="modalTag">Дизайн интерьеров</div>
+    <h2 class="modal-title" id="modalTitle"></h2>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-cta">
+      <p>Хотите такой дизайн в своём помещении?</p>
+      <a href="/sanuzel/" class="btn-lime">Создать AI-дизайн бесплатно →</a>
+    </div>
+  </div>
+</div>
+
+<div class="footer-wrap">
+  <div class="footer-grid">
+    <div>
+      <a href="/" class="footer-logo"><img src="/logo.png" class="logo-icon-sm" alt="Morrow Lab">Morrow Lab</a>
+      <p class="footer-desc">AI-дизайн интерьеров за 2 минуты. Загрузите фото — получите рендер.</p>
+      <p class="footer-copy">© 2026 ООО «Морроу Лаб» · <a href="/privacy/" style="color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#d4f72c'" onmouseout="this.style.color='rgba(255,255,255,.35)'">Политика конфиденциальности</a></p>
+    </div>
+    <div><div class="fc-title">Пространства</div><div class="footer-links"><a href="/sanuzel/">Санузел</a><a href="/kitchen/">Кухня</a><a href="/room/">Комната</a><a href="/business/">Бизнес</a><a href="/dom/">Дом</a></div></div>
+    <div><div class="fc-title">Контакты</div><div class="footer-links"><a href="mailto:hello@morrowlab.by">hello@morrowlab.by</a><a href="https://t.me/morrowlab" target="_blank">Telegram</a></div></div>
+  </div>
+</div>
 
 <script>
-var ZB=(function(){
-  var API='https://n8n.zenohome.by/webhook/zeno-blog';
-  var articles=[],tag='all',$=function(id){return document.getElementById(id)};
+  window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', scrollY > 10));
 
-  /* SEO конфиг */
-  var SEO={
-    siteName:'ZENO',
-    siteUrl:'https://zeno.by',
-    blogTitle:'Блог ZENO — AI-дизайн интерьеров, ремонт и отделочные материалы',
-    blogDesc:'Статьи о ремонте, отделочных материалах, AI-дизайне интерьера. Советы по ванной, кухне, выбору плитки и обоев. ZENO — AI-дизайн интерьеров.',
-    defaultImage:'https://zeno.by/images/og-blog.jpg'
-  };
-  function getBlogUrl(){var a=document.querySelector('.zb-links a.active');return a?a.href:SEO.siteUrl+'/blog';}
+  let articles = [];
 
-  var THUMBS=[
-    'linear-gradient(135deg,#1a2003 0%,#111 60%,rgba(209,254,23,.05) 100%)',
-    'linear-gradient(135deg,#0d1a0d 0%,#111 50%,rgba(74,170,255,.04) 100%)',
-    'linear-gradient(135deg,#1a1500 0%,#111 60%,rgba(255,200,50,.04) 100%)',
-    'linear-gradient(135deg,#0a0a15 0%,#111 50%,rgba(100,100,255,.04) 100%)',
-    'linear-gradient(135deg,#150a0a 0%,#111 50%,rgba(255,100,100,.03) 100%)',
-    'linear-gradient(135deg,#0a1515 0%,#111 50%,rgba(100,255,200,.03) 100%)'
-  ];
-  var ICONS=['&#9998;','&#9874;','&#9881;','&#9733;','&#9670;','&#9656;'];
-
-  var CYR={'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya',' ':'-'};
-  function slug(t){return t.toLowerCase().split('').map(function(c){return CYR[c]||c}).join('').replace(/[^a-z0-9-]/g,'').replace(/-+/g,'-')}
-
-  function updateMeta(opt){
-    var d=document,h=d.head,t=opt.title||SEO.blogTitle,dsc=opt.description||SEO.blogDesc,canon=opt.canonical||getBlogUrl(),ogImg=opt.image||SEO.defaultImage;
-    document.title=t;
-    function setMeta(name,content,isOg){
-      var sel=isOg?'meta[property="'+name+'"]':'meta[name="'+name+'"]',m=d.querySelector(sel);
-      if(!m){m=d.createElement('meta');m.setAttribute(isOg?'property':'name',name);h.appendChild(m)}
-      m.setAttribute('content',content||'');
-    }
-    setMeta('description',dsc,false);
-    setMeta('og:title',t,true);setMeta('og:description',dsc,true);setMeta('og:url',canon,true);
-    setMeta('og:type',opt.article?'article':'website',true);setMeta('og:image',ogImg,true);
-    setMeta('og:site_name',SEO.siteName,true);setMeta('og:locale','ru_RU',true);
-    setMeta('twitter:card','summary_large_image',false);setMeta('twitter:title',t,false);setMeta('twitter:description',dsc,false);
-    var lnk=d.querySelector('link[rel="canonical"]');
-    if(!lnk){lnk=d.createElement('link');lnk.rel='canonical';h.appendChild(lnk)}
-    lnk.href=canon;
-  }
-  function cat(kw){var k=(kw||'').toLowerCase();if(k.indexOf('ванн')>-1||k.indexOf('плитк')>-1||k.indexOf('санузел')>-1)return'ванная';if(k.indexOf('кухн')>-1||k.indexOf('гарнитур')>-1)return'кухня';if(k.indexOf('ai')>-1||k.indexOf('рендер')>-1)return'AI';if(k.indexOf('дизайн')>-1)return'дизайн';return'материалы'}
-  function excerpt(c,md){if(md)return md;var t=c.replace(/<[^>]*>/g,'').replace(/#+\s/g,'').replace(/\*\*/g,'').replace(/\n+/g,' ').trim();return t.substring(0,140)+(t.length>140?'...':'')}
-  function rtime(c){return Math.ceil(c.replace(/<[^>]*>/g,'').split(/\s+/).length/200)}
-
-  function animateNum(id,target){
-    var el=$(id);if(!el)return;
-    if(target===0){el.textContent='0';return}
-    var dur=800,start=0,step=Math.max(1,Math.floor(target/40));
-    var iv=setInterval(function(){
-      start+=step;
-      if(start>=target){start=target;clearInterval(iv)}
-      el.textContent=target>=1000?(start/1000).toFixed(1)+'k':start;
-    },dur/40);
-  }
-
-  function err(){
-    $('zb-load').style.display='none';
-    $('zb-empty').style.display='block';
-    $('zb-empty').textContent='Ошибка загрузки. Проверьте workflow ZENO Blog Proxy в n8n.';
-  }
-  function applyRaw(raw){
-    var list=(Array.isArray(raw)?raw:(raw&&raw.articles)||[]).filter(function(r){return(r.status||'').toLowerCase()==='done'});
-    articles=list;
-    articles.forEach(function(r){
-      r.slug=r.slug||slug(r.topic||'');
-      r.category=cat(r.keywords);
-      r.excerpt=excerpt(r.article||'',r.meta_description);
-    });
-    var cats={},totalWords=0,totalRead=0;
-    articles.forEach(function(a){
-      cats[a.category]=1;
-      var w=(a.article||'').replace(/<[^>]*>/g,'').split(/\s+/).length;
-      totalWords+=w;totalRead+=Math.ceil(w/200);
-    });
-    animateNum('zb-s-count',articles.length);
-    animateNum('zb-s-topics',Object.keys(cats).length);
-    animateNum('zb-s-words',totalWords);
-    animateNum('zb-s-time',totalRead);
-    if(!articles.length){$('zb-empty').style.display='block';updateMeta({title:SEO.blogTitle,description:SEO.blogDesc,canonical:getBlogUrl()});return}
-    render(articles);
-    var onArticle=checkRoute();
-    if(!onArticle){updateMeta({title:SEO.blogTitle,description:SEO.blogDesc,canonical:getBlogUrl()});var sb=$('zb-schema-blog');if(sb)sb.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Blog","name":SEO.blogTitle,"description":SEO.blogDesc,"url":getBlogUrl(),"publisher":{"@type":"Organization","name":"ZENO","url":SEO.siteUrl}});}
-  }
-  function load(){
-    $('zb-load').style.display='block';
-    fetch(API).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(raw){
-      $('zb-load').style.display='none';
-      applyRaw(raw);
-    }).catch(function(){
-      $('zb-load').style.display='none';
-      err();
-    });
-  }
-
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-  function render(list){
-    var g=$('zb-grid');g.innerHTML='';
-    if(!list.length){$('zb-empty').style.display='block';return}
-    $('zb-empty').style.display='none';
-    var blogBase=getBlogUrl().split('?')[0]||location.pathname;
-    for(var i=0;i<list.length;i++){
-      var a=list[i],d=document.createElement('article');
-      d.className='zb-card';d.setAttribute('data-cat',a.category);
-      var artUrl=blogBase+'?article='+encodeURIComponent(a.slug||a.id);
-      d.innerHTML='<a href="'+artUrl+'" class="zb-card-link" style="position:absolute;inset:0;z-index:1" aria-label="Читать: '+esc(a.meta_title||a.topic)+'"></a>'
-        +'<div class="zb-card-thumb"><div class="zb-card-thumb-bg" style="background:'+THUMBS[i%THUMBS.length]+'"></div><span class="zb-card-number">'+(i<9?'0':'')+(i+1)+'</span></div>'
-        +'<div class="zb-card-body"><div class="zb-card-meta"><span class="zb-card-cat">'+esc(a.category)+'</span><span class="zb-card-date">'+esc(a.generated_at)+'</span></div>'
-        +'<h2><a href="'+artUrl+'" class="zb-card-title">'+esc(a.meta_title||a.topic)+'</a></h2>'
-        +'<p>'+esc(a.excerpt)+'</p>'
-        +'<span class="zb-card-more">Читать <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span>'
-        +'</div>';
-      g.appendChild(d);
-    }
-  }
-
-  function openArt(a){
-    var p=new URLSearchParams(location.search);
-    p.set('article',a.slug||a.id);
-    history.pushState(null,'',location.pathname+'?'+p.toString());
-    showArt(a);
-  }
-
-  function showArt(a){
-    $('zb-list').style.display='none';
-    $('zb-foot-list').style.display='none';
-    $('zb-art').style.display='block';
-    var nb=$('zb-nav-back');if(nb){nb.style.display='inline-flex';nb.onclick=function(e){e.preventDefault();ZB.back()}}
-    $('zb-foot-art').style.display='block';
-    $('zb-bc-t').textContent=a.topic;
-    $('zb-a-cat').textContent=a.category;
-    $('zb-a-title').textContent=a.topic;
-    $('zb-a-date').textContent=a.generated_at||'';
-    $('zb-a-read').textContent=rtime(a.article||'')+' мин чтения';
-    var html=convertHTML(a.article||'');
-    html=html.replace(/<script[\s\S]*?<\/script>/gi,'')
-      .replace(/<iframe[\s\S]*?<\/iframe>/gi,'')
-      .replace(/<(embed|object|form|base|meta|link|svg)[\s\S]*?(?:<\/\1>|\/?>)/gi,'')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi,'')
-      .replace(/on\w+\s*=\s*[^\s>]*/gi,'')
-      .replace(/href\s*=\s*["']?\s*javascript:/gi,'href="#')
-      .replace(/src\s*=\s*["']?\s*javascript:/gi,'src="');
-    $('zb-a-body').innerHTML=html;
-    buildTOC();
-    var faq=[];try{faq=JSON.parse(a.faq||'[]')}catch(e){}
-    if(faq.length) renderFAQ(faq);else{$('zb-a-faq').style.display='none'}
-    var url=location.href;
-    $('zb-sh-tg').href='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(a.topic);
-    $('zb-sh-vk').href='https://vk.com/share.php?url='+encodeURIComponent(url)+'&title='+encodeURIComponent(a.topic);
-    var artTitle=(a.meta_title||a.topic)+' — ZENO',artDesc=a.meta_description||excerpt(a.article||'',a.meta_description);
-    var blogUrl=getBlogUrl(),canonUrl=blogUrl+(blogUrl.indexOf('?')>-1?'&':'?')+'article='+encodeURIComponent(a.slug||a.id);
-    updateMeta({title:artTitle,description:artDesc,canonical:canonUrl,article:true});
-    var artSchema={"@context":"https://schema.org","@type":"Article","headline":a.meta_title||a.topic,"description":artDesc,"datePublished":a.generated_at||'',"author":{"@type":"Organization","name":"ZENO"},"publisher":{"@type":"Organization","name":"ZENO","url":"https://zeno.by"},"mainEntityOfPage":{"@type":"WebPage","@id":canonUrl}};
-    $('zb-schema-art').textContent=JSON.stringify(artSchema);
-    var bcEl=$('zb-schema-blog');bcEl.textContent=JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ZENO","item":SEO.siteUrl},{"@type":"ListItem","position":2,"name":"Блог","item":getBlogUrl()},{"@type":"ListItem","position":3,"name":a.topic,"item":canonUrl}]});
-    var bcLink=$('zb-bc-blog');if(bcLink){bcLink.href=getBlogUrl();bcLink.removeAttribute('onclick');bcLink.onclick=function(e){e.preventDefault();ZB.back()}}
-    window.scrollTo(0,0);
-  }
-
-  function stripAITOC(html){
-    var d=document.createElement('div');d.innerHTML=html;
-    var h2=d.querySelectorAll('h2');
-    for(var i=0;i<h2.length;i++){
-      var t=(h2[i].textContent||'').toLowerCase().trim();
-      if(t!=='оглавление'&&t!=='содержание')continue;
-      var next=h2[i].nextElementSibling;
-      if(next&&(next.tagName==='UL'||next.tagName==='OL')){
-        h2[i].remove();next.remove();
-      }
-      break;
-    }
-    return d.innerHTML;
-  }
-  function convertHTML(c){
-    if(c.indexOf('<h2')>-1||c.indexOf('<p')>-1){
-      c=stripAITOC(c);
-      return c;
-    }
-    return c
-      .replace(/^### (.*$)/gm,'<h3>$1</h3>')
-      .replace(/^## (.*$)/gm,'<h2>$1</h2>')
-      .replace(/^# (.*$)/gm,'')
-      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-      .replace(/^\- (.*$)/gm,'<li>$1</li>')
-      .replace(/^(\d+)\. (.*$)/gm,'<li><strong>$1.</strong> $2</li>')
-      .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
-      .replace(/<\/ul>\s*<ul>/g,'')
-      .replace(/\n\n/g,'</p><p>')
-      .replace(/\n/g,'<br>');
-  }
-
-  function buildTOC(){
-    var hh=document.querySelectorAll('#zb-a-body h2');
-    var tl=$('zb-a-toc-list');tl.innerHTML='';
-    if(hh.length<2){$('zb-a-toc').style.display='none';return}
-    for(var i=0;i<hh.length;i++){
-      var id=hh[i].id||('s'+i);
-      if(!hh[i].id)hh[i].id=id;
-      var l=document.createElement('a');l.href='#'+id;l.textContent=hh[i].textContent;tl.appendChild(l);
-    }
-    $('zb-a-toc').style.display='block';
-  }
-
-  function renderFAQ(faq){
-    var fl=$('zb-a-faq-list');fl.innerHTML='';
-    var schema={"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]};
-    for(var i=0;i<faq.length;i++){
-      var d=document.createElement('div');d.className='zb-faq-item';
-      d.innerHTML='<div class="zb-faq-q">'+esc(faq[i].q)+'<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></div><div class="zb-faq-a">'+esc(faq[i].a)+'</div>';
-      d.querySelector('.zb-faq-q').addEventListener('click',function(){this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')});
-      fl.appendChild(d);
-      schema.mainEntity.push({"@type":"Question","name":faq[i].q,"acceptedAnswer":{"@type":"Answer","text":faq[i].a}});
-    }
-    $('zb-schema-faq').textContent=JSON.stringify(schema);
-    $('zb-a-faq').style.display='block';
-  }
-
-  function checkRoute(){
-    var p=new URLSearchParams(location.search);
-    var aid=p.get('article');
-    if(!aid) return false;
-    var found=articles.find(function(a){return String(a.id)===aid||a.slug===aid});
-    if(found){showArt(found);return true}
-    return false;
-  }
-
-  function back(){
-    history.pushState(null,'',location.pathname);
-    $('zb-art').style.display='none';$('zb-foot-art').style.display='none';
-    $('zb-list').style.display='block';$('zb-foot-list').style.display='block';
-    var nb=$('zb-nav-back');if(nb)nb.style.display='none';
-    updateMeta({title:SEO.blogTitle,description:SEO.blogDesc,canonical:getBlogUrl()});
-    $('zb-schema-art').textContent='';
-    $('zb-schema-blog').textContent=JSON.stringify({"@context":"https://schema.org","@type":"Blog","name":SEO.blogTitle,"description":SEO.blogDesc,"url":getBlogUrl(),"publisher":{"@type":"Organization","name":"ZENO","url":SEO.siteUrl}});
-    window.scrollTo(0,0);
-  }
-
-  $('zb-q').addEventListener('input',function(){
-    var q=this.value.toLowerCase().trim();
-    var f=articles.filter(function(a){return a.topic.toLowerCase().indexOf(q)>-1||a.keywords.toLowerCase().indexOf(q)>-1||a.excerpt.toLowerCase().indexOf(q)>-1});
-    if(tag!=='all') f=f.filter(function(a){return a.category===tag});
-    render(f);
-  });
-
-  $('zb-grid').addEventListener('click',function(e){
-    var lnk=e.target.closest('a.zb-card-link, a.zb-card-title');
-    if(!lnk)return;
-    e.preventDefault();
-    var aid=(new URL(lnk.href)).searchParams.get('article');
-    if(!aid)return;
-    var art=articles.find(function(x){return String(x.id)===aid||x.slug===aid});
-    if(art)openArt(art);
-  });
-
-  $('zb-tags').addEventListener('click',function(e){
-    if(!e.target.classList.contains('zb-tag')) return;
-    var ts=this.querySelectorAll('.zb-tag');
-    for(var i=0;i<ts.length;i++) ts[i].classList.remove('on');
-    e.target.classList.add('on');
-    tag=e.target.getAttribute('data-t');
-    var q=$('zb-q').value.toLowerCase().trim();
-    var f=articles;
-    if(tag!=='all') f=f.filter(function(a){return a.category===tag});
-    if(q) f=f.filter(function(a){return a.topic.toLowerCase().indexOf(q)>-1||a.keywords.toLowerCase().indexOf(q)>-1});
-    render(f);
-  });
-
-  window.addEventListener('popstate',function(){
-    var p=new URLSearchParams(location.search);
-    if(p.get('article')){
-      var found=articles.find(function(a){return String(a.id)===p.get('article')||a.slug===p.get('article')});
-      if(found){showArt(found);return}
-    }
-    back();
-  });
-
-  (function initSEO(){
-    var p=new URLSearchParams(location.search);
-    if(!p.get('article')){
-      updateMeta({title:SEO.blogTitle,description:SEO.blogDesc,canonical:getBlogUrl()});
-      var sb=$('zb-schema-blog');if(sb)sb.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Blog","name":SEO.blogTitle,"description":SEO.blogDesc,"url":getBlogUrl(),"publisher":{"@type":"Organization","name":"ZENO","url":SEO.siteUrl}});
-    }
+  (async () => {
+    try {
+      const r = await fetch('https://n8n.zenohome.by/webhook/morrow-blog');
+      const text = await r.text();
+      // Handle JSONP format: null([...]) or plain JSON
+      let data;
+      const jpMatch = text.match(/^\s*\w*\s*\((.+)\)\s*;?\s*$/s);
+      data = JSON.parse(jpMatch ? jpMatch[1] : text);
+      articles = (Array.isArray(data) ? data : data.articles || []).filter(a => a.article);
+      if (!articles.length) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; return; }
+      const cats = ['Дизайн интерьеров','Материалы','Ремонт','Советы','Тренды 2026'];
+      function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+      document.getElementById('blogArea').innerHTML = '<div class="blog-grid">' + articles.map((a, i) => {
+        const excerpt = (a.meta_description || a.article.replace(/<[^>]+>/g,'')).slice(0, 180);
+        const cat = cats[i % cats.length];
+        return `<div class="blog-card" onclick="openArticle(${i})">
+          <div class="blog-tag">${esc(cat)}</div>
+          <div class="blog-title">${esc(a.meta_title || a.topic || 'Статья')}</div>
+          <div class="blog-excerpt">${esc(excerpt)}...</div>
+          <div class="blog-meta"><span>${esc(a.generated_at || '2026')} · Morrow Lab</span><span class="blog-read">Читать →</span></div>
+        </div>`;
+      }).join('') + '</div>';
+    } catch(e) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; }
   })();
-  load();
-  return{back:back};
-})();
+
+  /* Санитизация HTML статей: RegExp для удаления тегов script собирается через concat — иначе парсер HTML обрывает блок script на середине. */
+  function sanitizeArticleHtml(raw) {
+    let cleaned = String(raw || '')
+      .replace(/https?:\/\/zeno\.by/gi, 'https://morrowlab.by')
+      .replace(/\bZENO\b/g, 'Morrow Lab')
+      .replace(/\bzeno\.by\b/gi, 'morrowlab.by');
+    const scriptEnd = '</scr' + 'ipt>';
+    cleaned = cleaned
+      .replace(new RegExp('<script[\\s\\S]*?' + scriptEnd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '')
+      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<(embed|object|form|base|meta|link|svg)[\s\S]*?(?:<\/\1>|\/?>)/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
+      .replace(/href\s*=\s*["']?\s*javascript:/gi, 'href="#')
+      .replace(/src\s*=\s*["']?\s*javascript:/gi, 'src="')
+      .replace(/action\s*=\s*["']?\s*javascript:/gi, 'action="');
+    return cleaned;
+  }
+
+  function openArticle(i) {
+    const a = articles[i];
+    document.getElementById('modalTitle').textContent = a.meta_title || a.topic || 'Статья';
+    document.getElementById('modalMeta').textContent = (a.generated_at || '2026') + ' · Morrow Lab';
+    document.getElementById('modalBody').innerHTML = sanitizeArticleHtml(a.article);
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalBtn(); }
+  function closeModalBtn() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
 </script>
+</body>
+</html>

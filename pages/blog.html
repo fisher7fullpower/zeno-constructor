@@ -185,15 +185,15 @@
     } catch(e) { document.getElementById('blogArea').innerHTML = '<p style="color:var(--gray);text-align:center;padding:40px">Статьи скоро появятся...</p>'; }
   })();
 
-  function openArticle(i) {
-    const a = articles[i];
-    document.getElementById('modalTitle').textContent = a.meta_title || a.topic || 'Статья';
-    document.getElementById('modalMeta').textContent = (a.generated_at || '2026') + ' · Morrow Lab';
-    let cleaned = (a.article || '')
-      .replace(/https?:\/\/zeno\.by/gi,'https://morrowlab.by')
-      .replace(/\bZENO\b/g,'Morrow Lab')
-      .replace(/\bzeno\.by\b/gi,'morrowlab.by');
-    cleaned = cleaned.replace(/<script[\s\S]*?<\/script>/gi, '')
+  /* Санитизация HTML статей: RegExp для удаления тегов script собирается через concat — иначе парсер HTML обрывает блок script на середине. */
+  function sanitizeArticleHtml(raw) {
+    let cleaned = String(raw || '')
+      .replace(/https?:\/\/zeno\.by/gi, 'https://morrowlab.by')
+      .replace(/\bZENO\b/g, 'Morrow Lab')
+      .replace(/\bzeno\.by\b/gi, 'morrowlab.by');
+    const scriptEnd = '</scr' + 'ipt>';
+    cleaned = cleaned
+      .replace(new RegExp('<script[\\s\\S]*?' + scriptEnd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '')
       .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
       .replace(/<(embed|object|form|base|meta|link|svg)[\s\S]*?(?:<\/\1>|\/?>)/gi, '')
       .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
@@ -201,7 +201,14 @@
       .replace(/href\s*=\s*["']?\s*javascript:/gi, 'href="#')
       .replace(/src\s*=\s*["']?\s*javascript:/gi, 'src="')
       .replace(/action\s*=\s*["']?\s*javascript:/gi, 'action="');
-    document.getElementById('modalBody').innerHTML = cleaned;
+    return cleaned;
+  }
+
+  function openArticle(i) {
+    const a = articles[i];
+    document.getElementById('modalTitle').textContent = a.meta_title || a.topic || 'Статья';
+    document.getElementById('modalMeta').textContent = (a.generated_at || '2026') + ' · Morrow Lab';
+    document.getElementById('modalBody').innerHTML = sanitizeArticleHtml(a.article);
     document.getElementById('modalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   }

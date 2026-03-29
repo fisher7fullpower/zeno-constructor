@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "constructor",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["-c", "import http.server,socketserver,os;os.chdir('/Users/adm/Documents/rep/REP_test');h=http.server.SimpleHTTPRequestHandler;socketserver.TCPServer(('',8765),h).serve_forever()"],
+      "port": 8765
+    }
+  ]
+}

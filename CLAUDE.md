@@ -4,6 +4,27 @@
 
 ---
 
+## Структура .claude/
+
+| Путь | Назначение |
+|------|-----------|
+| `.claude/instructions/technical.md` | Сервисы, порты, деплой, env, nginx, auth, API |
+| `.claude/instructions/style.md` | Дизайн-система: цвета, шрифты, компоненты |
+| `.claude/instructions/profile.md` | Профиль проекта, архитектурные решения |
+| `.claude/templates/html-page.md` | Шаблон новой HTML-страницы с nav/footer |
+| `.claude/templates/api-endpoint.md` | Шаблон Flask endpoint с auth и rate limit |
+| `.claude/templates/deploy-checklist.md` | Чеклист деплоя |
+| `.claude/agents/orchestrator.md` | Декомпозиция задач на агентов |
+| `.claude/agents/backend-agent.md` | Правила для задач бэкенда |
+| `.claude/agents/frontend-agent.md` | Правила для задач фронтенда |
+| `.claude/agents/security-agent.md` | Чеклист security review |
+| `.claude/scripts/audit-style.sh` | Проверка дизайн-системы в HTML-файлах |
+| `.claude/scripts/pre-tool-use.sh` | PreToolUse хук: блокирует секреты в коде |
+| `.claude/scripts/stop-hook.sh` | Stop хук: напоминает о незакоммиченных файлах |
+| `SECURITY.md` | Полный реестр security проверок и исправлений |
+
+---
+
 ## Guardrails
 
 1. **НИКОГДА не коммить секреты.** Все ключи — в env-переменных на сервере (`/etc/proxy-constructor.env`, `/etc/ml-upload.env`). Не добавлять токены, пароли, IP-адреса в код, документацию или fallback-значения `os.environ.get()`.
