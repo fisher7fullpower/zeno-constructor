@@ -425,6 +425,7 @@
         <div class="form-label">Тип помещения</div>
         <div class="chips" id="nicheChips">
           <div class="chip sel" onclick="selChip('nicheChips',this,'экстерьер')">Экстерьер / Фасад</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'дом')">Дом / Интерьер</div>
           <div class="chip" onclick="selChip('nicheChips',this,'гостиная')">Гостиная</div>
           <div class="chip" onclick="selChip('nicheChips',this,'кухня')">Кухня</div>
           <div class="chip" onclick="selChip('nicheChips',this,'спальня')">Спальня</div>
@@ -636,7 +637,7 @@
     'совмещённый санузел':'Bathroom','ванная':'Bathroom','туалет':'Bathroom','душевая':'Bathroom',
     'офис':'Office','кафе':'Cafe','ресторан':'Restaurant','барбершоп':'Barber Shop',
     'салон красоты':'Beauty Salon','магазин':'Retail',
-    'экстерьер':'Exterior','терраса':'Patio','беседка':'Patio'
+    'экстерьер':'Exterior','терраса':'Patio','беседка':'Patio','дом':'Living Room'
   };
   const STYLE_MAP = {
     'минимализм':'Minimalist','современный':'Modern','скандинавский':'Scandinavian',
@@ -761,7 +762,8 @@
       const data = await resp.json();
       const imgs = data?.success?.generated_image || data?.success?.output_images || data?.output_images;
       const resultUrl = imgs?.[0];
-      if (!resultUrl) throw new Error(data.message || data.error || 'Не удалось получить результат');
+      const _errMsg = data.message || data.error || 'Не удалось получить результат';
+      if (!resultUrl) throw new Error(typeof _errMsg === 'string' ? _errMsg : 'Не удалось получить результат');
 
       setProgress(100, 'Готово!');
       await new Promise(r => setTimeout(r, 400));

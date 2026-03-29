@@ -760,7 +760,8 @@
       const data = await resp.json();
       const imgs = data?.success?.generated_image || data?.success?.output_images || data?.output_images;
       const resultUrl = imgs?.[0];
-      if (!resultUrl) throw new Error(data.message || data.error || 'Не удалось получить результат');
+      const _errMsg = data.message || data.error || 'Не удалось получить результат';
+      if (!resultUrl) throw new Error(typeof _errMsg === 'string' ? _errMsg : 'Не удалось получить результат');
 
       setProgress(100, 'Готово!');
       await new Promise(r => setTimeout(r, 400));
@@ -775,30 +776,6 @@
 
     } catch(err) {
       if (progTimer) { clearInterval(progTimer); progTimer = null; }
-      progressWrap.classList.remove('visible');
-      submitBtn.style.display = 'flex';
-      alert('Ошибка: ' + err.message + '. Попробуйте ещё раз.');
-    }
-  }
-
-        package: selectedPkg, vertical: 'business', niche: selectedNiche,
-        room_state: selectedState, file_url: uploadedUrl
-      };
-
-      const res = await fetch(WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      setProgress(100, 'Готово!');
-      await new Promise(r => setTimeout(r, 500));
-
-      progressWrap.classList.remove('visible');
-      document.getElementById('successEmail').textContent = email;
-      document.getElementById('successWrap').classList.add('visible');
-
-    } catch (err) {
       progressWrap.classList.remove('visible');
       submitBtn.style.display = 'flex';
       alert('Ошибка: ' + err.message + '. Попробуйте ещё раз.');

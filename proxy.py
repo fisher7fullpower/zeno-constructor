@@ -624,7 +624,10 @@ def auth_send_code():
         '<p style="color:#888;font-size:13px">Код действителен 10 минут.</p>'
         '</div>'
     )
-    send_email(email, f'Код для входа: {otp} — Morrow Lab', html)
+    ok = send_email(email, f'Код для входа: {otp} — Morrow Lab', html)
+    if not ok:
+        del OTP_STORE[email]
+        return jsonify({'error': 'Не удалось отправить email. Проверьте адрес или попробуйте позже.'}), 500
     return jsonify({'success': True, 'message': 'Code sent'})
 
 @app.route('/api/auth/verify-code', methods=['POST', 'OPTIONS'])
