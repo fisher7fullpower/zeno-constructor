@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Дизайн Студия — дизайн-проект квартиры за 48 часов | Morrow Lab</title>
+  <meta name="description" content="Полный дизайн-проект квартиры за 48 часов. Рендеры помещений, мудборд, спецификация материалов с ценами BYN, смета и PDF-документ. Готовый пакет для разговора с подрядчиком. От 149 BYN.">
+  <meta name="keywords" content="дизайн проект квартиры минск, дизайн интерьера онлайн беларусь, быстрый дизайн проект, рендеры интерьера, спецификация материалов BYN">
+  <link rel="canonical" href="https://morrowlab.by/project/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://morrowlab.by/project/">
+  <meta property="og:title" content="Дизайн Студия — дизайн-проект за 48 часов | Morrow Lab">
+  <meta property="og:description" content="Рендеры, мудборд, спецификация материалов BYN, смета — в одном PDF. Готово к работе с подрядчиком. От 149 BYN, 48 часов.">
+  <meta property="og:image" content="https://morrowlab.by/og-image.jpg">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"Дизайн Студия Morrow Lab","description":"Дизайн-проект квартиры за 48 часов: рендеры помещений, стилистический коллаж, спецификация материалов с ценами BYN, смета ремонта и PDF-документ для работы с подрядчиком.","provider":{"@type":"Organization","name":"Morrow Lab","url":"https://morrowlab.by"},"areaServed":{"@type":"Country","name":"BY"},"offers":[{"@type":"Offer","name":"Концепт","price":"149","priceCurrency":"BYN"},{"@type":"Offer","name":"Базовый","price":"299","priceCurrency":"BYN"},{"@type":"Offer","name":"Стандарт","price":"399","priceCurrency":"BYN"},{"@type":"Offer","name":"Полный","price":"499","priceCurrency":"BYN"}]}</script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --lime:#d1fe17;--lime-dim:rgba(209,254,23,.08);--lime-border:rgba(209,254,23,.22);
+      --bg:#040406;--surface:#0c0c0e;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+      --gray:rgba(255,255,255,.45);--gray2:rgba(255,255,255,.28);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+
+    /* ── HEADER ── */
+    .header{position:sticky;top:0;z-index:100;background:rgba(4,4,6,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;height:60px;gap:24px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
+    .logo-icon{width:28px;height:28px;border-radius:8px}
+    .nav-center{display:flex;align-items:center;gap:2px;margin:0 auto}
+    .nav-link{display:flex;align-items:center;gap:5px;color:rgba(255,255,255,.5);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;cursor:pointer;background:none;border:none;font-family:inherit}
+    .nav-link:hover,.nav-link.cur{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-link.cur{color:var(--lime)}
+    .nav-dot{width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block;margin-left:2px}
+    .nav-item{position:relative}
+    .dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-6px);background:#0d0d0d;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:560px;display:grid;grid-template-columns:1fr 1fr;gap:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+    .nav-item:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+    .dd-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;text-decoration:none;color:#fff;transition:background .2s}
+    .dd-item:hover{background:rgba(255,255,255,.05)}
+    .dd-icon{width:34px;height:34px;border-radius:8px;background:var(--lime-dim);border:1px solid var(--lime-border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .dd-text{display:flex;flex-direction:column;gap:2px}
+    .dd-name{font-size:13px;font-weight:600}
+    .dd-desc{font-size:12px;color:var(--gray);line-height:1.4}
+    .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .btn-tg{background:rgba(255,255,255,.07);border:1px solid var(--border2);color:#fff;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;cursor:pointer;transition:background .2s;text-decoration:none}
+    .btn-tg:hover{background:rgba(255,255,255,.12)}
+    .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+    .burger span{display:block;width:22px;height:2px;background:#fff;border-radius:2px}
+
+    /* ── MOBILE MENU ── */
+    .mob-menu{display:none;position:fixed;inset:0;z-index:200;background:#050507;flex-direction:column;padding:28px 24px;gap:20px;overflow-y:auto}
+    .mob-menu.open{display:flex}
+    .mob-close{background:none;border:none;color:#fff;font-size:28px;cursor:pointer;align-self:flex-end;margin-bottom:8px}
+    .mob-menu a{font-size:22px;font-weight:600;color:rgba(255,255,255,.7);padding:10px 0;border-bottom:1px solid var(--border)}
+
+    /* ── HERO ── */
+    .hero-wrap{max-width:1100px;margin:0 auto;padding:90px 24px 70px;text-align:center}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(209,254,23,.08);border:1px solid rgba(209,254,23,.2);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--lime);letter-spacing:.5px;text-transform:uppercase;margin-bottom:28px}
+    .hero-badge-dot{width:6px;height:6px;background:var(--lime);border-radius:50%;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .hero-h1{font-size:clamp(34px,5.5vw,62px);font-weight:800;line-height:1.12;letter-spacing:-.03em;margin-bottom:20px}
+    .lime{color:var(--lime)}
+    .hero-sub{font-size:clamp(16px,1.8vw,18px);color:rgba(255,255,255,.6);max-width:640px;margin:0 auto 36px;line-height:1.65}
+    .hero-ctas{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:52px}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--lime);color:#040406;font-size:15px;font-weight:700;padding:14px 28px;border-radius:12px;border:none;cursor:pointer;transition:opacity .2s,transform .2s;text-decoration:none}
+    .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+    .btn-secondary{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-weight:500;padding:14px 24px;border-radius:12px;border:1px solid var(--border2);cursor:pointer;transition:background .2s;text-decoration:none}
+    .btn-secondary:hover{background:rgba(255,255,255,.12)}
+    .hero-trust{display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+    .trust-item{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.42);font-size:13px}
+    .trust-dot{width:5px;height:5px;background:var(--lime);border-radius:50%;opacity:.7}
+
+    /* ── STRIP ── */
+    .strip{background:rgba(255,255,255,.02);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 24px}
+    .strip-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:13.5px;color:rgba(255,255,255,.4);text-align:center}
+    .strip-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+
+    /* ── SECTION ── */
+    .section{max-width:1100px;margin:0 auto;padding:80px 24px}
+    .section-tag{font-size:11px;font-weight:700;color:var(--lime);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+    .section-h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:-.025em;line-height:1.2;margin-bottom:14px}
+    .section-sub{font-size:15px;color:var(--gray);max-width:520px;line-height:1.65}
+
+    /* ── DELIVERABLES ── */
+    .deliver-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px}
+    .deliver-card{background:var(--surface);border:1px solid var(--border);padding:28px 24px;transition:border-color .2s}
+    .deliver-card:first-child{border-radius:14px 2px 2px 2px}
+    .deliver-card:nth-child(3){border-radius:2px 14px 2px 2px}
+    .deliver-card:nth-child(4){border-radius:2px 2px 2px 14px}
+    .deliver-card:last-child{border-radius:2px 2px 14px 2px}
+    .deliver-card:hover{border-color:var(--lime-border)}
+    .deliver-num{font-size:11px;font-weight:700;color:var(--lime);letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px}
+    .deliver-icon{font-size:26px;margin-bottom:12px}
+    .deliver-title{font-size:15px;font-weight:700;margin-bottom:8px;line-height:1.3}
+    .deliver-desc{font-size:13px;color:var(--gray);line-height:1.55}
+    .deliver-note{margin-top:12px;font-size:11.5px;background:var(--lime-dim);color:rgba(255,255,255,.55);padding:6px 10px;border-radius:6px;border-left:2px solid rgba(209,254,23,.4)}
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:48px}
+    .step-card{background:var(--surface);border:1px solid var(--border);padding:28px 22px;position:relative}
+    .step-card:first-child{border-radius:14px 2px 2px 14px}
+    .step-card:last-child{border-radius:2px 14px 14px 2px}
+    .step-num{font-size:11px;font-weight:700;color:var(--lime);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+    .step-icon{font-size:26px;margin-bottom:14px}
+    .step-title{font-size:15px;font-weight:700;margin-bottom:8px}
+    .step-desc{font-size:13px;color:var(--gray);line-height:1.5}
+    .step-time{margin-top:14px;font-size:11.5px;color:var(--lime);font-weight:600;background:var(--lime-dim);display:inline-block;padding:4px 10px;border-radius:6px}
+
+    /* ── FLOW BANNER ── */
+    .flow-banner{background:linear-gradient(135deg,rgba(209,254,23,.05),rgba(209,254,23,.015));border:1px solid var(--lime-border);border-radius:20px;padding:48px;text-align:center}
+    .flow-banner-tag{font-size:11px;font-weight:700;color:var(--lime);letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px}
+    .flow-banner-h{font-size:clamp(20px,2.8vw,30px);font-weight:800;margin-bottom:12px;line-height:1.3}
+    .flow-banner-sub{font-size:15px;color:var(--gray);max-width:520px;margin:0 auto 36px;line-height:1.6}
+    .flow-steps{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+    .fs-card{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:12px;padding:16px 18px;text-align:center;min-width:140px}
+    .fs-icon{font-size:22px;margin-bottom:8px}
+    .fs-label{font-size:12px;font-weight:700;color:#fff;line-height:1.3}
+    .fs-sub{font-size:11px;color:var(--gray);margin-top:3px}
+    .fs-arr{font-size:18px;color:var(--lime);padding:0 10px;flex-shrink:0}
+
+    /* ── SAMPLE PREVIEW ── */
+    .sample-wrap{background:linear-gradient(135deg,rgba(209,254,23,.05),rgba(209,254,23,.015));border:1px solid var(--lime-border);border-radius:20px;padding:48px;overflow:hidden}
+    .sample-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:36px;flex-wrap:wrap}
+    .sample-pages{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+    .page-card{background:#0a0c10;border:2px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s;position:relative;aspect-ratio:3/4}
+    .page-card:hover{transform:translateY(-3px) scale(1.01);border-color:rgba(209,254,23,.25)}
+    .page-card.active{border-color:var(--lime);box-shadow:0 0 0 1px rgba(209,254,23,.15)}
+    .page-inner{padding:10px;height:100%;display:flex;flex-direction:column;gap:3px}
+    .page-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.07)}
+    .page-bar.lime{background:rgba(209,254,23,.4);width:55%}
+    .page-bar.short{width:35%}
+    .page-bar.med{width:70%}
+    .page-bar.full{width:100%}
+    .page-img-mock{flex:1;border-radius:5px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:20px;margin:3px 0}
+    .page-lines{display:flex;flex-direction:column;gap:3px;margin-top:auto}
+    .page-line{height:3px;border-radius:2px;background:rgba(255,255,255,.07)}
+    .page-label{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:9px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.3px;text-transform:uppercase}
+    .sample-detail{margin-top:24px;background:#0a0c10;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;display:flex;gap:18px;align-items:flex-start}
+    .sd-icon{font-size:28px;flex-shrink:0}
+    .sd-title{font-size:14px;font-weight:700;margin-bottom:5px}
+    .sd-desc{font-size:13px;color:var(--gray);line-height:1.5}
+    .sample-cta{display:flex;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap}
+    .btn-ghost{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--lime-border);color:var(--lime);font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;text-decoration:none;transition:.2s}
+    .btn-ghost:hover{background:rgba(209,254,23,.08)}
+
+    /* ── PACKAGES ── */
+    .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:48px}
+    .price-card{background:var(--surface);border:1px solid var(--border);padding:28px 22px;position:relative;transition:border-color .2s,transform .2s}
+    .price-card:first-child{border-radius:14px 2px 2px 14px}
+    .price-card:last-child{border-radius:2px 14px 14px 2px}
+    .price-card:hover{border-color:var(--lime-border);transform:translateY(-3px)}
+    .price-card.featured{border-color:var(--lime-border);background:rgba(209,254,23,.03);transform:translateY(-3px)}
+    .price-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--lime);color:#000;font-size:10px;font-weight:800;padding:3px 12px;border-radius:10px;letter-spacing:.3px;white-space:nowrap;text-transform:uppercase}
+    .price-tier{font-size:12px;font-weight:700;color:var(--gray);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+    .price-val{font-size:36px;font-weight:800;line-height:1;margin-bottom:3px}
+    .price-val span{font-size:15px;font-weight:500;color:var(--gray)}
+    .price-time{font-size:11.5px;color:var(--lime);margin-bottom:18px;font-weight:600}
+    .price-divider{height:1px;background:var(--border);margin:18px 0}
+    .price-list{display:flex;flex-direction:column;gap:9px;margin-bottom:24px;min-height:240px}
+    .price-feat{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.4}
+    .price-feat.dim{color:var(--gray2)}
+    .price-feat .c{color:var(--lime);flex-shrink:0;font-size:13px;margin-top:1px}
+    .price-feat .x{color:rgba(255,255,255,.18);flex-shrink:0;font-size:13px;margin-top:1px}
+    .btn-choose{display:block;width:100%;text-align:center;padding:12px;border-radius:10px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;transition:.2s}
+    .btn-outline{background:transparent;border:1px solid var(--border2);color:#fff}
+    .btn-outline:hover{border-color:var(--lime-border);color:var(--lime)}
+    .btn-filled{background:var(--lime);color:#000}
+    .btn-filled:hover{opacity:.9}
+    .price-note{font-size:11px;color:var(--gray2);text-align:center;margin-top:8px;line-height:1.4}
+
+    /* ── ADVANTAGES ── */
+    .adv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:48px}
+    .adv-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px 22px;transition:border-color .2s}
+    .adv-card:hover{border-color:var(--lime-border)}
+    .adv-icon{width:42px;height:42px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:16px}
+    .adv-title{font-size:14px;font-weight:700;margin-bottom:7px;line-height:1.3}
+    .adv-desc{font-size:13px;color:var(--gray);line-height:1.5}
+
+    /* ── FORM ── */
+    .form-section{max-width:800px;margin:0 auto;padding:0 24px 80px}
+    .form-wrap{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px}
+    .form-title{font-size:22px;font-weight:800;margin-bottom:6px}
+    .form-subtitle{font-size:14px;color:var(--gray);margin-bottom:32px}
+    .fsi{display:flex;gap:8px;margin-bottom:36px}
+    .fsi-step{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .3s}
+    .fsi-step.active{background:var(--lime)}
+    .form-step{display:none}
+    .form-step.active{display:block}
+    .f-label{display:block;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:7px}
+    .f-label em{color:#f06060;font-style:normal}
+    .f-input,.f-select,.f-textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;padding:12px 15px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+    .f-input::placeholder,.f-textarea::placeholder{color:var(--gray2)}
+    .f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--lime-border)}
+    .f-select option{background:#111}
+    .f-textarea{min-height:85px;resize:vertical}
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+    .f-group{margin-bottom:18px}
+    .pkg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px}
+    .pkg-opt{border:2px solid var(--border2);border-radius:12px;padding:14px 12px;cursor:pointer;transition:.2s;position:relative}
+    .pkg-opt:hover{border-color:rgba(209,254,23,.3)}
+    .pkg-opt.selected{border-color:var(--lime);background:var(--lime-dim)}
+    .pkg-opt input{position:absolute;opacity:0;pointer-events:none}
+    .pkg-badge{font-size:10px;font-weight:800;background:var(--lime);color:#000;padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+    .pkg-name{font-size:13.5px;font-weight:700;margin-bottom:2px}
+    .pkg-price-val{font-size:20px;font-weight:800;color:var(--lime)}
+    .pkg-price-note{font-size:11px;color:var(--gray);margin-top:2px}
+    .btns-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .sel-btn{background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;transition:.2s}
+    .sel-btn:hover,.sel-btn.active{background:var(--lime-dim);border-color:var(--lime-border);color:#fff}
+    .style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+    .style-btn{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;padding:11px;text-align:center;font-size:13px;cursor:pointer;transition:.2s}
+    .style-btn:hover,.style-btn.active{background:var(--lime-dim);border-color:var(--lime-border);color:#fff}
+    .upload-box{border:2px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:18px}
+    .upload-box:hover{border-color:rgba(209,254,23,.3);background:rgba(209,254,23,.015)}
+    .upload-icon{font-size:26px;margin-bottom:8px}
+    .upload-txt{font-size:13.5px;color:rgba(255,255,255,.55)}
+    .upload-note{font-size:11.5px;color:var(--gray);margin-top:4px}
+    .upload-input{display:none}
+    .previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .prev-img{width:58px;height:58px;object-fit:cover;border-radius:7px;border:1px solid var(--border)}
+    .form-nav{display:flex;gap:10px;margin-top:24px}
+    .btn-back{background:transparent;border:1px solid var(--border2);color:rgba(255,255,255,.45);padding:12px 18px;border-radius:10px;font-size:13.5px;cursor:pointer;transition:.2s}
+    .btn-back:hover{color:#fff;border-color:var(--border2)}
+    .btn-next{flex:1;background:var(--lime);color:#040406;padding:13px;border-radius:10px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:opacity .2s}
+    .btn-next:hover{opacity:.9}
+    .btn-submit{flex:1;background:var(--lime);color:#040406;padding:13px;border-radius:10px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:opacity .2s}
+    .btn-submit:hover{opacity:.9}
+    .f-note{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-size:12.5px;color:var(--gray);line-height:1.5;display:flex;gap:10px;margin-top:18px}
+    .form-success{display:none;text-align:center;padding:40px 20px}
+    .form-success.show{display:block}
+    .success-icon{font-size:46px;margin-bottom:14px}
+    .success-h{font-size:21px;font-weight:700;margin-bottom:10px}
+    .success-sub{font-size:14px;color:var(--gray);line-height:1.6;max-width:400px;margin:0 auto 22px}
+    .budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+    .budget-btn{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;font-size:13px;cursor:pointer;transition:.2s;text-align:left}
+    .budget-btn:hover,.budget-btn.active{background:var(--lime-dim);border-color:var(--lime-border)}
+
+    /* ── FAQ ── */
+    .faq-list{margin-top:48px;display:flex;flex-direction:column;gap:2px}
+    .faq-item{background:var(--surface);border:1px solid var(--border)}
+    .faq-item:first-child{border-radius:14px 14px 2px 2px}
+    .faq-item:last-child{border-radius:2px 2px 14px 14px}
+    .faq-q{padding:18px 22px;font-size:14.5px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;user-select:none}
+    .faq-icon{color:var(--lime);font-size:18px;transition:transform .25s;flex-shrink:0}
+    .faq-item.open .faq-icon{transform:rotate(45deg)}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .faq-item.open .faq-a{max-height:400px}
+    .faq-a-inner{padding:0 22px 18px;font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.65}
+
+    /* ── FOOTER ── */
+    .footer{background:var(--surface);border-top:1px solid var(--border);padding:36px 24px;text-align:center}
+    .footer-logo{font-size:15px;font-weight:700;margin-bottom:12px}
+    .footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+    .footer-links a{font-size:12.5px;color:var(--gray);transition:color .2s}
+    .footer-links a:hover{color:#fff}
+    .footer-copy{font-size:12px;color:var(--gray2)}
+
+    /* ── CONSENT ── */
+    .consent-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:10px;transition:border-color .2s;font-size:13px;color:rgba(255,255,255,.6);line-height:1.5}
+    .consent-label:hover{border-color:rgba(209,254,23,.3)}
+    .consent-label.checked{border-color:rgba(209,254,23,.4);background:rgba(209,254,23,.04)}
+    .consent-label input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:18px;height:18px;min-width:18px;border:2px solid var(--border2);border-radius:5px;cursor:pointer;position:relative;margin-top:1px;background:rgba(255,255,255,.04);transition:border-color .2s,background .2s}
+    .consent-label input[type="checkbox"]:checked{background:var(--lime);border-color:var(--lime)}
+    .consent-label input[type="checkbox"]:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:12px;font-weight:800;color:#000}
+
+    /* ── REVEAL ── */
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+    .reveal.in{opacity:1;transform:none}
+    .d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}.d4{transition-delay:.28s}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1000px){
+      .pricing-grid{grid-template-columns:repeat(2,1fr)}
+      .price-card:first-child{border-radius:14px 2px 2px 14px}
+      .price-card:nth-child(2){border-radius:2px 14px 14px 2px}
+      .price-card:nth-child(3){border-radius:14px 2px 2px 14px;border-top:none}
+      .price-card:last-child{border-radius:2px 14px 14px 2px}
+      .adv-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:760px){
+      .nav-center,.nav-right .btn-tg{display:none}
+      .burger{display:flex}
+      .hero-wrap{padding:60px 20px 50px}
+      .deliver-grid{grid-template-columns:1fr 1fr}
+      .steps-grid{grid-template-columns:1fr 1fr}
+      .pricing-grid{grid-template-columns:1fr 1fr}
+      .adv-grid{grid-template-columns:1fr}
+      .style-grid{grid-template-columns:repeat(2,1fr)}
+      .budget-grid{grid-template-columns:1fr}
+      .f-row{grid-template-columns:1fr}
+      .form-wrap{padding:28px 20px}
+      .flow-steps{flex-direction:column}
+      .fs-arr{transform:rotate(90deg)}
+      .sample-pages{grid-template-columns:repeat(3,1fr)}
+      .sample-wrap{padding:28px 20px}
+    }
+    @media(max-width:480px){
+      .deliver-grid{grid-template-columns:1fr}
+      .steps-grid{grid-template-columns:1fr}
+      .pricing-grid{grid-template-columns:1fr}
+      .pkg-grid{grid-template-columns:1fr 1fr}
+      .sample-pages{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <a href="/" class="logo"><img src="/logo.png" class="logo-icon" alt="Morrow Lab">Morrow Lab</a>
+  <nav class="nav-center">
+    <div class="nav-item">
+      <button class="nav-link">Пространства <span class="nav-dot"></span></button>
+      <div class="dropdown">
+        <a href="/sanuzel/" class="dd-item"><div class="dd-icon">🚿</div><div class="dd-text"><div class="dd-name">Санузел</div><div class="dd-desc">Ванная, туалет, душевая</div></div></a>
+        <a href="/kitchen/" class="dd-item"><div class="dd-icon">🍳</div><div class="dd-text"><div class="dd-name">Кухня</div><div class="dd-desc">Кухня-гостиная, столовая</div></div></a>
+        <a href="/room/" class="dd-item"><div class="dd-icon">🛋️</div><div class="dd-text"><div class="dd-name">Комната</div><div class="dd-desc">Гостиная, спальня, кабинет</div></div></a>
+        <a href="/business/" class="dd-item"><div class="dd-icon">💼</div><div class="dd-text"><div class="dd-name">Бизнес</div><div class="dd-desc">Офис, кафе, магазин</div></div></a>
+        <a href="/dom/" class="dd-item"><div class="dd-icon">🏡</div><div class="dd-text"><div class="dd-name">Дом</div><div class="dd-desc">Загородный, коттедж</div></div></a>
+        <a href="/constructor/" class="dd-item"><div class="dd-icon">📐</div><div class="dd-text"><div class="dd-name">Конструктор</div><div class="dd-desc">Планировка помещения</div></div></a>
+        <a href="/project/" class="dd-item cur" style="background:rgba(209,254,23,.05);border:1px solid rgba(209,254,23,.15);grid-column:1/-1"><div class="dd-icon" style="background:rgba(209,254,23,.12);border-color:rgba(209,254,23,.3)">✦</div><div class="dd-text"><div class="dd-name" style="color:#d1fe17">Дизайн Студия</div><div class="dd-desc">Полный проект — от рендеров до сметы</div></div></a>
+      </div>
+    </div>
+    <a href="/#examples" class="nav-link">Примеры</a>
+    <a href="#pricing" class="nav-link">Пакеты</a>
+    <a href="#faq" class="nav-link">FAQ</a>
+    <a href="/blog/" class="nav-link">Блог</a>
+    <a href="/masters/" class="nav-link">Мастера</a>
+    <a href="/project/" class="nav-link cur" style="color:#d1fe17"><span style="width:6px;height:6px;background:#d1fe17;border-radius:50%;display:inline-block;margin-right:4px"></span>Студия</a>
+  </nav>
+  <div class="nav-right">
+    <a href="https://t.me/morrowlab_bot" class="btn-tg" target="_blank">Telegram</a>
+    <a href="#brief" class="btn-primary" style="padding:8px 16px;font-size:13px">Заказать проект</a>
+    <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ── MOBILE MENU ── -->
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="/">Главная</a>
+  <a href="/room/">Комната</a>
+  <a href="/kitchen/">Кухня</a>
+  <a href="/sanuzel/">Санузел</a>
+  <a href="/dom/">Дом</a>
+  <a href="/business/">Бизнес</a>
+  <a href="/constructor/">Конструктор</a>
+  <a href="/project/" style="color:var(--lime);font-weight:700;">✦ Дизайн Студия</a>
+  <a href="#brief" style="color:var(--lime);margin-top:12px;font-size:18px;">Заказать проект →</a>
+</div>
+
+<!-- ── HERO ── -->
+<div class="hero-wrap">
+  <div class="hero-badge reveal"><span class="hero-badge-dot"></span>Дизайн Студия · Morrow Lab</div>
+  <h1 class="hero-h1 reveal d1">Дизайн-проект вашего<br>пространства за <span class="lime">48 часов</span></h1>
+  <p class="hero-sub reveal d2">Рендеры помещений, стилистический коллаж, спецификация материалов с ценами BYN и смета ремонта — в одном структурированном PDF-документе. Готово к работе с подрядчиком или дизайнером.</p>
+  <div class="hero-ctas reveal d3">
+    <a href="#brief" class="btn-primary">Заказать документ</a>
+    <a href="#whats-inside" class="btn-secondary">Состав проекта</a>
+  </div>
+  <div class="hero-trust reveal d4">
+    <div class="trust-item"><span class="trust-dot"></span>24–48 часов</div>
+    <div class="trust-item"><span class="trust-dot"></span>Полностью онлайн</div>
+    <div class="trust-item"><span class="trust-dot"></span>Цены BYN из магазинов РБ</div>
+    <div class="trust-item"><span class="trust-dot"></span>От 149 BYN</div>
+    <div class="trust-item"><span class="trust-dot"></span>PDF + онлайн-просмотр</div>
+  </div>
+</div>
+
+<!-- ── STRIP ── -->
+<div class="strip">
+  <div class="strip-inner">
+    <span>Дизайн-студии: <strong style="color:#fff">1–3 месяца</strong> и нужен выезд</span>
+    <div class="strip-sep"></div>
+    <span>Цена — <strong style="color:#fff">только после созвона</strong></span>
+    <div class="strip-sep"></div>
+    <span>Вместо этого: <strong style="color:var(--lime)">48 часов · онлайн · фиксированная цена</strong></span>
+  </div>
+</div>
+
+<!-- ── WHAT'S INSIDE ── -->
+<section class="section" id="whats-inside">
+  <div class="section-tag reveal">→ Состав</div>
+  <h2 class="section-h2 reveal d1">Что входит в документ</h2>
+  <p class="section-sub reveal d2">Каждый раздел — конкретные данные для конкретного шага в ремонте.</p>
+  <div class="deliver-grid">
+    <div class="deliver-card reveal d1">
+      <div class="deliver-num">01</div>
+      <div class="deliver-icon">🎨</div>
+      <div class="deliver-title">Визуализация помещений</div>
+      <div class="deliver-desc">Фотореалистичные рендеры каждой комнаты в выбранном стиле. Чётко видно, как будет выглядеть пространство после ремонта.</div>
+      <div class="deliver-note">1–3 цветовых варианта · зависит от пакета</div>
+    </div>
+    <div class="deliver-card reveal d2">
+      <div class="deliver-num">02</div>
+      <div class="deliver-icon">🖼️</div>
+      <div class="deliver-title">Стилистический коллаж</div>
+      <div class="deliver-desc">Мудборд с подборкой материалов: плитка, напольное покрытие, стены, мебель, декор. Визуальная сетка с подписями и цветовой палитрой.</div>
+      <div class="deliver-note">Стандарт и Полный пакет</div>
+    </div>
+    <div class="deliver-card reveal d3">
+      <div class="deliver-num">03</div>
+      <div class="deliver-icon">📐</div>
+      <div class="deliver-title">Планировочное решение</div>
+      <div class="deliver-desc">Схема расстановки мебели с учётом указанных размеров. Проходы, функциональные зоны, эргономика. Понятно для любого подрядчика.</div>
+      <div class="deliver-note">Только Полный пакет</div>
+    </div>
+    <div class="deliver-card reveal d1">
+      <div class="deliver-num">04</div>
+      <div class="deliver-icon">📋</div>
+      <div class="deliver-title">Спецификация материалов</div>
+      <div class="deliver-desc">Перечень всего необходимого: плитка, краска, напольное покрытие, сантехника. Бренды из РБ — OMA, Керамин, 21vek.by, Е1.</div>
+      <div class="deliver-note">Артикулы и цены BYN · берёте в магазин</div>
+    </div>
+    <div class="deliver-card reveal d2">
+      <div class="deliver-num">05</div>
+      <div class="deliver-icon">💰</div>
+      <div class="deliver-title">Смета ремонта</div>
+      <div class="deliver-desc">Ориентировочная смета по категориям: материалы, отделочные работы, мебель. Диапазон цен в BYN, рассчитан под ваш бюджет.</div>
+      <div class="deliver-note">Разбивка по категориям в BYN</div>
+    </div>
+    <div class="deliver-card reveal d3">
+      <div class="deliver-num">06</div>
+      <div class="deliver-icon">📄</div>
+      <div class="deliver-title">PDF-документ</div>
+      <div class="deliver-desc">Структурированный документ с фирменным оформлением: оглавление, все разделы, нумерация страниц. Удобен для показа подрядчику или дизайнеру.</div>
+      <div class="deliver-note">Отправляется на email + онлайн-ссылка</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section" id="how" style="padding-top:0">
+  <div class="section-tag reveal">→ Процесс</div>
+  <h2 class="section-h2 reveal d1">От заявки до готового PDF</h2>
+  <p class="section-sub reveal d2">Без звонков, выездов и согласований. Только форма и результат.</p>
+  <div class="steps-grid reveal d3">
+    <div class="step-card">
+      <div class="step-num">Шаг 01</div>
+      <div class="step-icon">📋</div>
+      <div class="step-title">Заполните бриф</div>
+      <div class="step-desc">Параметры помещения, фото текущего состояния, стиль, пожелания. 3–5 минут без лишних вопросов.</div>
+      <div class="step-time">≈ 3–5 мин</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Шаг 02</div>
+      <div class="step-icon">⚡</div>
+      <div class="step-title">Формируется документ</div>
+      <div class="step-desc">Система генерирует рендеры в вашем стиле, составляет спецификацию с актуальными позициями из РБ и рассчитывает смету.</div>
+      <div class="step-time">Автоматически</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Шаг 03</div>
+      <div class="step-icon">🔍</div>
+      <div class="step-title">Контроль качества</div>
+      <div class="step-desc">Оператор проверяет технические параметры: наличие всех разделов, читаемость рендеров, корректность позиций в спецификации.</div>
+      <div class="step-time">QA перед отправкой</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Шаг 04</div>
+      <div class="step-icon">📬</div>
+      <div class="step-title">Документ на email</div>
+      <div class="step-desc">Получаете структурированный PDF и онлайн-ссылку. Приходите к подрядчику с готовым документом — разговор сразу предметный.</div>
+      <div class="step-time">24–48 часов итого</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FLOW BANNER ── -->
+<section class="section" style="padding-top:0;padding-bottom:80px">
+  <div class="flow-banner reveal">
+    <div class="flow-banner-tag">✦ Зачем это нужно</div>
+    <h3 class="flow-banner-h">Получите документ — и приходите<br>к подрядчику подготовленным</h3>
+    <p class="flow-banner-sub">Большинство переговоров с подрядчиком или дизайнером уходит на объяснение "хочу что-то светлое, но с характером". С готовым PDF разговор сразу конкретный: вот рендеры, вот материалы, вот бюджет.</p>
+    <div class="flow-steps">
+      <div class="fs-card">
+        <div class="fs-icon">📸</div>
+        <div class="fs-label">Ваши фото</div>
+        <div class="fs-sub">Текущее состояние</div>
+      </div>
+      <div class="fs-arr">→</div>
+      <div class="fs-card">
+        <div class="fs-icon">⚡</div>
+        <div class="fs-label">Morrow Lab</div>
+        <div class="fs-sub">Готовит документ</div>
+      </div>
+      <div class="fs-arr">→</div>
+      <div class="fs-card" style="border-color:rgba(209,254,23,.25);background:rgba(209,254,23,.04)">
+        <div class="fs-icon">📄</div>
+        <div class="fs-label" style="color:var(--lime)">PDF у вас</div>
+        <div class="fs-sub">За 48 часов</div>
+      </div>
+      <div class="fs-arr">→</div>
+      <div class="fs-card">
+        <div class="fs-icon">🤝</div>
+        <div class="fs-label">К подрядчику</div>
+        <div class="fs-sub">С конкретикой</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SAMPLE PREVIEW ── -->
+<section class="section" style="padding-top:0;padding-bottom:80px">
+  <div class="sample-wrap reveal">
+    <div class="sample-head">
+      <div>
+        <div class="section-tag" style="margin-bottom:10px">→ Структура документа</div>
+        <h2 class="section-h2" style="margin-bottom:8px">Что внутри PDF</h2>
+        <p style="font-size:14px;color:var(--gray);max-width:400px;line-height:1.5">Нажмите на раздел — увидите что в нём. Каждый пакет включает разное количество разделов.</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:32px;font-weight:800;color:var(--lime);line-height:1">6</div>
+        <div style="font-size:12px;color:var(--gray)">разделов · PDF A4</div>
+      </div>
+    </div>
+    <div class="sample-pages" id="samplePages">
+      <div class="page-card active" data-page="0" onclick="showPage(0)">
+        <div class="page-inner">
+          <div class="page-bar lime"></div>
+          <div class="page-bar short" style="margin-bottom:3px"></div>
+          <div class="page-img-mock">🎨</div>
+          <div class="page-lines"><div class="page-line full"></div><div class="page-line med"></div></div>
+        </div>
+        <div class="page-label">Рендеры</div>
+      </div>
+      <div class="page-card" data-page="1" onclick="showPage(1)">
+        <div class="page-inner">
+          <div class="page-bar lime"></div>
+          <div class="page-bar short" style="margin-bottom:3px"></div>
+          <div class="page-img-mock" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:4px">
+            <div style="background:rgba(255,255,255,.06);border-radius:3px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:3px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:3px"></div>
+            <div style="background:rgba(255,255,255,.06);border-radius:3px"></div>
+          </div>
+          <div class="page-lines"><div class="page-line full"></div><div class="page-line short"></div></div>
+        </div>
+        <div class="page-label">Мудборд</div>
+      </div>
+      <div class="page-card" data-page="2" onclick="showPage(2)">
+        <div class="page-inner">
+          <div class="page-bar lime"></div>
+          <div class="page-bar short" style="margin-bottom:3px"></div>
+          <div class="page-img-mock">📐</div>
+          <div class="page-lines"><div class="page-line med"></div><div class="page-line full"></div><div class="page-line short"></div></div>
+        </div>
+        <div class="page-label">Планировка</div>
+      </div>
+      <div class="page-card" data-page="3" onclick="showPage(3)">
+        <div class="page-inner">
+          <div class="page-bar lime"></div>
+          <div class="page-bar short" style="margin-bottom:3px"></div>
+          <div class="page-img-mock" style="flex-direction:column;gap:3px;padding:5px;justify-content:center">
+            <div style="display:flex;gap:3px"><div style="flex:1;background:rgba(209,254,23,.15);border-radius:2px;height:7px"></div><div style="flex:2;background:rgba(255,255,255,.06);border-radius:2px;height:7px"></div><div style="flex:1;background:rgba(255,255,255,.06);border-radius:2px;height:7px"></div></div>
+            <div style="display:flex;gap:3px"><div style="flex:1;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div><div style="flex:2;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div><div style="flex:1;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div></div>
+            <div style="display:flex;gap:3px"><div style="flex:1;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div><div style="flex:2;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div><div style="flex:1;background:rgba(255,255,255,.04);border-radius:2px;height:7px"></div></div>
+          </div>
+          <div class="page-lines"><div class="page-line full"></div><div class="page-line med"></div></div>
+        </div>
+        <div class="page-label">Спецификация</div>
+      </div>
+      <div class="page-card" data-page="4" onclick="showPage(4)">
+        <div class="page-inner">
+          <div class="page-bar lime"></div>
+          <div class="page-bar short" style="margin-bottom:3px"></div>
+          <div class="page-img-mock" style="padding:6px;align-items:flex-end;justify-content:center;gap:3px">
+            <div style="flex:1;background:rgba(209,254,23,.25);border-radius:2px 2px 0 0;height:38%"></div>
+            <div style="flex:1;background:rgba(209,254,23,.35);border-radius:2px 2px 0 0;height:62%"></div>
+            <div style="flex:1;background:rgba(209,254,23,.45);border-radius:2px 2px 0 0;height:82%"></div>
+            <div style="flex:1;background:rgba(209,254,23,.3);border-radius:2px 2px 0 0;height:52%"></div>
+          </div>
+          <div class="page-lines"><div class="page-line full"></div><div class="page-line short"></div></div>
+        </div>
+        <div class="page-label">Смета</div>
+      </div>
+    </div>
+    <div class="sample-detail" id="sampleDetail">
+      <div class="sd-icon" id="sdIcon">🎨</div>
+      <div>
+        <div class="sd-title" id="sdTitle">Визуализация помещений</div>
+        <div class="sd-desc" id="sdDesc">Фотореалистичные рендеры каждой комнаты в выбранном стиле. Формат до и после — сразу видна разница. 1–3 цветовых варианта в зависимости от пакета.</div>
+      </div>
+    </div>
+    <div class="sample-cta">
+      <a href="#brief" class="btn-primary" style="font-size:13.5px;padding:12px 22px">Заказать документ</a>
+      <a href="https://t.me/morrowlab_bot" class="btn-ghost" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Задать вопрос
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── PACKAGES ── -->
+<section class="section" id="pricing" style="padding-top:0">
+  <div class="section-tag reveal">→ Пакеты</div>
+  <h2 class="section-h2 reveal d1">Выберите пакет</h2>
+  <p class="section-sub reveal d2">Все пакеты включают PDF-документ. Разница — в объёме разделов и скорости.</p>
+  <div class="pricing-grid reveal d3">
+
+    <!-- Концепт -->
+    <div class="price-card">
+      <div class="price-tier">Концепт</div>
+      <div class="price-val">149 <span>BYN</span></div>
+      <div class="price-time">⏱ до 48 часов</div>
+      <div class="price-divider"></div>
+      <div class="price-list">
+        <div class="price-feat"><span class="c">✓</span> Визуализация 2 помещений</div>
+        <div class="price-feat"><span class="c">✓</span> 1 цветовой вариант каждого рендера</div>
+        <div class="price-feat"><span class="c">✓</span> PDF-документ с оглавлением</div>
+        <div class="price-feat"><span class="c">✓</span> Онлайн-ссылка на просмотр</div>
+        <div class="price-feat dim"><span class="x">✗</span> Стилистический коллаж</div>
+        <div class="price-feat dim"><span class="x">✗</span> Спецификация материалов</div>
+        <div class="price-feat dim"><span class="x">✗</span> Смета ремонта</div>
+        <div class="price-feat dim"><span class="x">✗</span> Планировочное решение</div>
+      </div>
+      <button class="btn-choose btn-outline" onclick="selectPackage('concept')">Выбрать Концепт</button>
+      <div class="price-note">Для первичной визуализации идеи</div>
+    </div>
+
+    <!-- Базовый -->
+    <div class="price-card">
+      <div class="price-tier">Базовый</div>
+      <div class="price-val">299 <span>BYN</span></div>
+      <div class="price-time">⏱ до 48 часов</div>
+      <div class="price-divider"></div>
+      <div class="price-list">
+        <div class="price-feat"><span class="c">✓</span> Визуализация 3 помещений</div>
+        <div class="price-feat"><span class="c">✓</span> 1 цветовой вариант каждого рендера</div>
+        <div class="price-feat"><span class="c">✓</span> Спецификация материалов (BYN)</div>
+        <div class="price-feat"><span class="c">✓</span> Ориентировочная смета</div>
+        <div class="price-feat"><span class="c">✓</span> PDF-документ + онлайн-ссылка</div>
+        <div class="price-feat dim"><span class="x">✗</span> Стилистический коллаж</div>
+        <div class="price-feat dim"><span class="x">✗</span> Планировочное решение</div>
+      </div>
+      <button class="btn-choose btn-outline" onclick="selectPackage('basic')">Выбрать Базовый</button>
+      <div class="price-note">Визуализация + рабочая спецификация</div>
+    </div>
+
+    <!-- Стандарт -->
+    <div class="price-card featured">
+      <div class="price-badge">Популярный</div>
+      <div class="price-tier">Стандарт</div>
+      <div class="price-val">399 <span>BYN</span></div>
+      <div class="price-time">⏱ до 36 часов</div>
+      <div class="price-divider"></div>
+      <div class="price-list">
+        <div class="price-feat"><span class="c">✓</span> Визуализация 5 помещений</div>
+        <div class="price-feat"><span class="c">✓</span> 2 цветовых варианта каждого рендера</div>
+        <div class="price-feat"><span class="c">✓</span> Стилистический коллаж (мудборд)</div>
+        <div class="price-feat"><span class="c">✓</span> Спецификация материалов (BYN)</div>
+        <div class="price-feat"><span class="c">✓</span> Ориентировочная смета</div>
+        <div class="price-feat"><span class="c">✓</span> PDF-документ + онлайн-ссылка</div>
+        <div class="price-feat dim"><span class="x">✗</span> Планировочное решение</div>
+      </div>
+      <button class="btn-choose btn-filled" onclick="selectPackage('standard')">Выбрать Стандарт</button>
+      <div class="price-note">Полный набор без планировки</div>
+    </div>
+
+    <!-- Полный -->
+    <div class="price-card">
+      <div class="price-tier">Полный</div>
+      <div class="price-val">499 <span>BYN</span></div>
+      <div class="price-time">⚡ приоритет · до 24 часов</div>
+      <div class="price-divider"></div>
+      <div class="price-list">
+        <div class="price-feat"><span class="c">✓</span> Визуализация всех помещений</div>
+        <div class="price-feat"><span class="c">✓</span> 3 цветовых варианта каждого рендера</div>
+        <div class="price-feat"><span class="c">✓</span> Стилистический коллаж</div>
+        <div class="price-feat"><span class="c">✓</span> Планировочное решение</div>
+        <div class="price-feat"><span class="c">✓</span> Полная спецификация со ссылками РБ</div>
+        <div class="price-feat"><span class="c">✓</span> Детальная смета по категориям</div>
+        <div class="price-feat"><span class="c">✓</span> PDF-документ premium · онлайн-ссылка</div>
+      </div>
+      <button class="btn-choose btn-outline" onclick="selectPackage('full')">Выбрать Полный</button>
+      <div class="price-note">Максимальная детализация · приоритет</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── ADVANTAGES ── -->
+<section class="section" id="advantages" style="padding-top:0">
+  <div class="section-tag reveal">→ Преимущества</div>
+  <h2 class="section-h2 reveal d1">Почему это удобнее</h2>
+  <p class="section-sub reveal d2">Закрываем конкретные вопросы, которые возникают при планировании ремонта.</p>
+  <div class="adv-grid">
+    <div class="adv-card reveal d1">
+      <div class="adv-icon">⚡</div>
+      <div class="adv-title">48 часов вместо 1–3 месяцев</div>
+      <div class="adv-desc">Традиционный дизайн-проект занимает от 6 недель до 3 месяцев. Мы готовим документ за 24–48 часов — достаточно для точного результата.</div>
+    </div>
+    <div class="adv-card reveal d2">
+      <div class="adv-icon">🌐</div>
+      <div class="adv-title">Полностью онлайн</div>
+      <div class="adv-desc">Никаких выездов на обмер и встреч "для знакомства". Только форма с фото и параметрами — из любой точки, в любое время.</div>
+    </div>
+    <div class="adv-card reveal d3">
+      <div class="adv-icon">📍</div>
+      <div class="adv-title">Материалы из магазинов РБ</div>
+      <div class="adv-desc">Спецификация содержит реальные позиции из ОМА, Керамин, 21vek.by, Е1 — с артикулами и актуальными ценами в BYN.</div>
+    </div>
+    <div class="adv-card reveal d1">
+      <div class="adv-icon">🔒</div>
+      <div class="adv-title">Цена фиксирована при заказе</div>
+      <div class="adv-desc">Никаких "уточним стоимость после обмеров". Выбрали пакет — цена зафиксирована. 149, 299, 399 или 499 BYN — включено всё.</div>
+    </div>
+    <div class="adv-card reveal d2">
+      <div class="adv-icon">📄</div>
+      <div class="adv-title">Документ, а не набор картинок</div>
+      <div class="adv-desc">Структурированный PDF с оглавлением, нумерацией страниц и брендингом. Показываете подрядчику — сразу понятно что, где и сколько стоит.</div>
+    </div>
+    <div class="adv-card reveal d3">
+      <div class="adv-icon">✦</div>
+      <div class="adv-title">Ваш стиль, ваши параметры</div>
+      <div class="adv-desc">Документ формируется на основе ваших фото, размеров и выбранного стиля. Без интерпретации и без навязанного вкуса.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FORM ── -->
+<section class="form-section" id="brief">
+  <div class="section-tag reveal" style="text-align:center">→ Заявка</div>
+  <h2 class="section-h2 reveal d1" style="text-align:center;max-width:none">Заполните бриф</h2>
+  <p style="text-align:center;font-size:15px;color:var(--gray);margin-bottom:0" class="reveal d2">3 шага — 3–5 минут. Результат — через 24–48 часов после оплаты.</p>
+
+  <div class="form-wrap reveal d3" id="briefForm" style="margin-top:40px">
+    <div class="fsi">
+      <div class="fsi-step active" id="fsi1"></div>
+      <div class="fsi-step" id="fsi2"></div>
+      <div class="fsi-step" id="fsi3"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="form-step active" id="step1">
+      <div class="form-title">Контакт и пакет</div>
+      <div class="form-subtitle">Шаг <strong>1</strong> из 3</div>
+      <div class="f-row">
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Ваше имя <em>*</em></label>
+          <input type="text" class="f-input" id="f-name" placeholder="Иван Петров">
+        </div>
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Email <em>*</em></label>
+          <input type="email" class="f-input" id="f-email" placeholder="ivan@gmail.com">
+        </div>
+      </div>
+      <div class="f-group" style="margin-top:18px">
+        <label class="f-label">Телефон (необязательно)</label>
+        <input type="tel" class="f-input" id="f-phone" placeholder="+375 XX XXX-XX-XX">
+      </div>
+      <div class="f-group">
+        <label class="f-label">Выберите пакет <em>*</em></label>
+        <div class="pkg-grid">
+          <div class="pkg-opt" data-pkg="concept" onclick="togglePkg(this)">
+            <input type="radio" name="pkg" value="concept">
+            <div class="pkg-name">Концепт</div>
+            <div class="pkg-price-val">149 BYN</div>
+            <div class="pkg-price-note">2 рендера · без спецификации</div>
+          </div>
+          <div class="pkg-opt" data-pkg="basic" onclick="togglePkg(this)">
+            <input type="radio" name="pkg" value="basic">
+            <div class="pkg-name">Базовый</div>
+            <div class="pkg-price-val">299 BYN</div>
+            <div class="pkg-price-note">3 комнаты · спецификация</div>
+          </div>
+          <div class="pkg-opt selected" data-pkg="standard" onclick="togglePkg(this)">
+            <input type="radio" name="pkg" value="standard" checked>
+            <div class="pkg-badge">Хит</div>
+            <div class="pkg-name">Стандарт</div>
+            <div class="pkg-price-val">399 BYN</div>
+            <div class="pkg-price-note">5 комнат · мудборд</div>
+          </div>
+          <div class="pkg-opt" data-pkg="full" onclick="togglePkg(this)">
+            <input type="radio" name="pkg" value="full">
+            <div class="pkg-name">Полный</div>
+            <div class="pkg-price-val">499 BYN</div>
+            <div class="pkg-price-note">Всё · планировка · 24ч</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-nav"><button class="btn-next" onclick="nextStep(2)">Далее →</button></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="form-step" id="step2">
+      <div class="form-title">Параметры</div>
+      <div class="form-subtitle">Шаг <strong>2</strong> из 3</div>
+      <div class="f-group">
+        <label class="f-label">Тип помещения <em>*</em></label>
+        <select class="f-select f-input" id="f-type">
+          <option value="">Выберите...</option>
+          <option value="flat">Квартира</option>
+          <option value="house">Частный дом</option>
+          <option value="commercial">Коммерческое</option>
+          <option value="office">Офис</option>
+        </select>
+      </div>
+      <div class="f-row">
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Площадь (м²) <em>*</em></label>
+          <input type="number" class="f-input" id="f-area" placeholder="60" min="10" max="1000">
+        </div>
+        <div class="f-group" style="margin-bottom:0">
+          <label class="f-label">Количество комнат <em>*</em></label>
+          <div class="btns-row" style="margin-top:8px;margin-bottom:0">
+            <button class="sel-btn" onclick="selectRooms(this,'1')">1</button>
+            <button class="sel-btn" onclick="selectRooms(this,'2')">2</button>
+            <button class="sel-btn" onclick="selectRooms(this,'3')">3</button>
+            <button class="sel-btn" onclick="selectRooms(this,'4')">4</button>
+            <button class="sel-btn" onclick="selectRooms(this,'5+')">5+</button>
+          </div>
+        </div>
+      </div>
+      <div class="f-group" style="margin-top:18px">
+        <label class="f-label">Бюджет на ремонт <em>*</em></label>
+        <div class="budget-grid">
+          <button class="budget-btn" onclick="selectBudget(this,'up_to_10k')">до 10 000 BYN</button>
+          <button class="budget-btn" onclick="selectBudget(this,'10_30k')">10 000–30 000</button>
+          <button class="budget-btn" onclick="selectBudget(this,'30_50k')">30 000–50 000</button>
+          <button class="budget-btn" onclick="selectBudget(this,'50k_plus')">50 000+</button>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Пожелания (свободный текст)</label>
+        <textarea class="f-textarea f-input" id="f-wishes" placeholder="Особенности помещения, что важно учесть, что нравится или не нравится..."></textarea>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="nextStep(1)">← Назад</button>
+        <button class="btn-next" onclick="nextStep(3)">Далее →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="form-step" id="step3">
+      <div class="form-title">Стиль и фото</div>
+      <div class="form-subtitle">Шаг <strong>3</strong> из 3</div>
+      <div class="f-group">
+        <label class="f-label">Стиль интерьера <em>*</em></label>
+        <div class="style-grid">
+          <div class="style-btn" onclick="selectStyle(this,'modern')">Modern</div>
+          <div class="style-btn" onclick="selectStyle(this,'minimalist')">Minimalist</div>
+          <div class="style-btn" onclick="selectStyle(this,'scandinavian')">Scandinavian</div>
+          <div class="style-btn" onclick="selectStyle(this,'industrial')">Industrial</div>
+          <div class="style-btn" onclick="selectStyle(this,'japandi')">Japandi</div>
+          <div class="style-btn" onclick="selectStyle(this,'luxury')">Luxury</div>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Фото помещений <em>*</em> <span style="font-weight:400;color:var(--gray)">(1–5 фото)</span></label>
+        <div class="upload-box" onclick="document.getElementById('f-photos').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-txt">Загрузите фото текущего состояния</div>
+          <div class="upload-note">JPG, PNG, WEBP · до 10 МБ каждый</div>
+          <div style="margin-top:12px"><span style="background:var(--lime-dim);border:1px solid var(--lime-border);color:var(--lime);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px">Выбрать файлы</span></div>
+          <input type="file" id="f-photos" class="upload-input" accept="image/*" multiple onchange="previewFiles(this,'photos-prev')">
+        </div>
+        <div class="previews" id="photos-prev"></div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">План помещения <span style="font-weight:400;color:var(--gray)">(опционально)</span></label>
+        <div class="upload-box" onclick="document.getElementById('f-plan').click()" style="padding:16px">
+          <div class="upload-icon" style="font-size:20px">📐</div>
+          <div class="upload-txt" style="font-size:13px">Загрузить план (поможет с планировкой)</div>
+          <input type="file" id="f-plan" class="upload-input" accept="image/*" onchange="previewFiles(this,'plan-prev')">
+        </div>
+        <div class="previews" id="plan-prev"></div>
+      </div>
+      <div class="f-note">
+        <span style="font-size:17px">💬</span>
+        <span>После заявки мы свяжемся для уточнения деталей и оплаты. Готовность — 24–48 часов после оплаты.</span>
+      </div>
+
+      <!-- Согласие на обработку персональных данных -->
+      <div class="f-group" style="margin-top:20px">
+        <label class="consent-label" id="consentLabel">
+          <input type="checkbox" id="f-consent" onchange="checkConsent()">
+          <span>
+            Я даю согласие на <a href="/privacy/" target="_blank" style="color:var(--lime);text-decoration:underline">обработку персональных данных</a>
+            в соответствии с Законом РБ № 99-З от 07.05.2021 и их передачу
+            AI-сервисам (Replicate, Groq) для формирования дизайн-проекта
+          </span>
+        </label>
+        <div id="consent-error" style="display:none;color:#f06060;font-size:12px;margin-top:6px">
+          Необходимо дать согласие на обработку персональных данных
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <button class="btn-back" onclick="nextStep(2)">← Назад</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">Отправить заявку</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="form-success" id="formSuccess">
+      <div class="success-icon">✅</div>
+      <div class="success-h">Заявка получена</div>
+      <div class="success-sub">Свяжемся в течение 2–4 часов для подтверждения и оплаты. Документ будет готов через 24–48 часов после оплаты.</div>
+      <a href="https://t.me/morrowlab_bot" class="btn-primary" target="_blank">Написать в Telegram</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="section" id="faq" style="padding-top:0">
+  <div class="section-tag reveal">→ FAQ</div>
+  <h2 class="section-h2 reveal d1">Вопросы</h2>
+  <div class="faq-list reveal d2">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Зачем мне этот PDF, если я могу сам поиграть с AI-рендерами?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Разница между AI-рендером и этим документом — как между фото еды и меню с ценами. Один красивый рендер — это вдохновение. PDF со спецификацией материалов, артикулами из белорусских магазинов и сметой в BYN — это рабочий документ. Приходите к прорабу и сразу говорите предметно: "вот рендеры, вот список материалов, вот диапазон бюджета".</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Нужен ли план квартиры?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Нет, план необязателен. Для рендеров и спецификации достаточно фото и общих параметров — площадь, количество комнат. Если вы заказываете пакет "Полный" с планировочным решением, загрузите план или сфотографируйте схему из документов на квартиру — это повысит точность результата.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Можно ли использовать документ для реального ремонта?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Да. Спецификация содержит реальные товары из белорусских магазинов с артикулами. Смета основана на актуальных ценах рынка. Это отличная отправная точка для разговора с подрядчиком и составления итоговой сметы. Финальные размеры и технические детали рекомендуем уточнять с мастером на объекте.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">В чём разница между пакетом Концепт и Базовым?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Концепт (149 BYN) — только 2 рендера без спецификации и сметы. Подходит, если вы хотите посмотреть как будет выглядеть пространство, без привязки к материалам. Базовый (299 BYN) — 3 рендера плюс полная спецификация с ценами BYN и ориентировочная смета. Это уже рабочий документ для общения с подрядчиком.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Как происходит оплата?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">После получения заявки мы свяжемся в течение 2–4 часов и выставим счёт. Принимаем оплату картой (bePaid), банковским переводом или наличными в Минске. Работа начинается после подтверждения оплаты.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Что если результат не соответствует ожиданиям?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Если рендеры или спецификация не соответствуют пожеланиям из брифа — предоставим одну бесплатную корректировку. Чем точнее заполнен бриф и чем качественнее фото, тем ближе результат к ожиданиям. Рекомендуем загружать несколько фото с разных углов при хорошем освещении.</div></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Для каких объектов подходит?<span class="faq-icon">+</span></div>
+      <div class="faq-a"><div class="faq-a-inner">Квартиры (студии, 1–5 комнатные), частные дома, коммерческие помещения (кафе, офисы, магазины). Оптимально для помещений 20–200 м². Для больших объектов — обсудим индивидуально через Telegram.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-logo">Morrow Lab</div>
+  <div class="footer-links">
+    <a href="/">Главная</a>
+    <a href="/blog/">Блог</a>
+    <a href="/privacy/">Политика конфиденциальности</a>
+    <a href="https://t.me/morrowlab_bot" target="_blank">Telegram</a>
+    <a href="mailto:hello@morrowlab.by">hello@morrowlab.by</a>
+  </div>
+  <div class="footer-copy">© 2026 Morrow Lab · Дизайн-проекты онлайн</div>
+</footer>
+
+<script>
+(function(){
+  // Burger
+  var burger=document.getElementById('burger'),menu=document.getElementById('mobMenu'),close=document.getElementById('mobClose');
+  if(burger)burger.addEventListener('click',function(){menu.classList.add('open')});
+  if(close)close.addEventListener('click',function(){menu.classList.remove('open')});
+
+  // Reveal
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+
+  // FAQ
+  window.toggleFaq=function(el){el.parentElement.classList.toggle('open')};
+
+  // Sample pages
+  var pages=[
+    {icon:'🎨',title:'Визуализация помещений',desc:'Фотореалистичные рендеры каждой комнаты в выбранном стиле. Один рендер занимает страницу A4. Формат "до и после" — видна разница. 1–3 варианта в зависимости от пакета.'},
+    {icon:'🖼️',title:'Стилистический коллаж',desc:'Мудборд с подборкой материалов и предметов: плитка, напольное покрытие, мебель, декор, цветовая палитра. Сетка с подписями — удобно показать подрядчику направление.'},
+    {icon:'📐',title:'Планировочное решение',desc:'Схема расстановки мебели с учётом указанных размеров помещения. Проходы, зоны, эргономика. Только в пакете "Полный". Основа для разговора с прорабом о демонтаже и монтаже.'},
+    {icon:'📋',title:'Спецификация материалов',desc:'Таблица по каждой позиции: название, производитель, артикул, магазин в РБ (ОМА, Керамин, 21vek.by, Е1), цена в BYN. Распечатываете — берёте в магазин.'},
+    {icon:'💰',title:'Смета ремонта',desc:'Ориентировочная смета по категориям: отделочные материалы, работы, мебель и техника. Диапазон цен в BYN с учётом вашего бюджета. Разбивка по категориям.'}
+  ];
+  window.showPage=function(idx){
+    document.querySelectorAll('.page-card').forEach(function(c,i){c.classList.toggle('active',i===idx)});
+    var d=pages[idx];
+    document.getElementById('sdIcon').textContent=d.icon;
+    document.getElementById('sdTitle').textContent=d.title;
+    document.getElementById('sdDesc').textContent=d.desc;
+  };
+
+  // Package select from pricing cards
+  window.selectPackage=function(pkg){
+    document.querySelectorAll('.pkg-opt').forEach(function(el){el.classList.toggle('selected',el.dataset.pkg===pkg)});
+    document.getElementById('brief').scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  window.togglePkg=function(el){
+    document.querySelectorAll('.pkg-opt').forEach(function(o){o.classList.remove('selected')});
+    el.classList.add('selected');
+    el.querySelector('input').checked=true;
+  };
+
+  // Step nav
+  var cur=1;
+  window.nextStep=function(step){
+    if(step>cur){
+      if(cur===1){
+        if(!document.getElementById('f-name').value.trim()||!document.getElementById('f-email').value.trim()){alert('Пожалуйста, заполните имя и email');return;}
+      }
+      if(cur===2){
+        if(!document.getElementById('f-type').value||!document.getElementById('f-area').value){alert('Пожалуйста, заполните тип помещения и площадь');return;}
+      }
+    }
+    document.getElementById('step'+cur).classList.remove('active');
+    document.getElementById('fsi'+cur).classList.remove('active');
+    cur=step;
+    document.getElementById('step'+cur).classList.add('active');
+    document.getElementById('fsi'+cur).classList.add('active');
+    document.getElementById('briefForm').scrollIntoView({behavior:'smooth',block:'start'});
+  };
+
+  // Selectors
+  window.selectRooms=function(el,val){document.querySelectorAll('.sel-btn').forEach(function(b){b.classList.remove('active')});el.classList.add('active');el.dataset.val=val};
+  window.selectBudget=function(el,val){document.querySelectorAll('.budget-btn').forEach(function(b){b.classList.remove('active')});el.classList.add('active');el.dataset.val=val};
+  window.selectStyle=function(el,val){document.querySelectorAll('.style-btn').forEach(function(b){b.classList.remove('active')});el.classList.add('active');el.dataset.val=val};
+
+  // Preview
+  window.previewFiles=function(input,pid){
+    var p=document.getElementById(pid);p.innerHTML='';
+    Array.from(input.files).forEach(function(f){
+      if(!f.type.startsWith('image/'))return;
+      var img=document.createElement('img');img.className='prev-img';img.src=URL.createObjectURL(f);p.appendChild(img);
+    });
+  };
+
+  // Upload single file as base64 to /webhook/photo-upload, returns URL
+  function uploadPhoto(file){
+    return new Promise(function(resolve,reject){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var ts=Date.now().toString(36);
+        var ext=file.name.split('.').pop().toLowerCase()||'jpg';
+        var filename='studio_'+ts+'_'+Math.random().toString(36).substr(2,5)+'.'+ext;
+        fetch('/webhook/photo-upload',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({filename:filename,data:e.target.result})
+        }).then(function(r){return r.json()})
+          .then(function(j){
+            if(j.success&&j.url)resolve('https://morrowlab.by'+j.url);
+            else reject(new Error(j.error||'Upload failed'));
+          }).catch(reject);
+      };
+      reader.onerror=reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Consent toggle
+  window.checkConsent=function(){
+    var cb=document.getElementById('f-consent');
+    var lbl=document.getElementById('consentLabel');
+    lbl.classList.toggle('checked',cb.checked);
+    document.getElementById('consent-error').style.display='none';
+  };
+
+  // Submit
+  window.submitForm=function(){
+    if(!document.getElementById('f-photos').files.length){alert('Загрузите хотя бы одно фото помещения');return;}
+    if(!document.querySelector('.style-btn.active')){alert('Выберите стиль интерьера');return;}
+    if(!document.getElementById('f-consent').checked){
+      document.getElementById('consent-error').style.display='block';
+      document.getElementById('consentLabel').scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+    var pkg=document.querySelector('.pkg-opt.selected');
+    var rooms=document.querySelector('.sel-btn.active');
+    var budget=document.querySelector('.budget-btn.active');
+    var style=document.querySelector('.style-btn.active');
+    var btn=document.querySelector('.btn-submit');
+    btn.disabled=true;btn.textContent='Загружаем фото...';
+
+    var photos=Array.from(document.getElementById('f-photos').files).slice(0,5);
+    var plan=document.getElementById('f-plan').files[0];
+    var allFiles=plan?photos.concat([plan]):photos;
+
+    Promise.all(allFiles.map(uploadPhoto))
+      .then(function(urls){
+        var photoUrls=plan?urls.slice(0,-1):urls;
+        var planUrl=plan?urls[urls.length-1]:null;
+        btn.textContent='Отправляем заявку...';
+        var payload={
+          name:document.getElementById('f-name').value,
+          email:document.getElementById('f-email').value,
+          phone:document.getElementById('f-phone').value,
+          package:pkg?pkg.dataset.pkg:'standard',
+          type:document.getElementById('f-type').value,
+          area:parseInt(document.getElementById('f-area').value)||0,
+          rooms:rooms?rooms.dataset.val:'',
+          style:style?style.dataset.val:'',
+          budget:budget?budget.dataset.val:'',
+          wishes:document.getElementById('f-wishes').value,
+          files_urls:photoUrls,
+          plan_url:planUrl,
+          consent:true,
+          consent_ts:new Date().toISOString()
+        };
+        return fetch('/webhook/studio-order',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+      })
+      .then(function(){showSuccess()})
+      .catch(function(err){
+        console.error(err);
+        alert('Ошибка отправки. Проверьте интернет и попробуйте ещё раз.');
+      });
+  };
+
+  function showSuccess(){
+    document.querySelectorAll('.form-step,.fsi').forEach(function(el){el.style.display='none'});
+    document.getElementById('formSuccess').classList.add('show');
+  }
+
+  // Hash pre-select
+  var h=window.location.hash;
+  if(h==='#concept')selectPackage('concept');
+  else if(h==='#basic')selectPackage('basic');
+  else if(h==='#full')selectPackage('full');
+})();
+</script>
+</body>
+</html>

@@ -60,8 +60,7 @@ export default async function ClientsPage() {
         </div>
       ) : (
         <div className="grid gap-3">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {clients.map((client: any) => (
+          {clients.map((client: Record<string, unknown>) => (
             <Link
               key={client.id}
               href={`/${client.slug}`}

@@ -74,10 +74,10 @@ Morrow Lab — AI-студия дизайна интерьеров: ванные
 }
 
 function buildUserPrompt(input: GenerateInput): string {
-  const postTypeLabel = POST_TYPES[input.postType] ?? input.postType;
-  const roomLabel = ROOMS[input.room ?? ""] ?? "помещение";
-  const styleLabel = STYLES[input.style ?? ""] ?? "современный стиль";
-  const toneLabel = TONES[input.tone ?? ""] ?? "профессиональный";
+  const postTypeLabel = POST_TYPES[input.postType] ?? POST_TYPES["showcase"]!;
+  const roomLabel = ROOMS[input.room ?? ""] ?? ROOMS[""]!;
+  const styleLabel = STYLES[input.style ?? ""] ?? STYLES[""]!;
+  const toneLabel = TONES[input.tone ?? ""] ?? TONES[""]!;
   const platform = (input.platforms ?? ["instagram"])[0];
 
   const safePlatform = /^[a-zA-Z]{2,20}$/.test(platform) ? platform : "instagram";

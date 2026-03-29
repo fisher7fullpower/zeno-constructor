@@ -226,6 +226,7 @@ export default function TeamPage() {
                   <button
                     className="p-1.5 text-white/40 hover:text-red-400 transition-colors"
                     title="Удалить"
+                    onClick={() => alert("Удаление участников пока не реализовано")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

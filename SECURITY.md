@@ -171,8 +171,8 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | L-1 | Неиспользуемые Supabase зависимости | package.json | ✅ Удалены |
-| L-2 | Смешанные импорты (raw pool + mock client) | invites/[token]/route.ts | ⏭️ Косметика |
-| L-3 | `eslint-disable` комментарии | Множество файлов | ⏭️ Косметика |
+| L-2 | Смешанные импорты (raw pool + mock client) | invites/[token]/route.ts | ⏭️ Архитектурно: pool для JOIN, mock для simple queries |
+| L-3 | `eslint-disable` комментарии | Множество файлов | ✅ `as any` → `as Record<string, unknown>` (3 файла) |
 | L-4 | Минимальная email валидация (`@` check) | auth/register/route.ts | ✅ Regex |
 | L-5 | Доверие email из query параметра над токеном | auth/confirm/route.ts | ✅ Только token email |
 | L-6 | Homepage redirect без проверки доступа | page.tsx | ✅ Filter by user |
@@ -293,7 +293,7 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R-L1 | `showSuccess()` на ошибке отправки заказа | pages/project/index.html | ⏭️ UX, не security |
+| R-L1 | `showSuccess()` на ошибке отправки заказа | pages/project/index.html | ✅ `alert()` при ошибке |
 | R-L2 | `.env.example` содержит префиксы токенов (`r8_`, `gsk_`) | .env.example | ⏭️ Minor reconnaissance |
 | R-L3 | Untracked файлы могут содержать данные | working directory | ⏭️ Покрыто .gitignore |
 
@@ -331,7 +331,7 @@
 | R2-L2 | `plan` value в email без HTML escape | auth/register/route.ts | ⏭️ Email clients sanitize |
 | R2-L3 | Groq error text в console.error | api/generate/route.ts | ⏭️ Не утекает клиенту |
 | R2-L4 | n8n error text в логах | src/lib/n8n.ts | ⏭️ Серверные логи |
-| R2-L5 | Team page delete button без handler | settings/team/page.tsx | ⏭️ UX, не security |
+| R2-L5 | Team page delete button без handler | settings/team/page.tsx | ✅ `alert()` placeholder |
 
 ---
 
@@ -467,7 +467,7 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R5-L1 | JSONP callback в blog/index.html — global function | blog/index.html | ⏭️ Fallback, fetch приоритет |
+| R5-L1 | JSONP callback в blog/index.html — global function | blog/index.html | ✅ JSONP убран, только fetch |
 | R5-L2 | Admin deploy key placeholder | admin/index.html | ⏭️ Отдельная CMS |
 | R5-L3 | Replicate input без field filtering | proxy.py | ⏭️ By design (= R4-L2) |
 
@@ -513,7 +513,7 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R6-L1 | bathroom setCanvasInfo innerHTML — callers используют `<b>` для форматирования | bathroom_constructor.html | ⏭️ Callers передают только числовые значения |
+| R6-L1 | bathroom setCanvasInfo innerHTML — callers используют `<b>` для форматирования | bathroom_constructor.html | ✅ `textContent`, убрана HTML разметка |
 
 ### 12.2 SMM admin (0 CRITICAL, 0 HIGH, 2 MEDIUM, 5 LOW)
 
@@ -530,8 +530,8 @@
 
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
-| R6-SL1 | postType/room/style/tone не валидированы против allowlist | api/generate/route.ts | ⏭️ Fallback через `?? label` |
-| R6-SL2 | Rate limiter map unbounded growth | lib/rate-limit.ts | ⏭️ Cleanup каждые 100 calls |
+| R6-SL1 | postType/room/style/tone не валидированы против allowlist | api/generate/route.ts | ✅ Fallback на allowlist значения вместо user input |
+| R6-SL2 | Rate limiter map unbounded growth | lib/rate-limit.ts | ✅ Hard cap 50K entries + eviction |
 | R6-SL3 | No explicit CSRF token | middleware.ts | ⏭️ SameSite=Lax + JSON content-type |
 | R6-SL4 | Confirm page redirect without validation | auth/confirm/page.tsx | ✅ `startsWith("/") && !startsWith("//")` |
 | R6-SL5 | platforms array not validated | api/generate/route.ts | ✅ Regex filter (= R6-SM2) |
@@ -557,9 +557,9 @@
 | 5 | SMM admin (раунд 5) | 9 | 4 | 5 |
 | 6 | morrowlab.by (раунд 6) | 3 | 2 | 1 |
 | 6 | SMM admin (раунд 6) | 7 | 4 | 3 |
-| **Итого** | | **166** | **141** | **25** |
+| **Итого** | | **166** | **149** | **17** |
 
-> 25 отложенных — Low risk, by-design decisions, informational.
+> 17 отложенных — by-design decisions, архитектурные решения, инфраструктурная ответственность.
 > 0 Critical, 0 High остаются открытыми.
 
 ---

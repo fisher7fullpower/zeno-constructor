@@ -1586,7 +1586,7 @@ function setProgress(pct) {
   document.getElementById('progressBar').style.width = pct + '%';
 }
 function setCanvasInfo(text) {
-  document.getElementById('canvasInfo').innerHTML = text;
+  document.getElementById('canvasInfo').textContent = text;
 }
 
 // ══════════════════════════════════════════════════════
@@ -2155,7 +2155,7 @@ function loadImageFile(file) {
         objectsLayer.destroyChildren(); objectsLayer.draw();
         document.getElementById('objList').innerHTML = '<div class="obj-hint">Нажмите «Найти объекты»</div>';
         setStatus('✓ Изображение загружено', 'success');
-        setCanvasInfo(`<b>${img.width}×${img.height}</b> px`);
+        setCanvasInfo(`${img.width}×${img.height} px`);
         const cacheC = document.createElement('canvas');
         cacheC.width = img.width; cacheC.height = img.height;
         cacheC.getContext('2d').drawImage(img, 0, 0);
@@ -2266,7 +2266,7 @@ async function analyzeImage() {
     renderObjectList();
     setProgress(100);
     setStatus(`✓ Найдено: ${detectedObjects.length} объектов`, 'success');
-    setCanvasInfo(`<b>${originalImage.width}×${originalImage.height}</b> px · <b style="color:var(--lime)">${detectedObjects.length}</b> объектов`);
+    setCanvasInfo(`${originalImage.width}×${originalImage.height} px · ${detectedObjects.length} объектов`);
 
     const hint = document.getElementById('cornerHint');
     hint.classList.add('visible');

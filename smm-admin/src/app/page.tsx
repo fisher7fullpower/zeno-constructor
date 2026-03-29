@@ -14,8 +14,7 @@ export default async function HomePage() {
     .eq("user_id", user.id)
     .limit(1);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const firstClient = (clientUsers?.[0]?.clients as any);
+  const firstClient = clientUsers?.[0]?.clients as Record<string, unknown> | undefined;
   if (firstClient?.slug) {
     redirect(`/${firstClient.slug}`);
   }

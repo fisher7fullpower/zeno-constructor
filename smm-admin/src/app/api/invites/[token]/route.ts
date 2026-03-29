@@ -24,8 +24,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   return NextResponse.json({
     valid: true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    client_name: (invite.clients as any)?.name,
+    client_name: (invite.clients as Record<string, unknown>)?.name,
     email: invite.email,
     role: invite.role,
   });

@@ -341,22 +341,12 @@ var ZB=(function(){
   }
   function load(){
     $('zb-load').style.display='block';
-    var jsonpTimer;
-    window.zbBlogListData=function(data){
-      if(jsonpTimer)clearTimeout(jsonpTimer);
-      $('zb-load').style.display='none';
-      applyRaw(data);
-    };
     fetch(API).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(raw){
-      if(jsonpTimer)clearTimeout(jsonpTimer);
       $('zb-load').style.display='none';
       applyRaw(raw);
     }).catch(function(){
-      jsonpTimer=setTimeout(err,6000);
-      var s=document.createElement('script');
-      s.src=API+'?callback=zbBlogListData';
-      s.onerror=function(){clearTimeout(jsonpTimer);err();};
-      document.head.appendChild(s);
+      $('zb-load').style.display='none';
+      err();
     });
   }
 
