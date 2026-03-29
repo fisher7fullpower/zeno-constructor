@@ -108,7 +108,7 @@ HOMEDESIGNS_ALLOWED_FIELDS = {
     'room_type', 'design_style', 'design_theme', 'num_images', 'resolution',
     'mode', 'scale', 'seed', 'strength', 'guidance_scale',
     'custom_message', 'color_scheme', 'material', 'furniture_style',
-    'design_type', 'ai_intervention', 'no_design',
+    'design_type', 'ai_intervention', 'no_design', 'house_angle',
 }
 
 # ── Security: Replicate input allowed fields ──
