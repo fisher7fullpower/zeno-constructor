@@ -159,7 +159,7 @@ def send_email(to_email, subject, html_body):
         resp = requests.post(
             'https://api.resend.com/emails',
             headers={'Authorization': 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json'},
-            json={'from': 'Morrow Lab <' + FROM_EMAIL + '>', 'to': [to_email],
+            json={'from': FROM_EMAIL if '<' in FROM_EMAIL else 'Morrow Lab <' + FROM_EMAIL + '>', 'to': [to_email],
                   'subject': subject, 'html': html_body},
             timeout=15
         )
