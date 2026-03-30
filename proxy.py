@@ -289,6 +289,49 @@ def replicate_status(pred_id):
     except Exception:
         return jsonify({'error': 'Service unavailable'}), 502
 
+# ── design advisor (Groq LLM) ────────────────────────────────────────
+# NOTE: must be registered BEFORE the generic /api/decor8/<path:endpoint>
+@app.route('/api/decor8/advisor', methods=['POST', 'OPTIONS'])
+def decor8_advisor():
+    if request.method == 'OPTIONS': return '', 204
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    if not rate_limit('advisor:' + ip, 10, 60):
+        return jsonify({'error': 'Too many requests'}), 429
+    data = request.get_json(force=True) or {}
+    msg = data.get('message', '')
+    if not isinstance(msg, str) or len(msg) > 2000:
+        return jsonify({'error': 'Message too long'}), 400
+    try:
+        resp = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={
+                'Authorization': 'Bearer ' + GROQ_API_KEY,
+                'Content-Type': 'application/json',
+            },
+            json={
+                'model': 'llama-3.3-70b-versatile',
+                'messages': [
+                    {'role': 'system', 'content': (
+                        'Ты — AI дизайн-консультант Morrow Lab. '
+                        'Помогаешь с выбором стиля интерьера, материалов, цветов и планировки. '
+                        'Отвечай на русском, кратко и по делу. '
+                        'Если вопрос не связан с дизайном или ремонтом — вежливо откажи.'
+                    )},
+                    {'role': 'user', 'content': msg},
+                ],
+                'max_tokens': 1024,
+                'temperature': 0.7,
+            },
+            timeout=30
+        )
+        rj = resp.json()
+        answer = rj.get('choices', [{}])[0].get('message', {}).get('content', '')
+        return jsonify({'success': True, 'message': answer}), 200
+    except requests.Timeout:
+        return jsonify({'error': 'Timeout'}), 504
+    except Exception:
+        return jsonify({'error': 'Service unavailable'}), 502
+
 # ── Decor8.ai generic proxy ──────────────────────────────────────────
 @app.route('/api/decor8/<path:endpoint>', methods=['POST', 'OPTIONS'])
 def decor8_proxy(endpoint):
@@ -331,48 +374,6 @@ def decor8_proxy(endpoint):
             return jsonify({'error': 'Invalid response from upstream'}), resp.status_code
     except requests.Timeout:
         return jsonify({'error': 'Timeout (120s)'}), 504
-    except Exception:
-        return jsonify({'error': 'Service unavailable'}), 502
-
-# ── design advisor (Groq LLM) ────────────────────────────────────────
-@app.route('/api/decor8/advisor', methods=['POST', 'OPTIONS'])
-def decor8_advisor():
-    if request.method == 'OPTIONS': return '', 204
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
-    if not rate_limit('advisor:' + ip, 10, 60):
-        return jsonify({'error': 'Too many requests'}), 429
-    data = request.get_json(force=True) or {}
-    msg = data.get('message', '')
-    if not isinstance(msg, str) or len(msg) > 2000:
-        return jsonify({'error': 'Message too long'}), 400
-    try:
-        resp = requests.post(
-            'https://api.groq.com/openai/v1/chat/completions',
-            headers={
-                'Authorization': 'Bearer ' + GROQ_API_KEY,
-                'Content-Type': 'application/json',
-            },
-            json={
-                'model': 'llama-3.3-70b-versatile',
-                'messages': [
-                    {'role': 'system', 'content': (
-                        'Ты — AI дизайн-консультант Morrow Lab. '
-                        'Помогаешь с выбором стиля интерьера, материалов, цветов и планировки. '
-                        'Отвечай на русском, кратко и по делу. '
-                        'Если вопрос не связан с дизайном или ремонтом — вежливо откажи.'
-                    )},
-                    {'role': 'user', 'content': msg},
-                ],
-                'max_tokens': 1024,
-                'temperature': 0.7,
-            },
-            timeout=30
-        )
-        rj = resp.json()
-        answer = rj.get('choices', [{}])[0].get('message', {}).get('content', '')
-        return jsonify({'success': True, 'message': answer}), 200
-    except requests.Timeout:
-        return jsonify({'error': 'Timeout'}), 504
     except Exception:
         return jsonify({'error': 'Service unavailable'}), 502
 

@@ -256,7 +256,7 @@
     .cp-send:disabled{opacity:.3;cursor:default}
 
     @media(max-width:1100px){.nav-center{display:none}.burger{display:flex}.nav-back{display:none}}
-    @media(max-width:960px){.page-hero{grid-template-columns:1fr;padding-top:80px;min-height:auto}.form-card{position:relative;top:0}.btn-lime{display:none}}
+    @media(max-width:960px){.page-hero{grid-template-columns:1fr;padding-top:80px;min-height:auto}.form-card{position:relative;top:0}.nav-right .btn-lime{display:none}}
     @media(max-width:640px){.ex-grid{grid-template-columns:1fr}.pricing-grid{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr;gap:28px}.section-wrap{padding:56px 20px}.page-hero{padding:80px 20px 32px;gap:32px}.form-card{padding:24px}.header{padding:0 20px}.form-row{grid-template-columns:1fr}}
   
     /* ── DROPDOWN BRIDGE ── */
@@ -375,12 +375,15 @@
 <div class="mob-menu" id="mobMenu">
   <button class="mob-close" id="mobClose">✕</button>
   <a href="/">Главная</a>
-  <a href="/sanuzel/" style="color:var(--lime)">Санузел</a>
-  <a href="/kitchen/">Кухня</a>
+  <a href="/sanuzel/">Санузел</a>
+  <a href="/kitchen/" style="color:var(--lime)">Кухня</a>
   <a href="/room/">Комната</a>
   <a href="/business/">Бизнес</a>
   <a href="/dom/">Дом</a>
   <a href="/blog/">Блог</a>
+  <a href="https://constructor.morrowlab.by/">Конструктор</a>
+  <a href="/moodboard/">AI Мудборд</a>
+  <a href="/masters/">Мастера</a>
 </div>
 
 <!-- HERO + FORM -->
@@ -657,7 +660,6 @@
     <textarea class="cp-input" id="cpInput" placeholder="Какой гарнитур для кухни 8 кв.м?" rows="1" onkeydown="cpKey(event)"></textarea>
     <button class="cp-send" id="cpSend" onclick="cpSend()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2" fill="#000" stroke="none"/></svg></button>
   </div></div>
-</div>
   <div class="cp-specialists" id="cpMasters">
     <button class="cp-spec-back" onclick="cpHideMasters()">← Вернуться в чат</button>
     <div class="cp-spec-title">Консультация с мастером</div>
@@ -688,6 +690,7 @@
     </div>
     <div class="cp-spec-price"><p>Консультация 30 мин — <strong>29 BYN</strong><br>Оплата напрямую мастеру</p></div>
   </div>
+</div>
 
 <script>
   // Before/After slider
@@ -731,7 +734,7 @@
     'органик':'organicmodern','тосканский':'tuscan','кабин':'cabin',
     'пустынный':'desertmodern','глобальный':'global','индустриальный шик':'industrialchic',
     'современный фермерский':'modernfarmhouse','евроклассика':'europeanclassic',
-    'тёплый минимализм':'warmminimalist','классический':'europeanclassic'
+    'тёплый минимализм':'warmminimalist','классический':'neoclassical'
   };
 
   // header scroll

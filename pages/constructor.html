@@ -1021,7 +1021,7 @@ let activeObjectId = null; // which object is selected for AI masking (null = no
 let labelsVisible = true;
 let initialPositions = [];
 let savedPositions = {}; // persists across re-renders: {idx: {x,y}}
-let selectedStyle = 'modern';
+let selectedStyle = 'Modern';
 let restyleImageUrl = null;
 
 // Material zones — professional color selection
@@ -1491,17 +1491,13 @@ function setStatus(msg, type='idle', spinner=false) {
   el.className = `status-bar ${type}`;
   el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
 }
-function setRestyleStatus(msg, type='idle', spinner=false) {
-  msg = typeof msg === 'string' ? msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') : msg;
-  const el = document.getElementById('restyleStatus');
-  el.className = `status-bar ${type}`;
-  el.innerHTML = spinner ? `<div class="spinner"></div>${msg}` : msg;
-}
+// setRestyleStatus: first definition removed (restyleStatus element doesn't exist)
+// actual no-op definition is at the bottom of the file
 function setProgress(pct) {
   document.getElementById('progressBar').style.width = pct + '%';
 }
 function setCanvasInfo(text) {
-  document.getElementById('canvasInfo').textContent = text;
+  document.getElementById('canvasInfo').innerHTML = text;
 }
 
 // ══════════════════════════════════════════════════════
@@ -1603,7 +1599,7 @@ function selectAiLevel(level, el) {
 }
 
 function escHtml(s){return typeof s==='string'?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):s;}
-function trustedHtml(s){var o={__html:s};return o;}
+// trustedHtml removed — React-style helper, unused in plain JS
 function setHdStatus(tool, msg, type='idle', spinner=false) {
   const el = document.getElementById(`hd-${tool}-status`);
   if (!el) return;
@@ -1911,17 +1907,7 @@ async function hdDesignAdvisor() {
 }
 
 
-function previewTexture(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    hdTextureBase64 = e.target.result;
-    const img = document.getElementById('hd-texture-preview');
-    img.src = hdTextureBase64; img.style.display = 'block';
-    document.getElementById('hd-texture-drop').textContent = '✓ ' + file.name;
-  };
-  reader.readAsDataURL(file);
-}
+// previewTexture removed — Material Swap disabled, hd-texture-preview/hd-texture-drop elements don't exist
 
 // Paint color hex display
 document.addEventListener('DOMContentLoaded', () => {
@@ -2304,7 +2290,7 @@ function renderDetectedObjects() {
       group.add(new Konva.Image({ image: cropImg, width: w, height: h, opacity: isActive ? 1 : 0.7 }));
       group.add(new Konva.Rect({
         width: w, height: h,
-        stroke: isActive ? '#CCFF00' : '#CCFF00',
+        stroke: '#CCFF00',
         strokeWidth: isActive ? 2.5 : 1,
         fill: isActive ? 'rgba(204,255,0,0.06)' : 'transparent',
         dash: isActive ? [] : [6, 3],
