@@ -510,7 +510,7 @@ async function renderInspiration() {
   errEl.style.display = 'none';
   document.getElementById('renderSection').classList.add('visible');
   try {
-    var res = await fetch('/api/decor8/generate_inspirational_designs', {
+    var res = await fetch('/api/decor8/generate_designs', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

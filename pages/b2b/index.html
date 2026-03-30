@@ -346,7 +346,7 @@
 var TOOLS = {
   staging:          { title:'Виртуальный стейджинг', desc:'Загрузите фото пустой или обставленной комнаты — AI создаст дизайн интерьера в выбранном стиле.', endpoint:'generate_designs_for_room', needsPhoto:true, showRoom:true, showStyle:true, showColor:false, showNum:true },
   room_design:      { title:'AI Дизайн интерьера', desc:'AI преобразит вашу комнату в выбранном стиле, сохраняя геометрию помещения.', endpoint:'generate_designs_for_room', needsPhoto:true, showRoom:true, showStyle:true, showColor:false, showNum:true },
-  inspiration:      { title:'AI Вдохновение', desc:'Генерация дизайна без загрузки фото — только тип комнаты и стиль. Идеально для поиска идей.', endpoint:'generate_inspirational_designs', needsPhoto:false, showRoom:true, showStyle:true, showColor:false, showNum:true },
+  inspiration:      { title:'AI Вдохновение', desc:'Генерация дизайна без загрузки фото — только тип комнаты и стиль. Идеально для поиска идей.', endpoint:'generate_designs', needsPhoto:false, showRoom:true, showStyle:true, showColor:false, showNum:true },
   remodel_kitchen:  { title:'Ремодель кухни', desc:'AI переделает вашу кухню: новые фасады, столешница, фартук.', endpoint:'remodel_kitchen', needsPhoto:true, showRoom:false, showStyle:true, showColor:false, showNum:true },
   remodel_bathroom: { title:'Ремодель санузла', desc:'AI обновит ванную комнату: плитка, сантехника, мебель.', endpoint:'remodel_bathroom', needsPhoto:true, showRoom:false, showStyle:true, showColor:false, showNum:true },
   prime_walls:      { title:'Подготовка стен', desc:'AI подготавливает стены — убирает дефекты, выравнивает поверхности.', endpoint:'prime_walls_for_room', needsPhoto:true, showRoom:false, showStyle:false, showColor:false, showNum:false },
@@ -359,7 +359,7 @@ var TOOLS = {
 
 var STYLES = [
   ['современный','modern'],['минимализм','minimalist'],['скандинавский','scandinavian'],['лофт','industrial'],
-  ['japandi','japandi'],['модерн','contemporary'],['неоклассика','neoclassical'],['арт-деко','artdeco'],
+  ['japandi','japandi'],['модерн','contemporary'],['неоклассика','neotraditional'],['арт-деко','artdeco'],
   ['mid-century','midcenturymodern'],['бохо','boho'],['прованс','frenchcountry'],['средиземноморский','mediterranean'],
   ['прибрежный','coastal'],['тропический','tropical'],['рустик','rustic'],['фермерский','farmhouse'],
   ['викторианский','victorian'],['марокканский','moroccan'],['ваби-саби','wabi_sabi'],['хюгге','scandinavian'],

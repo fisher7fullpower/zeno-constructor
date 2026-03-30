@@ -88,7 +88,7 @@ PROXY_IMAGE_ALLOWED_DOMAINS = {
 DECOR8_ENDPOINTS = {
     'generate_designs_for_room',
     'generate_landscaping_designs',
-    'generate_inspirational_designs',
+    'generate_designs',
     'remove_objects_from_room',
     'change_wall_color',
     'change_kitchen_cabinets_color',
@@ -355,15 +355,42 @@ def decor8_proxy(endpoint):
             json_payload['input_image_url'] = saved_url
     d8_headers = {
         'Authorization': 'Bearer ' + DECOR8_TOKEN,
-        'Content-Type': 'application/json',
     }
     try:
-        resp = requests.post(
-            f'https://api.decor8.ai/{endpoint}',
-            headers=d8_headers,
-            json=json_payload,
-            timeout=120
-        )
+        # upscale_image requires multipart/form-data with binary file
+        if endpoint == 'upscale_image':
+            import io, base64 as b64mod
+            img_url = json_payload.get('input_image_url', '')
+            scale = json_payload.get('scale_factor', 2)
+            img_data = None
+            fname = 'image.jpg'
+            if img_url.startswith('data:'):
+                # base64 data URL
+                header, encoded = img_url.split(',', 1)
+                img_data = b64mod.b64decode(encoded)
+                if 'png' in header: fname = 'image.png'
+            elif img_url.startswith('http'):
+                r = requests.get(img_url, timeout=30)
+                r.raise_for_status()
+                img_data = r.content
+                if 'png' in r.headers.get('Content-Type', ''): fname = 'image.png'
+            if not img_data:
+                return jsonify({'error': 'No image provided for upscale'}), 400
+            resp = requests.post(
+                'https://api.decor8.ai/upscale_image',
+                headers=d8_headers,
+                files={'input_image': (fname, io.BytesIO(img_data), 'image/jpeg')},
+                data={'scale_factor': str(scale)},
+                timeout=120
+            )
+        else:
+            d8_headers['Content-Type'] = 'application/json'
+            resp = requests.post(
+                f'https://api.decor8.ai/{endpoint}',
+                headers=d8_headers,
+                json=json_payload,
+                timeout=120
+            )
         try:
             rj = resp.json()
             if resp.status_code != 200:
