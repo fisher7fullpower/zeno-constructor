@@ -223,6 +223,19 @@
     .upload-icon{font-size:26px;margin-bottom:8px}
     .upload-txt{font-size:13.5px;color:rgba(255,255,255,.55)}
     .upload-note{font-size:11.5px;color:var(--gray);margin-top:4px}
+    .preview-render-wrap{margin:18px 0;padding:18px;background:var(--surface);border:1px solid var(--lime-border);border-radius:12px}
+    .preview-render-wrap .pr-title{font-size:13px;font-weight:700;color:var(--lime);margin-bottom:8px}
+    .preview-render-wrap .pr-desc{font-size:12px;color:var(--gray);margin-bottom:14px;line-height:1.5}
+    .btn-preview{background:rgba(209,254,23,.12);border:1px solid var(--lime-border);color:var(--lime);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+    .btn-preview:hover{background:rgba(209,254,23,.2)}
+    .btn-preview:disabled{opacity:.4;cursor:not-allowed}
+    .pr-spinner{display:none;margin-top:12px;text-align:center;font-size:12px;color:var(--gray)}
+    .pr-spinner.visible{display:block}
+    .pr-result{display:none;margin-top:14px}
+    .pr-result.visible{display:flex;gap:10px;flex-wrap:wrap}
+    .pr-result img{flex:1;min-width:140px;max-width:50%;border-radius:10px}
+    .pr-result-label{width:100%;font-size:11px;color:var(--gray);text-align:center;margin-top:4px}
+    .pr-cta{margin-top:12px;font-size:12px;color:var(--gray);line-height:1.5}
     .upload-input{display:none}
     .previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .prev-img{width:58px;height:58px;object-fit:cover;border-radius:7px;border:1px solid var(--border)}
@@ -875,6 +888,19 @@
           <input type="file" id="f-photos" class="upload-input" accept="image/*" multiple onchange="previewFiles(this,'photos-prev')">
         </div>
         <div class="previews" id="photos-prev"></div>
+        <!-- Quick AI Preview -->
+        <div class="preview-render-wrap" id="previewRenderWrap" style="display:none">
+          <div class="pr-title">Быстрый AI Preview</div>
+          <div class="pr-desc">Посмотрите, как будет выглядеть ваша комната в выбранном стиле. Полный проект включает рендеры всех комнат, планировку и смету.</div>
+          <button class="btn-preview" id="btnPreview" onclick="quickPreview()">Посмотреть Preview</button>
+          <div class="pr-spinner" id="prSpinner"><div class="loading-spinner" style="width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--lime);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>Генерация рендера...</div>
+          <div class="pr-result" id="prResult">
+            <img id="prBefore" src="" alt="До">
+            <img id="prAfter" src="" alt="AI Preview">
+            <div class="pr-result-label">Это быстрый preview. Полный проект включает рендеры всех комнат, планировку и смету.</div>
+          </div>
+          <div id="prError" style="display:none;color:#f06060;font-size:12px;margin-top:8px"></div>
+        </div>
       </div>
       <div class="f-group">
         <label class="f-label">План помещения <span style="font-weight:400;color:var(--gray)">(опционально)</span></label>
@@ -897,7 +923,7 @@
           <span>
             Я даю согласие на <a href="/privacy/" target="_blank" style="color:var(--lime);text-decoration:underline">обработку персональных данных</a>
             в соответствии с Законом РБ № 99-З от 07.05.2021 и их передачу
-            AI-сервисам (Replicate, Groq) для формирования дизайн-проекта
+            AI-сервисам (Decor8.ai, Groq) для формирования дизайн-проекта
           </span>
         </label>
         <div id="consent-error" style="display:none;color:#f06060;font-size:12px;margin-top:6px">
@@ -1042,6 +1068,57 @@
       if(!f.type.startsWith('image/'))return;
       var img=document.createElement('img');img.className='prev-img';img.src=URL.createObjectURL(f);p.appendChild(img);
     });
+    // Show preview render button when photos are uploaded
+    if(pid==='photos-prev'&&input.files.length>0){
+      document.getElementById('previewRenderWrap').style.display='block';
+    }
+  };
+
+  // Quick AI Preview via Decor8
+  var previewDone=false;
+  window.quickPreview=function(){
+    if(previewDone)return;
+    var photos=document.getElementById('f-photos');
+    if(!photos.files.length){alert('Сначала загрузите фото');return;}
+    var styleBtn=document.querySelector('.style-btn.active');
+    var style=styleBtn?styleBtn.dataset.val:'modern';
+    var btn=document.getElementById('btnPreview');
+    var spinner=document.getElementById('prSpinner');
+    var result=document.getElementById('prResult');
+    var errEl=document.getElementById('prError');
+    btn.disabled=true;
+    spinner.classList.add('visible');
+    result.classList.remove('visible');
+    errEl.style.display='none';
+    // Read first photo as base64
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var base64=e.target.result;
+      document.getElementById('prBefore').src=base64;
+      fetch('/api/decor8/generate_designs_for_room',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({input_image_url:base64,room_type:'livingroom',design_style:style,num_images:1})
+      }).then(function(r){return r.json()}).then(function(data){
+        var url=data&&data.info&&data.info.images&&data.info.images[0]&&data.info.images[0].url;
+        if(url){
+          document.getElementById('prAfter').src=url;
+          result.classList.add('visible');
+          previewDone=true;
+        } else {
+          errEl.textContent='Ошибка: '+(data.error||data.message||'нет результата');
+          errEl.style.display='block';
+          btn.disabled=false;
+        }
+      }).catch(function(err){
+        errEl.textContent='Ошибка: '+err.message;
+        errEl.style.display='block';
+        btn.disabled=false;
+      }).finally(function(){
+        spinner.classList.remove('visible');
+      });
+    };
+    reader.readAsDataURL(photos.files[0]);
   };
 
   // Upload single file as base64 to /webhook/photo-upload, returns URL

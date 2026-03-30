@@ -11,7 +11,7 @@
 - [ ] Нет хардкода секретов (API ключи, пароли, JWT_SECRET, IP)
 - [ ] `os.environ.get()` — без fallback-значений типа `'gsk_...'`
 - [ ] SSRF: proxy-image → domain allowlist
-- [ ] Open proxy: homedesigns → endpoint allowlist
+- [ ] Open proxy: decor8 → endpoint allowlist
 - [ ] CORS: не `*`, только allowlist из ~6 доменов
 
 ### High

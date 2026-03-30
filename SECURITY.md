@@ -49,7 +49,7 @@
 |---|---------|------|--------|
 | 1 | **Хардкод пароля** `DEFAULT_PASS='***REDACTED_OLD_PASSWORD***'` в admin HTML | admin/index.html | ✅ Удалён, JWT auth |
 | 2 | **SSRF в proxy-image** — произвольные URL без проверки домена | proxy.py `/api/proxy-image` | ✅ Domain allowlist |
-| 3 | **Open proxy** — homedesigns endpoint принимал любые пути | proxy.py `/api/homedesigns/v2/` | ✅ Endpoint allowlist |
+| 3 | **Open proxy** — decor8 endpoint принимал любые пути | proxy.py `/api/decor8/v2/` | ✅ Endpoint allowlist |
 | 4 | **CORS `*`** — wildcard разрешал запросы с любого домена | proxy.py `after_request` | ✅ Origin allowlist (6 доменов) |
 | 5 | **Хардкод GROQ_API_KEY** с fallback `gsk_...` в коде | /opt/proxy.py | ✅ `os.environ.get()` |
 | 6 | **Хардкод RESEND_KEY и JWT_SECRET** напрямую в коде | /opt/proxy.py | ✅ `os.environ.get()` |
@@ -102,7 +102,7 @@
 | Severity | Проблема | Статус |
 |----------|---------|--------|
 | CRITICAL | **Webhook URL** передаётся в Replicate без валидации (SSRF через третью сторону) | ✅ Allowlist: morrowlab.by, zenohome.by |
-| HIGH | **Произвольные поля** пробрасываются в HomeDesigns API (parameter injection) | ✅ `HOMEDESIGNS_ALLOWED_FIELDS` (22 поля) |
+| HIGH | **Произвольные поля** пробрасываются в Decor8 API (parameter injection) | ✅ `DECOR8_ALLOWED_FIELDS` (22 поля) |
 | MEDIUM | **Нет rate limiting** в локальном proxy.py | ✅ In-memory rate limiter (30/60/20/10/мин) |
 | MEDIUM | **Нет валидации содержимого base64** — SVG/polyglot файлы | ✅ Magic bytes + запрет SVG |
 | MEDIUM | **Regex prediction ID** `{20,30}` может быть хрупким | ✅ Расширен до `{10,40}` |
@@ -219,12 +219,12 @@
 |------|------------|
 | **CORS** | Allowlist из 6 доменов (morrowlab.by, zenohome.by + www/constructor) |
 | **SSRF protection** | Domain allowlist для proxy-image (6 доменов) |
-| **Endpoint allowlist** | 11 разрешённых HomeDesigns endpoints |
-| **Field allowlist** | 22 разрешённых поля для HomeDesigns API |
+| **Endpoint allowlist** | 11 разрешённых Decor8 endpoints |
+| **Field allowlist** | 22 разрешённых поля для Decor8 API |
 | **Replicate input allowlist** | 17 разрешённых полей для Replicate API input |
 | **Webhook validation** | Только morrowlab.by и zenohome.by домены |
 | **Image validation** | Magic bytes (PNG/JPG/GIF/WebP), SVG заблокирован, max 10MB |
-| **Rate limiting** | In-memory rate limiter + Flask-Limiter (prod): replicate 30/мин, homedesigns 20/мин, advisor 10/мин, proxy-image 60/мин |
+| **Rate limiting** | In-memory rate limiter + Flask-Limiter (prod): replicate 30/мин, decor8 20/мин, advisor 10/мин, proxy-image 60/мин |
 | **CSRF** | Origin/Referer проверка против ALLOWED_ORIGINS |
 | **Auth** | JWT httpOnly cookie + `check_admin()` для admin endpoints |
 | **Error handling** | Generic сообщения наружу, `sys.exit(1)` при отсутствии токенов |
@@ -250,7 +250,7 @@
 
 | Файл | Переменные |
 |------|------------|
-| `/etc/proxy-constructor.env` | REPLICATE_TOKEN, HOMEDESIGNS_TOKEN, GROQ_API_KEY, JWT_SECRET, RESEND_KEY, FROM_EMAIL, ADMIN_PASS |
+| `/etc/proxy-constructor.env` | REPLICATE_TOKEN, DECOR8_TOKEN, GROQ_API_KEY, JWT_SECRET, RESEND_KEY, FROM_EMAIL, ADMIN_PASS |
 | `/etc/ml-upload.env` | ADMIN_KEY |
 
 ---
@@ -406,7 +406,7 @@
 | # | Проблема | Файл | Статус |
 |---|---------|------|--------|
 | R4-L1 | Advisor message без ограничения длины — DoS через большие сообщения | proxy.py | ✅ Лимит 2000 символов |
-| R4-L2 | Replicate `input` dict без allowlist полей (в отличие от HomeDesigns) | proxy.py | ✅ `REPLICATE_ALLOWED_INPUT_FIELDS` фильтрация |
+| R4-L2 | Replicate `input` dict без allowlist полей (в отличие от Decor8) | proxy.py | ✅ `REPLICATE_ALLOWED_INPUT_FIELDS` фильтрация |
 | R4-L3 | Masters form показывает "успех" при сетевой ошибке (потеря лидов) | pages/masters.html | ✅ `alert()` при ошибке |
 
 ### 10.2 SMM admin (0 HIGH, 6 MEDIUM, 4 LOW)

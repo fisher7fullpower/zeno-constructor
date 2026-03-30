@@ -436,7 +436,7 @@
     }
     .sampling-banner.visible { display: block; }
 
-    /* ── homedesigns.ai tools — redesigned ──────────────── */
+    /* ── Decor8.ai tools ──────────────── */
     .hd-tool {
       background: var(--gray);
       border: 1px solid var(--gray2);
@@ -651,7 +651,7 @@
       <div id="statusBar" class="status-bar idle">Загрузите рендер</div>
     </div>
 
-    <!-- homedesigns.ai ALL TOOLS BLOCK -->
+    <!-- Decor8.ai ALL TOOLS BLOCK -->
     <div class="section">
       <div class="section-title" style="margin-bottom:10px">AI — Инструменты</div>
 
@@ -858,20 +858,8 @@
             <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Загрузите фото плитки из каталога — AI наложит её текстуру на зону.</div>
-            <div class="hd-texture-drop" onclick="document.getElementById('hd-texture-input').click()" id="hd-texture-drop">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v8M4 6l3 3 3-3M1 10v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1"/></svg>
-              Загрузить фото плитки
-            </div>
-            <input type="file" id="hd-texture-input" accept="image/*" style="display:none" onchange="previewTexture(this)">
-            <img id="hd-texture-preview" style="display:none;width:100%;border-radius:7px;margin-bottom:7px;border:1px solid var(--gray2)" alt="">
-            <select class="hd-select" id="hd-tex-count">
-              <option value="1 X 1">1×1 плитка</option>
-              <option value="2 X 2" selected>2×2 плитки</option>
-              <option value="3 X 3">3×3 плитки</option>
-              <option value="4 X 4">4×4 плитки</option>
-            </select>
-            <button class="btn btn-dark" onclick="hdMaterialSwap()">Заменить плитку</button>
+            <div class="hd-note" style="color:#999">Замена плитки временно недоступна. Используйте «Перекраска материала».</div>
+            <button class="btn btn-dark" onclick="hdMaterialSwap()" disabled style="opacity:0.4;cursor:not-allowed">Заменить плитку</button>
             <img id="hd-matswap-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-matswap-use" onclick="applyHdResult('matswap')">↙ Использовать как фон</button>
             <div class="hd-status idle" id="hd-matswap-status"></div>
@@ -891,9 +879,8 @@
             <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">Удаляет объект из выделенной зоны или очищает всю комнату.</div>
-            <button class="btn btn-dark" onclick="hdFurnitureRemoval(false)" style="margin-bottom:6px">Удалить из зоны</button>
-            <button class="btn btn-ghost" onclick="hdFurnitureRemoval(true)">Очистить всю комнату</button>
+            <div class="hd-note">AI удаляет мебель и объекты из комнаты.</div>
+            <button class="btn btn-dark" onclick="hdFurnitureRemoval(true)">Удалить объекты</button>
             <img id="hd-removal-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-removal-use" onclick="applyHdResult('removal')">↙ Использовать как фон</button>
             <div class="hd-status idle" id="hd-removal-status"></div>
@@ -913,55 +900,8 @@
             <svg class="hd-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
           </div>
           <div class="hd-tool-body">
-            <div class="hd-note">AI достраивает стену или пол в выделенной зоне — реалистичнее, чем размытие.</div>
-            <select class="hd-select" id="hd-fill-style">
-              <optgroup label="Современные">
-                <option value="Modern">Модерн</option>
-                <option value="Contemporary">Контемпорари</option>
-                <option value="Minimalism">Минимализм</option>
-                <option value="Minimalist">Минималистичный</option>
-                <option value="Transitional">Переходный</option>
-                <option value="Futuristic">Футуристический</option>
-              </optgroup>
-              <optgroup label="Стили мира">
-                <option value="Scandinavian">Скандинавский</option>
-                <option value="Japandi">Japandi</option>
-                <option value="Japanese Design">Японский</option>
-                <option value="Zen">Зен</option>
-                <option value="Bauhaus">Баухаус</option>
-                <option value="Midcentury Modern">Середина века</option>
-              </optgroup>
-              <optgroup label="Фактурные">
-                <option value="Industrial">Лофт / Индустриальный</option>
-                <option value="Urban Modern">Урбан</option>
-                <option value="Rustic">Рустик</option>
-                <option value="Eclectic">Эклектика</option>
-                <option value="Art Deco">Арт-деко</option>
-                <option value="Art Nouveau">Арт-нуво</option>
-              </optgroup>
-              <optgroup label="Природные">
-                <option value="Coastal">Прибрежный</option>
-                <option value="Tropical">Тропический</option>
-                <option value="Biophilic">Бионический</option>
-                <option value="Cottage Core">Деревенский</option>
-                <option value="Bali">Бали</option>
-                <option value="Mediterranean">Средиземноморский</option>
-                <option value="French Country">Французская провинция</option>
-              </optgroup>
-              <optgroup label="Классические">
-                <option value="Traditional">Традиционный</option>
-                <option value="Luxurious">Люкс</option>
-                <option value="Hollywood Regency">Голливуд регенси</option>
-                <option value="Hollywood Glam">Голливудский гламур</option>
-                <option value="Victorian">Викторианский</option>
-                <option value="Moroccan">Марокканский</option>
-                <option value="Bohemian">Бохо</option>
-              </optgroup>
-              <optgroup label="Без стиля">
-                <option value="No Style">Без стиля</option>
-              </optgroup>
-            </select>
-            <button class="btn btn-dark" onclick="hdFillSpaces()">Заполнить зону</button>
+            <div class="hd-note">AI подготавливает стены — убирает дефекты, выравнивает поверхности.</div>
+            <button class="btn btn-dark" onclick="hdFillSpaces()">Подготовить стены</button>
             <img id="hd-fill-result" class="hd-result-img" alt="">
             <button class="hd-use-btn" id="hd-fill-use" onclick="applyHdResult('fill')">↙ Использовать как фон</button>
             <div class="hd-status idle" id="hd-fill-status"></div>
@@ -1089,10 +1029,25 @@ let zones = [];
 let activeSamplingZoneId = null;
 let originalImgData = null;
 
-// homedesigns.ai results storage per tool
+// Decor8.ai results storage per tool
 const hdResults = {};
 let hdTextureBase64 = null;
 let selectedAiLevel = 'Low';
+
+// Constructor style mapping → Decor8 lowercase
+const CONSTRUCTOR_STYLE_MAP = {
+  'Modern':'modern','Minimalist':'minimalist','Scandinavian':'scandinavian',
+  'Industrial':'industrial','Japandi':'japandi','Luxury':'luxemodern',
+  'Contemporary':'contemporary','Transitional':'transitional','Futuristic':'modern',
+  'Zen':'asian_zen','Bauhaus':'bauhaus','Midcentury Modern':'midcenturymodern',
+  'Urban Modern':'urbanmodern','Rustic':'rustic','Eclectic':'eclectic',
+  'Art Deco':'artdeco','Art Nouveau':'artnouveau','Coastal':'coastal',
+  'Tropical':'tropical','Biophilic':'organicmodern','Cottage Core':'cottagecore',
+  'Bali':'tropical','Mediterranean':'mediterranean','French Country':'frenchcountry',
+  'Traditional':'traditional','Luxurious':'luxemodern','Hollywood Regency':'hollywoodregency',
+  'Hollywood Glam':'hollywoodregency','Victorian':'victorian','Moroccan':'moroccan',
+  'Bohemian':'boho','No Style':'modern','Japanese Design':'japandi',
+};
 
 // Manual draw mode
 let isDrawMode = false;
@@ -1630,7 +1585,7 @@ document.addEventListener('keydown', (e) => {
 renderZonesList();
 
 // ══════════════════════════════════════════════════════
-// homedesigns.ai tool helpers
+// Decor8.ai tool helpers
 // ══════════════════════════════════════════════════════
 
 function toggleHdTool(id) {
@@ -1665,18 +1620,16 @@ function showHdResult(tool, url) {
   if (btn) btn.classList.add('visible');
 }
 
-async function callHdApi(endpoint, payload) {
-  const resp = await fetch(`${API_BASE}/api/homedesigns/v2/${endpoint}`, {
+async function callDecor8(endpoint, payload) {
+  const resp = await fetch(`${API_BASE}/api/decor8/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
   const data = await resp.json();
-  // Normalize response: API returns {success:{generated_image:[...]}} or {output_images:[...]}
-  const imgs = data?.success?.generated_image
-             || data?.success?.output_images
-             || data?.output_images;
-  if (imgs?.length) data._url = imgs[0];
+  // Normalize response: Decor8 returns {info:{images:[{url:'...'}]}}
+  const imgs = data?.info?.images;
+  if (imgs?.length) data._url = imgs[0].url;
   return data;
 }
 
@@ -1776,21 +1729,20 @@ async function hdCreativeRedesign() {
       // Full style transformation via Replicate — completely replaces walls, materials
       await hdFullRestyleReplicate();
     } else {
-      // Structure-preserving via homedesigns.ai (keeps room geometry)
-      const data = await callHdApi('creative_redesign', {
-        image: getOriginalBase64(),
-        design_type: 'Interior',
-        room_type: 'Bathroom',
-        design_style: selectedStyle,
-        ai_intervention: selectedAiLevel,
-        no_design: 1
+      // Structure-preserving via Decor8.ai (keeps room geometry)
+      const d8style = CONSTRUCTOR_STYLE_MAP[selectedStyle] || selectedStyle.toLowerCase();
+      const data = await callDecor8('generate_designs_for_room', {
+        input_image_url: getOriginalBase64(),
+        room_type: 'livingroom',
+        design_style: d8style,
+        num_images: 1
       });
       if (data._url) {
         showHdResult('restyle', data._url);
         setHdStatus('restyle','✓ Готово','success');
       } else {
         const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-        setHdStatus('restyle', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+        setHdStatus('restyle', `Ошибка: ${msg}`, 'error');
       }
     }
   } catch(e) { setHdStatus('restyle',`Ошибка: ${e.message}`,'error'); }
@@ -1821,11 +1773,12 @@ async function hdFullRestyleReplicate() {
 
   const predData = await createResp.json();
   if (!predData.id) {
-    // Fallback to homedesigns.ai if Replicate fails
+    // Fallback to Decor8 if Replicate fails
     setHdStatus('restyle','Запасной вариант...','loading',true);
-    const data = await callHdApi('creative_redesign', {
-      image: getOriginalBase64(), design_type:'Interior', room_type:'Bathroom',
-      design_style: selectedStyle, ai_intervention:'Extreme', no_design:1
+    const d8style = CONSTRUCTOR_STYLE_MAP[selectedStyle] || selectedStyle.toLowerCase();
+    const data = await callDecor8('generate_designs_for_room', {
+      input_image_url: getOriginalBase64(), room_type: 'livingroom',
+      design_style: d8style, num_images: 1
     });
     if (data._url) { showHdResult('restyle', data._url); setHdStatus('restyle','✓ Готово','success'); }
     else throw new Error(data.message || 'Ошибка API');
@@ -1849,130 +1802,91 @@ async function hdFullRestyleReplicate() {
   throw new Error('Таймаут. Попробуйте снова.');
 }
 
-// 2. Change Color & Textures
+// 2. Change Color & Textures → Decor8 change_wall_color
 async function hdChangeColorTexture() {
   if (!originalImage) { setHdStatus('colors','Загрузите рендер','error'); return; }
-  const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('colors','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   const color    = document.getElementById('hd-col-color').value;
   const material = document.getElementById('hd-col-material').value;
-  const mtype    = document.getElementById('hd-col-mtype').value;
-  const obj      = document.getElementById('hd-col-object').value;
   if (!color && !material) { setHdStatus('colors','Выберите цвет или материал','error'); return; }
-  if (material && !mtype) { setHdStatus('colors','Выберите тип/сорт материала','error'); return; }
   setHdStatus('colors','AI перекрашивает...','loading',true);
-  // Use detected object's English name if one is selected on canvas
-  const activeObjLabel = activeObjectId !== null ? detectedObjects[activeObjectId]?.labelEn : null;
-  const effectiveObj = activeObjLabel || obj;
-  const payload = { image: getOriginalBase64(), masked_image: maskB64, design_type: 'Interior', no_design: 1 };
-  if (color) payload.color = color;
-  if (material) { payload.materials = material; payload.materials_type = mtype; }
-  if (effectiveObj) payload.object = effectiveObj;
+  const colorScheme = color || material;
   try {
-    const data = await callHdApi('change_color_textures', payload);
+    const data = await callDecor8('change_wall_color', {
+      input_image_url: getOriginalBase64(),
+      color_scheme: colorScheme
+    });
     if (data._url) {
       showHdResult('colors', data._url);
       setHdStatus('colors','✓ Готово','success');
     } else {
       const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('colors', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      setHdStatus('colors', `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('colors',`Ошибка: ${e.message}`,'error'); }
 }
 
-// 3. Paint Visualizer
+// 3. Paint Visualizer → Decor8 change_wall_color
 async function hdPaintVisualizer() {
   if (!originalImage) { setHdStatus('paint','Загрузите рендер','error'); return; }
-  const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('paint','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
   const hex = document.getElementById('hd-paint-color').value;
-  const rgb = hexToRgb(hex);
   setHdStatus('paint','Наношу краску...','loading',true);
   try {
-    const data = await callHdApi('paint_visualizer', {
-      image: getOriginalBase64(), masked_image: maskB64,
-      rgb_color: `${rgb.r},${rgb.g},${rgb.b}`, no_design: 1
+    const data = await callDecor8('change_wall_color', {
+      input_image_url: getOriginalBase64(),
+      color_scheme: hex
     });
     if (data._url) {
       showHdResult('paint', data._url);
       setHdStatus('paint','✓ Готово','success');
     } else {
       const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('paint', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      setHdStatus('paint', `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('paint',`Ошибка: ${e.message}`,'error'); }
 }
 
-// 4. Material Swap
+// 4. Material Swap — временно недоступно (нет аналога в Decor8)
 async function hdMaterialSwap() {
-  if (!originalImage) { setHdStatus('matswap','Загрузите рендер','error'); return; }
-  const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('matswap','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
-  if (!hdTextureBase64) { setHdStatus('matswap','Загрузите фото плитки/текстуры','error'); return; }
-  const count = document.getElementById('hd-tex-count').value;
-  setHdStatus('matswap','Меняю материал...','loading',true);
-  try {
-    const data = await callHdApi('material_swap', {
-      image: getOriginalBase64(), masked_image: maskB64,
-      texture_image: hdTextureBase64, no_of_texture: count, no_design: 2
-    });
-    if (data._url) {
-      showHdResult('matswap', data._url);
-      setHdStatus('matswap','✓ Готово','success');
-    } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('matswap', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
-    }
-  } catch(e) { setHdStatus('matswap',`Ошибка: ${e.message}`,'error'); }
+  setHdStatus('matswap','Замена плитки временно недоступна. Используйте «Перекраска материала».','error');
 }
 
-// 5. Furniture Removal
+// 5. Furniture Removal → Decor8 remove_objects_from_room
 async function hdFurnitureRemoval(clearAll) {
   if (!originalImage) { setHdStatus('removal','Загрузите рендер','error'); return; }
-  setHdStatus('removal', clearAll?'Очищаю комнату...':'Удаляю объект из зоны...','loading',true);
-  const payload = { image: getOriginalBase64() };
-  if (!clearAll) {
-    const maskB64 = getActiveMaskBase64();
-    if (!maskB64) { setHdStatus('removal','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
-    payload.masked_image = maskB64;
-  }
+  setHdStatus('removal', 'Удаляю объекты...','loading',true);
   try {
-    const data = await callHdApi('furniture_removal', payload);
+    const data = await callDecor8('remove_objects_from_room', {
+      input_image_url: getOriginalBase64()
+    });
     if (data._url) {
       showHdResult('removal', data._url);
       setHdStatus('removal','✓ Готово','success');
     } else {
       const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('removal', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      setHdStatus('removal', `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('removal',`Ошибка: ${e.message}`,'error'); }
 }
 
-// 6. Fill Spaces
+// 6. Fill Spaces → Decor8 prime_walls_for_room
 async function hdFillSpaces() {
   if (!originalImage) { setHdStatus('fill','Загрузите рендер','error'); return; }
-  const maskB64 = getActiveMaskBase64();
-  if (!maskB64) { setHdStatus('fill','Кликните на объект на холсте, чтобы выбрать зону','error'); return; }
-  const style = document.getElementById('hd-fill-style').value;
   setHdStatus('fill','Заполняю пространство...','loading',true);
   try {
-    const data = await callHdApi('fill_spaces', {
-      image: getOriginalBase64(), masked_image: maskB64,
-      design_type: 'Interior', room_type: 'Bathroom',
-      design_style: style, no_design: 1,
-      prompt: 'realistic tile wall background'
+    const data = await callDecor8('prime_walls_for_room', {
+      input_image_url: getOriginalBase64()
     });
     if (data._url) {
       showHdResult('fill', data._url);
       setHdStatus('fill','✓ Готово','success');
     } else {
       const msg = data.message || data.error || JSON.stringify(data).slice(0,120);
-      setHdStatus('fill', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      setHdStatus('fill', `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('fill',`Ошибка: ${e.message}`,'error'); }
 }
 
-// 7. Design Advisor
+// 7. Design Advisor → Groq via /api/decor8/advisor
 async function hdDesignAdvisor() {
   const q = document.getElementById('hd-advisor-q').value.trim();
   if (!q) return;
@@ -1980,28 +1894,22 @@ async function hdDesignAdvisor() {
   const reply = document.getElementById('hd-advisor-reply');
   reply.classList.remove('visible');
   try {
-    const resp = await fetch(`${API_BASE}/api/homedesigns/advisor`, {
+    const resp = await fetch(`${API_BASE}/api/decor8/advisor`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ message: q })
     });
     const data = await resp.json();
-    if (data.data || data.success) {
-      reply.textContent = data.data || '✓';
+    if (data.success && data.message) {
+      reply.textContent = data.message;
       reply.classList.add('visible');
       setHdStatus('advisor','','idle');
     } else {
-      const msg = data.message || data.error || JSON.stringify(data).slice(0,100);
-      setHdStatus('advisor', isHdAuthError(msg) ? hdPaidPlanMsg() : `Ошибка: ${msg}`, 'error');
+      const msg = data.error || data.message || JSON.stringify(data).slice(0,100);
+      setHdStatus('advisor', `Ошибка: ${msg}`, 'error');
     }
   } catch(e) { setHdStatus('advisor',`Ошибка: ${e.message}`,'error'); }
 }
 
-function isHdAuthError(msg) {
-  return msg && (msg.includes('Invalid API') || msg.includes('Did you mean') || msg.includes('Unauthenticated') || msg.includes('activate'));
-}
-function hdPaidPlanMsg() {
-  return trustedHtml('Требует активный план <a href="https://homedesigns.ai/pricing" target="_blank" style="color:var(--lime)">homedesigns.ai →</a>');
-}
 
 function previewTexture(input) {
   const file = input.files[0]; if (!file) return;

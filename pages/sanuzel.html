@@ -96,6 +96,17 @@
     .chip:hover{border-color:var(--lime-border);color:var(--lime)}
     .chip.sel{border-color:var(--lime);background:var(--lime-dim);color:var(--lime);font-weight:600}
 
+    /* STYLE SCROLL */
+    .style-scroll-wrap{position:relative}
+    .style-scroll{display:flex;gap:7px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0}
+    .style-scroll::-webkit-scrollbar{display:none}
+    .style-scroll .chip{flex-shrink:0;scroll-snap-align:start}
+
+    /* RENDER COUNTER */
+    .render-counter{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;font-size:12px;font-weight:600;color:var(--lime);margin-bottom:14px}
+    .render-counter .rc-bar{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .render-counter .rc-fill{height:100%;background:var(--lime);border-radius:2px;transition:width .3s}
+
     /* PACKAGE SELECTOR */
     .pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
     .pkg-opt{border:1px solid var(--border2);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s}
@@ -427,6 +438,7 @@
         <div class="chips" id="stateChips">
           <div class="chip sel" onclick="selChip('stateChips',this,'empty')">Черновая / пустая</div>
           <div class="chip" onclick="selChip('stateChips',this,'furnished')">Текущий дизайн</div>
+          <div class="chip" onclick="selChip('stateChips',this,'remodel')">Ремонт санузла</div>
         </div>
       </div>
 
@@ -434,23 +446,68 @@
       <div class="form-group">
         <div class="form-label">Тип помещения</div>
         <div class="chips" id="nicheChips">
-          <div class="chip sel" onclick="selChip('nicheChips',this,'совмещённый санузел')">Совмещённый санузел</div>
-          <div class="chip" onclick="selChip('nicheChips',this,'ванная')">Ванная</div>
+          <div class="chip sel" onclick="selChip('nicheChips',this,'ванная')">Ванная</div>
           <div class="chip" onclick="selChip('nicheChips',this,'туалет')">Туалет</div>
-          <div class="chip" onclick="selChip('nicheChips',this,'душевая')">Душевая</div>
+          <div class="chip" onclick="selChip('nicheChips',this,'прачечная')">Прачечная</div>
         </div>
       </div>
 
       <!-- STYLE -->
       <div class="form-group">
         <div class="form-label">Стиль дизайна</div>
-        <div class="chips" id="styleChips">
-          <div class="chip sel" onclick="selChip('styleChips',this,'минимализм')">Минимализм</div>
-          <div class="chip" onclick="selChip('styleChips',this,'современный')">Современный</div>
-          <div class="chip" onclick="selChip('styleChips',this,'скандинавский')">Скандинавский</div>
-          <div class="chip" onclick="selChip('styleChips',this,'лофт')">Лофт</div>
-          <div class="chip" onclick="selChip('styleChips',this,'классический')">Классический</div>
-          <div class="chip" onclick="selChip('styleChips',this,'барокко')">Барокко</div>
+        <div class="style-scroll-wrap">
+          <div class="style-scroll" id="styleChips">
+            <div class="chip sel" onclick="selChip('styleChips',this,'современный')">Современный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'минимализм')">Минимализм</div>
+            <div class="chip" onclick="selChip('styleChips',this,'скандинавский')">Скандинавский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'лофт')">Лофт</div>
+            <div class="chip" onclick="selChip('styleChips',this,'джапанди')">Джапанди</div>
+            <div class="chip" onclick="selChip('styleChips',this,'бохо')">Бохо</div>
+            <div class="chip" onclick="selChip('styleChips',this,'модерн')">Модерн</div>
+            <div class="chip" onclick="selChip('styleChips',this,'ар-деко')">Ар-деко</div>
+            <div class="chip" onclick="selChip('styleChips',this,'мидсенчури')">Мидсенчури</div>
+            <div class="chip" onclick="selChip('styleChips',this,'хай-тек')">Хай-тек</div>
+            <div class="chip" onclick="selChip('styleChips',this,'классический')">Классический</div>
+            <div class="chip" onclick="selChip('styleChips',this,'неотрадиционный')">Неотрадиционный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'прибрежный')">Прибрежный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'тропический')">Тропический</div>
+            <div class="chip" onclick="selChip('styleChips',this,'эклектика')">Эклектика</div>
+            <div class="chip" onclick="selChip('styleChips',this,'французский')">Французский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'рустик')">Рустик</div>
+            <div class="chip" onclick="selChip('styleChips',this,'шебби-шик')">Шебби-шик</div>
+            <div class="chip" onclick="selChip('styleChips',this,'винтаж')">Винтаж</div>
+            <div class="chip" onclick="selChip('styleChips',this,'кантри')">Кантри</div>
+            <div class="chip" onclick="selChip('styleChips',this,'дзен')">Дзен</div>
+            <div class="chip" onclick="selChip('styleChips',this,'голливуд')">Голливуд</div>
+            <div class="chip" onclick="selChip('styleChips',this,'баухаус')">Баухаус</div>
+            <div class="chip" onclick="selChip('styleChips',this,'средиземноморский')">Средиземноморский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'фермерский')">Фермерский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'викторианский')">Викторианский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'готический')">Готический</div>
+            <div class="chip" onclick="selChip('styleChips',this,'марокканский')">Марокканский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'переходный')">Переходный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'максимализм')">Максимализм</div>
+            <div class="chip" onclick="selChip('styleChips',this,'арабский')">Арабский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'ретрофутуризм')">Ретрофутуризм</div>
+            <div class="chip" onclick="selChip('styleChips',this,'ар-нуво')">Ар-нуво</div>
+            <div class="chip" onclick="selChip('styleChips',this,'урбан')">Урбан</div>
+            <div class="chip" onclick="selChip('styleChips',this,'ваби-саби')">Ваби-саби</div>
+            <div class="chip" onclick="selChip('styleChips',this,'грандмилениал')">Грандмилениал</div>
+            <div class="chip" onclick="selChip('styleChips',this,'коттеджкор')">Коттеджкор</div>
+            <div class="chip" onclick="selChip('styleChips',this,'люкс-модерн')">Люкс-модерн</div>
+            <div class="chip" onclick="selChip('styleChips',this,'органик')">Органик</div>
+            <div class="chip" onclick="selChip('styleChips',this,'тосканский')">Тосканский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'кабин')">Кабин</div>
+            <div class="chip" onclick="selChip('styleChips',this,'пустынный')">Пустынный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'индустриальный шик')">Индустриальный шик</div>
+            <div class="chip" onclick="selChip('styleChips',this,'современный фермерский')">Совр. фермерский</div>
+            <div class="chip" onclick="selChip('styleChips',this,'евроклассика')">Евроклассика</div>
+            <div class="chip" onclick="selChip('styleChips',this,'тёплый минимализм')">Тёплый минимализм</div>
+            <div class="chip" onclick="selChip('styleChips',this,'традиционный')">Традиционный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'прибрежная бабушка')">Прибрежная бабушка</div>
+            <div class="chip" onclick="selChip('styleChips',this,'глобальный')">Глобальный</div>
+            <div class="chip" onclick="selChip('styleChips',this,'юго-западный')">Юго-западный</div>
+          </div>
         </div>
       </div>
 
@@ -466,14 +523,20 @@
         </div>
       </div>
 
+      <!-- RENDER COUNTER -->
+      <div class="render-counter" id="renderCounter">
+        Осталось: <span id="renderLeft">3</span> из <span id="renderTotal">3</span>
+        <div class="rc-bar"><div class="rc-fill" id="renderBar" style="width:100%"></div></div>
+      </div>
+
       <!-- PACKAGE -->
       <div class="form-group">
         <div class="form-label">Тариф</div>
         <div class="pkg-grid">
-          <div class="pkg-opt sel" onclick="selPkg(this,'free')"><div class="pkg-name" data-cms-price-name="free">Free</div><div class="pkg-price" data-cms-price-val="free">0 BYN</div></div>
-          <div class="pkg-opt" onclick="selPkg(this,'basic')"><div class="pkg-name" data-cms-price-name="basic">Basic</div><div class="pkg-price" data-cms-price-val="basic">29 BYN</div></div>
-          <div class="pkg-opt" onclick="selPkg(this,'pro')"><div class="pkg-name" data-cms-price-name="pro">Pro</div><div class="pkg-price" data-cms-price-val="pro">79 BYN</div></div>
-          <div class="pkg-opt" onclick="selPkg(this,'business')"><div class="pkg-name" data-cms-price-name="business">Biz</div><div class="pkg-price" data-cms-price-val="business">199 BYN</div></div>
+          <div class="pkg-opt sel" onclick="selPkg(this,'free')"><div class="pkg-name">Free</div><div class="pkg-price">0 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'basic')"><div class="pkg-name">Basic</div><div class="pkg-price">19 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'pro')"><div class="pkg-name">Pro</div><div class="pkg-price">49 BYN</div></div>
+          <div class="pkg-opt" onclick="selPkg(this,'studio')"><div class="pkg-name">Studio</div><div class="pkg-price">149 BYN/мес</div></div>
         </div>
       </div>
 
@@ -500,9 +563,19 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Скачать
           </a>
-          <a href="/estimate/" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">Отправить на оценку →</a>
+          <button class="btn-ghost" onclick="resetResult()" style="font-size:13px">↺ Новый дизайн</button>
         </div>
-        <button class="btn-ghost" onclick="resetResult()" style="margin-top:10px;width:100%;font-size:13px">↺ Новый дизайн</button>
+        <div id="estimateBlock" style="margin-top:16px;padding:16px;background:var(--card2);border:1px solid var(--border2);border-radius:12px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px">Получить смету от компании</div>
+          <div id="partnerList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="radio" name="contactMethod" value="telegram" checked> Telegram</label>
+            <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="radio" name="contactMethod" value="phone"> Телефон</label>
+            <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="radio" name="contactMethod" value="email"> Email</label>
+          </div>
+          <input class="form-input" id="contactValue" placeholder="@username или номер" style="margin-bottom:10px">
+          <button class="btn-lime" onclick="sendEstimate()" style="width:100%;padding:10px">Отправить на оценку</button>
+        </div>
       </div>
 
       <!-- SUBMIT -->
@@ -619,21 +692,27 @@
   const CHAT_WEBHOOK = 'https://n8n.zenohome.by/webhook/morrow-chat';
 
   const NICHE_MAP = {
-    'гостиная':'Living Room','спальня':'Bedroom','детская':'Kids Room','кабинет':'Office',
-    'прихожая':'Hallway','кухня':'Kitchen','кухня-гостиная':'Kitchen','столовая':'Dining Room',
-    'совмещённый санузел':'Bathroom','ванная':'Bathroom','туалет':'Bathroom','душевая':'Bathroom',
-    'офис':'Office','кафе':'Cafe','ресторан':'Restaurant','барбершоп':'Barber Shop',
-    'салон красоты':'Beauty Salon','магазин':'Retail',
-    'экстерьер':'Exterior','терраса':'Patio','беседка':'Patio'
+    'ванная':'bathroom','туалет':'powderroom','прачечная':'laundryroom'
   };
   const STYLE_MAP = {
-    'минимализм':'Minimalist','современный':'Modern','скандинавский':'Scandinavian',
-    'лофт':'Industrial','классический':'Neoclassical','барокко':'Baroque'
-  };
-  const EXTERIOR_NICHES = new Set(['экстерьер','терраса','беседка']);
-  const EXTERIOR_STYLE_MAP = {
-    'минимализм':'Modern','современный':'Contemporary','скандинавский':'Modern Scandinavian',
-    'лофт':'Urban Industrial','классический':'Neoclassical','барокко':'Baroque'
+    'минимализм':'minimalist','скандинавский':'scandinavian','лофт':'industrial',
+    'бохо':'boho','традиционный':'traditional','ар-деко':'artdeco',
+    'мидсенчури':'midcenturymodern','прибрежный':'coastal','тропический':'tropical',
+    'эклектика':'eclectic','современный':'contemporary','французский':'frenchcountry',
+    'рустик':'rustic','шебби-шик':'shabbychic','винтаж':'vintage',
+    'кантри':'country','модерн':'modern','дзен':'asian_zen',
+    'голливуд':'hollywoodregency','баухаус':'bauhaus','средиземноморский':'mediterranean',
+    'фермерский':'farmhouse','викторианский':'victorian','готический':'gothic',
+    'марокканский':'moroccan','юго-западный':'southwestern','переходный':'transitional',
+    'максимализм':'maximalist','арабский':'arabic','джапанди':'japandi',
+    'ретрофутуризм':'retrofuturism','ар-нуво':'artnouveau','урбан':'urbanmodern',
+    'ваби-саби':'wabi_sabi','грандмилениал':'grandmillennial',
+    'прибрежная бабушка':'coastalgrandmother','неотрадиционный':'neotraditional',
+    'коттеджкор':'cottagecore','люкс-модерн':'luxemodern','хай-тек':'high_tech',
+    'органик':'organicmodern','тосканский':'tuscan','кабин':'cabin',
+    'пустынный':'desertmodern','глобальный':'global','индустриальный шик':'industrialchic',
+    'современный фермерский':'modernfarmhouse','евроклассика':'europeanclassic',
+    'тёплый минимализм':'warmminimalist','классический':'europeanclassic'
   };
 
   // header scroll
@@ -646,7 +725,44 @@
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
   // form state
-  let selectedState = 'empty', selectedNiche = 'совмещённый санузел', selectedStyle = 'минимализм', selectedPkg = 'free';
+  let selectedState = 'empty', selectedNiche = 'ванная', selectedStyle = 'современный', selectedPkg = 'free';
+
+  async function updateRenderCounter() {
+    try {
+      const res = await fetch('/api/renders/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const d = await res.json();
+      document.getElementById('renderLeft').textContent = d.remaining;
+      document.getElementById('renderTotal').textContent = d.limit;
+      document.getElementById('renderBar').style.width = (d.remaining / d.limit * 100) + '%';
+    } catch {}
+  }
+  updateRenderCounter();
+
+  async function loadPartners() {
+    try {
+      const res = await fetch('/api/partners');
+      const partners = await res.json();
+      document.getElementById('partnerList').innerHTML = partners.map(p =>
+        '<label style="font-size:12.5px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" name="est_partner" value="' + String(p.id).replace(/"/g,'&quot;') + '" checked> ' + (p.name||'').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</label>'
+      ).join('');
+    } catch {}
+  }
+  loadPartners();
+
+  async function sendEstimate() {
+    const checked = [...document.querySelectorAll('input[name="est_partner"]:checked')].map(c => c.value);
+    if (!checked.length) { alert('Выберите хотя бы одну компанию'); return; }
+    const method = document.querySelector('input[name="contactMethod"]:checked')?.value || 'telegram';
+    const contact = document.getElementById('contactValue').value.trim();
+    if (!contact) { alert('Укажите контакт для связи'); return; }
+    try {
+      await fetch('/api/request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partners: checked, contact_method: method, contact_value: contact,
+          render_url: document.getElementById('imgAfter')?.src || '', room_type: selectedNiche, style: selectedStyle,
+          name: document.getElementById('nameInput')?.value || '', city: document.getElementById('cityInput')?.value || '', source: 'sanuzel_render' }) });
+      alert('Заявка отправлена! Компании свяжутся с вами.');
+    } catch { alert('Ошибка отправки. Попробуйте ещё раз.'); }
+  }
 
   function selChip(groupId, el, val) {
     document.querySelectorAll('#' + groupId + ' .chip').forEach(c => c.classList.remove('sel'));
@@ -663,7 +779,7 @@
 
   function selPkgScroll(val) {
     const opts = document.querySelectorAll('.pkg-opt');
-    const map = { free:0, basic:1, pro:2, business:3 };
+    const map = { free:0, basic:1, pro:2, studio:3 };
     opts.forEach(p => p.classList.remove('sel'));
     opts[map[val]].classList.add('sel'); selectedPkg = val;
     document.getElementById('form').scrollIntoView({ behavior: 'smooth' });
@@ -705,13 +821,19 @@
     document.getElementById('fileName').classList.remove('visible');
   }
 
-  // submit — inline render via homedesigns.ai
+  // submit — inline render via Decor8.ai
   async function submitForm() {
     const fileInput = document.getElementById('photoInput');
     if (!fileInput.files[0]) { alert('Загрузите фото помещения'); return; }
     if (!['image/jpeg','image/png','image/webp'].includes(fileInput.files[0].type)) {
       alert('Поддерживаются форматы: JPG, PNG, WebP'); return;
     }
+
+    try {
+      const checkRes = await fetch('/api/renders/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const checkData = await checkRes.json();
+      if (checkData.remaining <= 0) { alert('Лимит рендеров исчерпан. Выберите платный тариф.'); return; }
+    } catch {}
 
     const submitBtn = document.getElementById('submitBtn');
     const progressWrap = document.getElementById('progressWrap');
@@ -726,7 +848,7 @@
         r.onload = e => {
           const img = new Image();
           img.onload = () => {
-            const maxPx = 1024, minPx = 512;
+            const maxPx = 1536, minPx = 512;
             const scaleDown = Math.min(maxPx / img.width, maxPx / img.height, 1);
             const scaleUp = Math.max(minPx / img.width, minPx / img.height, 1);
             const scale = img.width < minPx || img.height < minPx
@@ -753,29 +875,32 @@
         setProgress(prog, pMsgs[Math.min(Math.floor((prog - 30) / 20), 2)]);
       }, 800);
 
-      const roomType = NICHE_MAP[selectedNiche] || 'Living Room';
-      const isExterior = EXTERIOR_NICHES.has(selectedNiche);
-      const hdStyle = isExterior ? (EXTERIOR_STYLE_MAP[selectedStyle] || 'Modern') : (STYLE_MAP[selectedStyle] || 'Modern');
+      const roomType = NICHE_MAP[selectedNiche] || 'bathroom';
+      const designStyle = STYLE_MAP[selectedStyle] || 'contemporary';
+      const endpoint = selectedState === 'remodel' ? 'remodel_bathroom' : 'generate_designs_for_room';
 
-      const resp = await fetch('/api/homedesigns/v2/creative_redesign', {
+      const resp = await fetch('/api/decor8/' + endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image: fileDataUrl,
-          design_type: isExterior ? 'Exterior' : 'Interior',
-          ...(isExterior ? {house_angle: 'Front of House'} : {room_type: roomType}),
-          design_style: hdStyle,
-          ai_intervention: 'Mid',
-          no_design: 1
+          input_image_url: fileDataUrl,
+          room_type: roomType,
+          design_style: designStyle,
+          num_images: 1
         })
       });
 
       clearInterval(progTimer); progTimer = null;
       const data = await resp.json();
-      const imgs = data?.success?.generated_image || data?.success?.output_images || data?.output_images;
-      const resultUrl = imgs?.[0];
-      const _errMsg = data.message || data.error || 'Не удалось получить результат';
-      if (!resultUrl) throw new Error(typeof _errMsg === 'string' ? _errMsg : 'Не удалось получить результат');
+      const images = data?.info?.images || [];
+      const resultUrl = images[0]?.url;
+      if (!resultUrl) {
+        const _errMsg = data.error || data.message || 'Не удалось получить результат';
+        throw new Error(typeof _errMsg === 'string' ? _errMsg : 'Не удалось получить результат');
+      }
+
+      fetch('/api/renders/use', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+        .then(() => updateRenderCounter()).catch(() => {});
 
       setProgress(100, 'Готово!');
       await new Promise(r => setTimeout(r, 400));

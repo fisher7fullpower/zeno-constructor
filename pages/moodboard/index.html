@@ -82,6 +82,20 @@
 
     .limit-msg{text-align:center;padding:20px;font-size:13px;color:#ff6b6b;display:none}
 
+    .render-section{display:none;margin-bottom:24px}
+    .render-section.visible{display:block}
+    .render-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .render-actions .cta-btn{flex:1;min-width:140px;justify-content:center}
+    .render-preview{position:relative;border-radius:12px;overflow:hidden;background:#111;min-height:60px}
+    .render-preview img{width:100%;display:block;border-radius:12px}
+    .render-spinner{display:none;text-align:center;padding:40px}
+    .render-spinner.visible{display:block}
+    .render-spinner .loading-spinner{margin:0 auto 10px}
+    .render-ba{display:flex;gap:12px;flex-wrap:wrap}
+    .render-ba-item{flex:1;min-width:200px}
+    .render-ba-item img{width:100%;border-radius:10px}
+    .render-ba-label{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
+
     @media(max-width:640px){
       .hero{padding:40px 16px 24px}
       .upload-section,.result{padding:0 16px 40px}
@@ -247,12 +261,43 @@
     <ol class="tips-list" id="tipsList"></ol>
   </div>
 
+  <!-- AI Render in detected style -->
+  <div class="result-card render-section" id="renderSection">
+    <div class="result-card-title">AI-рендер в этом стиле</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Превратите вашу комнату в определённый стиль с помощью AI</div>
+    <div class="render-actions">
+      <button class="cta-btn cta-btn-primary" onclick="renderInStyle()">Сгенерировать в этом стиле</button>
+      <button class="cta-btn cta-btn-ghost" onclick="renderInspiration()">Вдохновение (без фото)</button>
+    </div>
+    <div class="render-spinner" id="renderSpinner">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Генерация рендера...</div>
+    </div>
+    <div id="renderResult" style="display:none">
+      <div class="render-ba">
+        <div class="render-ba-item" id="renderBefore">
+          <img id="renderBeforeImg" src="" alt="До">
+          <div class="render-ba-label">Оригинал</div>
+        </div>
+        <div class="render-ba-item" id="renderAfter">
+          <img id="renderAfterImg" src="" alt="После">
+          <div class="render-ba-label">AI-рендер</div>
+        </div>
+      </div>
+    </div>
+    <div id="renderInspirationResult" style="display:none">
+      <img id="renderInspirationImg" src="" alt="Вдохновение" style="width:100%;border-radius:10px">
+      <div class="render-ba-label">AI-вдохновение</div>
+    </div>
+    <div id="renderError" style="display:none;color:#ff6b6b;font-size:13px;margin-top:10px"></div>
+  </div>
+
   <!-- CTA -->
   <div class="result-card" style="text-align:center">
-    <div style="font-size:16px;font-weight:700;margin-bottom:8px">Хотите такой интерьер?</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Создайте AI-рендер вашей комнаты в этом стиле</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">Хотите больше вариантов?</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Создайте AI-рендер вашей комнаты с выбором из 51 стиля</div>
     <div class="cta-row" style="justify-content:center">
-      <a href="/room/" class="cta-btn cta-btn-primary" id="ctaRender">🎨 Создать рендер комнаты</a>
+      <a href="/room/" class="cta-btn cta-btn-primary" id="ctaRender">Рендер комнаты</a>
       <a href="/kitchen/" class="cta-btn cta-btn-ghost">Кухня</a>
       <a href="/sanuzel/" class="cta-btn cta-btn-ghost">Санузел</a>
       <a href="/business/" class="cta-btn cta-btn-ghost">Офис</a>
@@ -322,13 +367,22 @@ async function analyze() {
   }
 }
 
+function esc(s) {
+  if (typeof s !== 'string') return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escCssValue(s) {
+  if (typeof s !== 'string') return '';
+  return s.replace(/[^#a-zA-Z0-9(),.\s%-]/g, '');
+}
+
 function renderResult(d) {
   // Style
   document.getElementById('styleName').textContent = d.style_name || 'Стиль не определён';
   document.getElementById('styleDesc').textContent = d.description || '';
 
   var tags = (d.matching_styles || []).map(function(s) {
-    return '<span class="style-tag">' + s + '</span>';
+    return '<span class="style-tag">' + esc(s) + '</span>';
   }).join('');
   document.getElementById('styleTags').innerHTML = tags;
 
@@ -337,9 +391,9 @@ function renderResult(d) {
   var pNames = d.palette_names || [];
   document.getElementById('paletteGrid').innerHTML = palette.map(function(hex, i) {
     return '<div class="palette-item">'
-      + '<div class="palette-swatch" style="background:' + hex + '"></div>'
-      + '<div class="palette-hex">' + hex + '</div>'
-      + '<div class="palette-name">' + (pNames[i] || '') + '</div>'
+      + '<div class="palette-swatch" style="background:' + escCssValue(hex) + '"></div>'
+      + '<div class="palette-hex">' + esc(hex) + '</div>'
+      + '<div class="palette-name">' + esc(pNames[i] || '') + '</div>'
       + '</div>';
   }).join('');
 
@@ -349,8 +403,8 @@ function renderResult(d) {
     var q = encodeURIComponent(m.search || m.name);
     var utm = '&utm_source=morrowlab&utm_medium=referral&utm_campaign=moodboard';
     return '<tr>'
-      + '<td>' + m.name + '</td>'
-      + '<td class="price">' + (m.price_range || '—') + '</td>'
+      + '<td>' + esc(m.name) + '</td>'
+      + '<td class="price">' + esc(m.price_range || '—') + '</td>'
       + '<td class="store-links">'
       + '<a href="https://www.21vek.by/search/?query=' + q + utm + '" target="_blank">21vek</a>'
       + '<a href="https://www.oz.by/search/?q=' + q + utm + '" target="_blank" style="color:var(--muted)">OZ</a>'
@@ -360,15 +414,125 @@ function renderResult(d) {
   // Tips
   var tips = d.tips || [];
   document.getElementById('tipsList').innerHTML = tips.map(function(t) {
-    return '<li>' + t + '</li>';
+    return '<li>' + esc(t) + '</li>';
   }).join('');
 
-  // Set CTA link with style parameter
-  var styleEn = d.style_name_en || 'Modern';
+  // Map detected style to Decor8 format
+  var styleEn = d.style_name_en || d.style_name || 'Modern';
+  detectedStyleDecor8 = mapStyleToDecor8(styleEn);
   document.getElementById('ctaRender').href = '/room/?style=' + encodeURIComponent(styleEn);
+
+  // Show render section
+  document.getElementById('renderSection').classList.add('visible');
+  document.getElementById('renderResult').style.display = 'none';
+  document.getElementById('renderInspirationResult').style.display = 'none';
+  document.getElementById('renderError').style.display = 'none';
 
   document.getElementById('result').classList.add('visible');
   document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+// Style mapping for Decor8
+var detectedStyleDecor8 = 'modern';
+const MOODBOARD_STYLE_MAP = {
+  'modern':'modern','minimalist':'minimalist','scandinavian':'scandinavian',
+  'industrial':'industrial','japandi':'japandi','boho':'boho','bohemian':'boho',
+  'art deco':'artdeco','mid-century modern':'midcenturymodern','midcentury':'midcenturymodern',
+  'coastal':'coastal','tropical':'tropical','rustic':'rustic','farmhouse':'farmhouse',
+  'traditional':'traditional','contemporary':'contemporary','eclectic':'eclectic',
+  'mediterranean':'mediterranean','victorian':'victorian','gothic':'gothic',
+  'moroccan':'moroccan','french country':'frenchcountry','transitional':'transitional',
+  'luxury':'luxemodern','wabi-sabi':'wabi_sabi','cottagecore':'cottagecore',
+  'loft':'industrial','zen':'asian_zen','bauhaus':'bauhaus','vintage':'vintage',
+  'shabby chic':'shabbychic','country':'country','hollywood regency':'hollywoodregency',
+  'art nouveau':'artnouveau','maximalist':'maximalist','retro':'retrofuturism',
+};
+
+function mapStyleToDecor8(styleName) {
+  if (!styleName) return 'modern';
+  var lower = styleName.toLowerCase().trim();
+  if (MOODBOARD_STYLE_MAP[lower]) return MOODBOARD_STYLE_MAP[lower];
+  for (var key in MOODBOARD_STYLE_MAP) {
+    if (lower.includes(key) || key.includes(lower)) return MOODBOARD_STYLE_MAP[key];
+  }
+  return lower.replace(/[\s-]+/g, '');
+}
+
+async function renderInStyle() {
+  if (!imageBase64) { alert('Сначала загрузите фото'); return; }
+  var spinner = document.getElementById('renderSpinner');
+  var result = document.getElementById('renderResult');
+  var errEl = document.getElementById('renderError');
+  var insEl = document.getElementById('renderInspirationResult');
+  spinner.classList.add('visible');
+  result.style.display = 'none';
+  insEl.style.display = 'none';
+  errEl.style.display = 'none';
+  document.getElementById('renderSection').classList.add('visible');
+  try {
+    var res = await fetch('/api/decor8/generate_designs_for_room', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        input_image_url: imageBase64,
+        room_type: 'livingroom',
+        design_style: detectedStyleDecor8,
+        num_images: 1
+      })
+    });
+    var data = await res.json();
+    var url = data?.info?.images?.[0]?.url;
+    if (url) {
+      document.getElementById('renderBeforeImg').src = imageBase64;
+      document.getElementById('renderAfterImg').src = url;
+      result.style.display = 'block';
+    } else {
+      errEl.textContent = 'Ошибка: ' + (data.error || data.message || 'нет результата');
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Ошибка: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    spinner.classList.remove('visible');
+  }
+}
+
+async function renderInspiration() {
+  var spinner = document.getElementById('renderSpinner');
+  var insEl = document.getElementById('renderInspirationResult');
+  var result = document.getElementById('renderResult');
+  var errEl = document.getElementById('renderError');
+  spinner.classList.add('visible');
+  result.style.display = 'none';
+  insEl.style.display = 'none';
+  errEl.style.display = 'none';
+  document.getElementById('renderSection').classList.add('visible');
+  try {
+    var res = await fetch('/api/decor8/generate_inspirational_designs', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        room_type: 'livingroom',
+        design_style: detectedStyleDecor8,
+        num_images: 1
+      })
+    });
+    var data = await res.json();
+    var url = data?.info?.images?.[0]?.url;
+    if (url) {
+      document.getElementById('renderInspirationImg').src = url;
+      insEl.style.display = 'block';
+    } else {
+      errEl.textContent = 'Ошибка: ' + (data.error || data.message || 'нет результата');
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Ошибка: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    spinner.classList.remove('visible');
+  }
 }
 
 // Drag & drop

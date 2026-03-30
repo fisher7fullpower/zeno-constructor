@@ -23,7 +23,7 @@
 
 ### Rate Limiting
 - Все публичные POST endpoints → добавить `@limiter.limit()`
-- AI endpoints (Replicate, HomeDesigns) → `10/minute`
+- AI endpoints (Replicate, Decor8) → `10/minute`
 - Form submissions → `5/day`
 - Auth/OTP → `5/hour`
 

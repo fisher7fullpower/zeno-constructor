@@ -28,16 +28,16 @@ def rate_limit(key, limit=30, window=60):
     return entry['count'] <= limit
 
 REPLICATE_TOKEN   = os.environ.get('REPLICATE_TOKEN', '')
-HOMEDESIGNS_TOKEN = os.environ.get('HOMEDESIGNS_TOKEN', '')
+DECOR8_TOKEN      = os.environ.get('DECOR8_TOKEN', '')
 RESEND_KEY        = os.environ.get('RESEND_KEY', '')
 FROM_EMAIL        = os.environ.get('FROM_EMAIL', 'noreply@morrowlab.by')
 JWT_SECRET        = os.environ.get('JWT_SECRET', '')
 ADMIN_KEY         = os.environ.get('ADMIN_KEY', '')
 GROQ_API_KEY      = os.environ.get('GROQ_API_KEY', '')
 
-if not REPLICATE_TOKEN or not HOMEDESIGNS_TOKEN:
+if not REPLICATE_TOKEN or not DECOR8_TOKEN:
     import sys
-    print("FATAL: REPLICATE_TOKEN and/or HOMEDESIGNS_TOKEN not set in environment", file=sys.stderr)
+    print("FATAL: REPLICATE_TOKEN and/or DECOR8_TOKEN not set in environment", file=sys.stderr)
     sys.exit(1)
 
 REPLICATE_HDRS = {'Authorization': 'Token ' + REPLICATE_TOKEN, 'Content-Type': 'application/json'}
@@ -78,37 +78,33 @@ app.after_request(cors_and_security)
 
 # ── Security: image proxy domain allowlist ──
 PROXY_IMAGE_ALLOWED_DOMAINS = {
-    'homedesigns.ai',
-    'www.homedesigns.ai',
-    'api.homedesigns.ai',
+    'storage.googleapis.com',
     'replicate.delivery',
     'pbxt.replicate.delivery',
     'tjzk.replicate.delivery',
 }
 
-# ── Security: HomeDesigns endpoint allowlist ──
-HOMEDESIGNS_ALLOWED_ENDPOINTS = {
-    'redesign_room',
-    'redesign_room_pro',
-    'generate_room',
-    'generate_room_pro',
-    'design_advisor',
-    'upscale',
-    'fill_room',
-    'empty_room',
-    'style_transfer',
-    'sketch_to_render',
-    'floor_plan_to_render',
-    'creative_redesign',
+# ── Security: Decor8.ai endpoint allowlist ──
+DECOR8_ENDPOINTS = {
+    'generate_designs_for_room',
+    'generate_landscaping_designs',
+    'generate_inspirational_designs',
+    'remove_objects_from_room',
+    'change_wall_color',
+    'change_kitchen_cabinets_color',
+    'remodel_kitchen',
+    'remodel_bathroom',
+    'prime_walls_for_room',
+    'upscale_image',
+    'sketch_to_3d_render',
+    'replace_sky_behind_house',
 }
 
-# ── Security: HomeDesigns allowed form fields ──
-HOMEDESIGNS_ALLOWED_FIELDS = {
-    'image', 'image_url', 'mask', 'mask_url', 'prompt', 'negative_prompt',
-    'room_type', 'design_style', 'design_theme', 'num_images', 'resolution',
-    'mode', 'scale', 'seed', 'strength', 'guidance_scale',
-    'custom_message', 'color_scheme', 'material', 'furniture_style',
-    'design_type', 'ai_intervention', 'no_design', 'house_angle',
+# ── Security: Decor8.ai allowed request fields ──
+DECOR8_ALLOWED_FIELDS = {
+    'input_image_url', 'room_type', 'design_style', 'num_images',
+    'scale_factor', 'color_scheme', 'speciality_decor', 'prompt',
+    'decor_items',
 }
 
 # ── Security: Replicate input allowed fields ──
@@ -117,7 +113,7 @@ REPLICATE_ALLOWED_INPUT_FIELDS = {
     'scheduler', 'num_inference_steps', 'guidance_scale', 'seed', 'scale',
     'face_enhance', 'tile', 'version', 'model', 'output_format', 'output_quality',
     'aspect_ratio', 'safety_tolerance', 'prompt_upsampling', 'go_fast',
-    'megapixels', 'disable_safety_checker',
+    'megapixels',
 }
 
 # ── Security: max base64 image size (10 MB decoded) ──
@@ -293,30 +289,35 @@ def replicate_status(pred_id):
     except Exception:
         return jsonify({'error': 'Service unavailable'}), 502
 
-# ── homedesigns.ai generic v2 proxy ──────────────────────────────────
-@app.route('/api/homedesigns/v2/<path:endpoint>', methods=['POST', 'OPTIONS'])
-def homedesigns_v2(endpoint):
+# ── Decor8.ai generic proxy ──────────────────────────────────────────
+@app.route('/api/decor8/<path:endpoint>', methods=['POST', 'OPTIONS'])
+def decor8_proxy(endpoint):
     if request.method == 'OPTIONS': return '', 204
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
-    if not rate_limit('hd:' + ip, 20, 60):
+    if not rate_limit('d8:' + ip, 20, 60):
         return jsonify({'error': 'Too many requests'}), 429
-    if endpoint not in HOMEDESIGNS_ALLOWED_ENDPOINTS:
+    if endpoint not in DECOR8_ENDPOINTS:
         return jsonify({'error': 'Unknown endpoint'}), 400
     data = request.get_json(force=True) or {}
     json_payload = {}
     for key, value in data.items():
-        if key not in HOMEDESIGNS_ALLOWED_FIELDS:
+        if key not in DECOR8_ALLOWED_FIELDS:
             continue
-        # Strip data URL prefix from image so API receives pure base64
-        if key == 'image' and isinstance(value, str) and value.startswith('data:'):
-            comma = value.find(',')
-            value = value[comma + 1:] if comma != -1 else value
         json_payload[key] = value
-    hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN, 'Content-Type': 'application/json'}
+    # Save base64 image to server and send URL to Decor8
+    img = json_payload.get('input_image_url', '')
+    if isinstance(img, str) and img.startswith('data:'):
+        saved_url = save_base64_image(img)
+        if saved_url:
+            json_payload['input_image_url'] = saved_url
+    d8_headers = {
+        'Authorization': 'Bearer ' + DECOR8_TOKEN,
+        'Content-Type': 'application/json',
+    }
     try:
         resp = requests.post(
-            f'https://homedesigns.ai/api/v2/{endpoint}',
-            headers=hd_headers,
+            f'https://api.decor8.ai/{endpoint}',
+            headers=d8_headers,
             json=json_payload,
             timeout=120
         )
@@ -324,45 +325,121 @@ def homedesigns_v2(endpoint):
             rj = resp.json()
             if resp.status_code != 200:
                 import sys
-                print(f'[homedesigns] {endpoint} → {resp.status_code}: fields={list(json_payload.keys())} body={str(rj)[:300]}', file=sys.stderr, flush=True)
+                print(f'[decor8] {endpoint} → {resp.status_code}: fields={list(json_payload.keys())} body={str(rj)[:300]}', file=sys.stderr, flush=True)
             return jsonify(rj), resp.status_code
         except Exception:
-            return jsonify({'success': False, 'message': 'Invalid response from upstream'}), resp.status_code
+            return jsonify({'error': 'Invalid response from upstream'}), resp.status_code
     except requests.Timeout:
-        return jsonify({'success': False, 'message': 'Timeout (120s)'}), 504
+        return jsonify({'error': 'Timeout (120s)'}), 504
     except Exception:
-        return jsonify({'success': False, 'message': 'Service unavailable'}), 502
+        return jsonify({'error': 'Service unavailable'}), 502
 
-# ── design_advisor ────────────────────────────────────────────────────
-@app.route('/api/homedesigns/advisor', methods=['POST', 'OPTIONS'])
-def homedesigns_advisor():
+# ── design advisor (Groq LLM) ────────────────────────────────────────
+@app.route('/api/decor8/advisor', methods=['POST', 'OPTIONS'])
+def decor8_advisor():
     if request.method == 'OPTIONS': return '', 204
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
     if not rate_limit('advisor:' + ip, 10, 60):
         return jsonify({'error': 'Too many requests'}), 429
     data = request.get_json(force=True) or {}
-    hd_headers = {'Authorization': 'Bearer ' + HOMEDESIGNS_TOKEN}
+    msg = data.get('message', '')
+    if not isinstance(msg, str) or len(msg) > 2000:
+        return jsonify({'error': 'Message too long'}), 400
     try:
-        msg = data.get('message', '')
-        if not isinstance(msg, str) or len(msg) > 2000:
-            return jsonify({'error': 'Message too long'}), 400
-        msg_ru = msg + '\n\nПожалуйста, ответь на русском языке.'
         resp = requests.post(
-            'https://homedesigns.ai/api/v2/design_advisor',
-            headers=hd_headers,
-            data={'custom_message': msg_ru},
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={
+                'Authorization': 'Bearer ' + GROQ_API_KEY,
+                'Content-Type': 'application/json',
+            },
+            json={
+                'model': 'llama-3.3-70b-versatile',
+                'messages': [
+                    {'role': 'system', 'content': (
+                        'Ты — AI дизайн-консультант Morrow Lab. '
+                        'Помогаешь с выбором стиля интерьера, материалов, цветов и планировки. '
+                        'Отвечай на русском, кратко и по делу. '
+                        'Если вопрос не связан с дизайном или ремонтом — вежливо откажи.'
+                    )},
+                    {'role': 'user', 'content': msg},
+                ],
+                'max_tokens': 1024,
+                'temperature': 0.7,
+            },
             timeout=30
         )
-        try:
-            return jsonify(resp.json()), resp.status_code
-        except Exception:
-            return jsonify({'success': False, 'message': 'Invalid response from upstream'}), resp.status_code
+        rj = resp.json()
+        answer = rj.get('choices', [{}])[0].get('message', {}).get('content', '')
+        return jsonify({'success': True, 'message': answer}), 200
+    except requests.Timeout:
+        return jsonify({'error': 'Timeout'}), 504
     except Exception:
-        return jsonify({'success': False, 'message': 'Service unavailable'}), 502
+        return jsonify({'error': 'Service unavailable'}), 502
+
+# ── Render counter (FREE tier: localStorage + IP fallback) ───────────
+# FREE: 3/day per IP, BASIC/PRO/STUDIO: server-side via JWT
+_render_counts = {}  # ip -> {'count': N, 'reset': timestamp}
+
+TIER_LIMITS = {'free': 3, 'basic': 5, 'pro': 15, 'studio': 50}
+
+@app.route('/api/renders/check', methods=['POST', 'OPTIONS'])
+def renders_check():
+    if request.method == 'OPTIONS': return '', 204
+    data = request.get_json(force=True) or {}
+    # JWT users: check tier from token
+    token = request.cookies.get('ml_auth')
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            tier = payload.get('tier', 'free')
+            used = payload.get('renders_used', 0)
+            limit = TIER_LIMITS.get(tier, 3)
+            return jsonify({'remaining': max(0, limit - used), 'limit': limit, 'tier': tier})
+        except Exception:
+            pass
+    # Anonymous: IP-based
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    now = time.time()
+    rec = _render_counts.get(ip, {'count': 0, 'reset': now + 86400})
+    if now > rec['reset']:
+        rec = {'count': 0, 'reset': now + 86400}
+    remaining = max(0, TIER_LIMITS['free'] - rec['count'])
+    return jsonify({'remaining': remaining, 'limit': TIER_LIMITS['free'], 'tier': 'free'})
+
+@app.route('/api/renders/use', methods=['POST', 'OPTIONS'])
+def renders_use():
+    if request.method == 'OPTIONS': return '', 204
+    # JWT users
+    token = request.cookies.get('ml_auth')
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+            tier = payload.get('tier', 'free')
+            used = payload.get('renders_used', 0)
+            limit = TIER_LIMITS.get(tier, 3)
+            if used >= limit:
+                return jsonify({'error': 'Лимит рендеров исчерпан', 'remaining': 0}), 403
+            # Note: in production, update DB; here we track in-memory
+            return jsonify({'remaining': max(0, limit - used - 1), 'limit': limit, 'tier': tier})
+        except Exception:
+            pass
+    # Anonymous: IP-based
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    now = time.time()
+    rec = _render_counts.get(ip, {'count': 0, 'reset': now + 86400})
+    if now > rec['reset']:
+        rec = {'count': 0, 'reset': now + 86400}
+    if rec['count'] >= TIER_LIMITS['free']:
+        _render_counts[ip] = rec
+        return jsonify({'error': 'Лимит бесплатных рендеров исчерпан', 'remaining': 0}), 403
+    rec['count'] += 1
+    _render_counts[ip] = rec
+    remaining = max(0, TIER_LIMITS['free'] - rec['count'])
+    return jsonify({'remaining': remaining, 'limit': TIER_LIMITS['free'], 'tier': 'free'})
 
 @app.route('/api/proxy-image', methods=['GET'])
 def proxy_image():
-    """Fetch external image (from homedesigns.ai results) and return with CORS headers."""
+    """Fetch external image (from Decor8/Replicate results) and return with CORS headers."""
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
     if not rate_limit('img:' + ip, 60, 60):
         return jsonify({'error': 'Too many requests'}), 429
